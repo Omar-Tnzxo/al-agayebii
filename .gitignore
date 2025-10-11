@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+
+# Cursor IDE metadata
+.cursor/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build cache
+.vercel/
+
+# Testing coverage
+coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# Misc
+.env.local
+.env.*.local
+
+# Docs & reports not needed in production
+REPAIR_REPORT.md
+PROJECT_STATUS_FINAL.md
+تقرير-الفحص-الشامل-النهائي.md
+*.md.backup
+تقرير*.md
+*-تقرير-*.md
+CHECKOUT-FIX.md
+CLEAR-ORDERS.sql
+DASHBOARD-SUPABASE-STATUS.md
+FINAL-ORDERS-FIX.sql
+SETUP-DATABASE-INSTRUCTIONS.md
+SUPABASE-CONNECTION.md 

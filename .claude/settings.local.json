@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(grep:*)",
+      "Bash(npm run dev:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run kill-node:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run clean:*)",
+      "Bash(curl -X GET http://localhost:3000/api/database/update-statuses -H \"Content-Type: application/json\")",
+      "Bash(curl:*)",
+      "WebSearch",
+      "Bash(del \"lib\\gemini.ts\")",
+      "Bash(psql:*)",
+      "Bash(del \"app\\api\\database\\cleanup\\route.ts\")",
+      "Bash(cat:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(if exist tsconfig.tsbuildinfo del /f tsconfig.tsbuildinfo)",
+      "Bash(timeout:*)",
+      "Bash(del:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
