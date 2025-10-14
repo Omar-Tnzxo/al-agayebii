@@ -141,6 +141,8 @@ export async function PATCH(
     const body = await request.json();
 
     // بناء جسم التحديث ديناميكياً
+    console.log('📝 بيانات التحديث المستلمة:', body);
+    
     const updateFields: Record<string, any> = {};
     if (typeof body.name === 'string') updateFields.name = body.name;
     if (typeof body.description === 'string') updateFields.description = body.description;
@@ -150,6 +152,8 @@ export async function PATCH(
     if (typeof body.is_active === 'boolean') updateFields.is_active = body.is_active;
     if (typeof body.type === 'string') updateFields.type = body.type;
     updateFields.updated_at = new Date().toISOString();
+    
+    console.log('📝 الحقول المراد تحديثها:', updateFields);
 
     if (Object.keys(updateFields).length === 1 && updateFields.updated_at) {
       return NextResponse.json(
@@ -193,7 +197,7 @@ export async function PATCH(
         .maybeSingle();
       
       if (error) {
-        console.error('خطأ في تحديث التصنيف:', error);
+        console.error('❌ خطأ في تحديث التصنيف:', error);
         return NextResponse.json(
           { error: 'فشل في تحديث التصنيف', details: error.message },
           { status: 500 }
@@ -207,6 +211,7 @@ export async function PATCH(
         );
       }
       
+      console.log('✅ تم تحديث التصنيف بنجاح:', updatedData);
       return NextResponse.json({ 
         success: true, 
         message: 'تم تحديث التصنيف بنجاح',

@@ -127,6 +127,8 @@ export async function POST(request: NextRequest) {
     }
 
     // إضافة التصنيف
+    console.log('📝 محاولة إضافة تصنيف جديد:', { name, type, description, image, is_active, sort_order });
+    
     const { data, error } = await supabase.from('categories').insert([
       {
         name,
@@ -139,9 +141,11 @@ export async function POST(request: NextRequest) {
     ]).select().maybeSingle();
 
     if (error) {
+      console.error('❌ خطأ في إضافة التصنيف:', error);
       return NextResponse.json({ error: 'فشل في إضافة التصنيف', details: error.message }, { status: 500 });
     }
 
+    console.log('✅ تم إضافة التصنيف بنجاح:', data);
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     return NextResponse.json({ error: 'خطأ داخلي في الخادم', details: error.message }, { status: 500 });

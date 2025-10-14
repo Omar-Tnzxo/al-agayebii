@@ -20,6 +20,8 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log('🖼️ تم اختيار ملف:', { name: file.name, size: file.size, type: file.type });
+
     // التحقق من نوع الملف
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
@@ -49,6 +51,7 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
       const formData = new FormData();
       formData.append('file', file);
 
+      console.log('📤 بدء رفع الصورة...');
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -62,6 +65,7 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
 
       // إشعار المكون الأب بالصورة المرفوعة
       console.log('✅ تم رفع الصورة بنجاح:', result.imageUrl);
+      console.log('📢 استدعاء onImageUploaded مع URL:', result.imageUrl);
       onImageUploaded(result.imageUrl);
       
     } catch (error: any) {

@@ -141,6 +141,8 @@ export default function EditCategoryPage() {
         is_active: category?.is_active,
       };
       
+      console.log('📤 إرسال بيانات تحديث التصنيف:', payload);
+      
       const response = await fetch(`/api/categories/${categoryType}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -313,7 +315,10 @@ export default function EditCategoryPage() {
             
             <div className="lg:col-span-2">
               <ImageUpload
-                onImageUploaded={(url) => setImageUrl(url)}
+                onImageUploaded={(url) => {
+                  console.log('📥 تحديث صورة التصنيف في state:', url);
+                  setImageUrl(url);
+                }}
                 currentImage={imageUrl}
               />
             </div>

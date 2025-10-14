@@ -195,6 +195,7 @@ CREATE TABLE public.products (
   view_count integer DEFAULT 0,
   new_until timestamp with time zone,
   cost_price numeric DEFAULT 0 CHECK (cost_price >= 0::numeric),
+  sales_count integer DEFAULT 0,
   CONSTRAINT products_pkey PRIMARY KEY (id),
   CONSTRAINT fk_products_category_type FOREIGN KEY (category_type) REFERENCES public.categories(type),
   CONSTRAINT products_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id)

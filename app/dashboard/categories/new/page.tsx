@@ -84,20 +84,24 @@ export default function NewCategoryPage() {
     setErrors({});
     
     try {
+      const payload = {
+        name: category.name.trim(),
+        description: category.description.trim(),
+        type: category.type.trim().toLowerCase(),
+        image: category.image || '',
+        is_active: category.is_active,
+        sort_order: Number(category.sort_order) || 0
+      };
+      
+      console.log('📤 إرسال بيانات التصنيف الجديد:', payload);
+      
       // إرسال البيانات للخادم عبر API
       const response = await fetch('/api/categories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          name: category.name.trim(),
-          description: category.description.trim(),
-          type: category.type.trim().toLowerCase(),
-          image: category.image || '',
-          is_active: category.is_active,
-          sort_order: Number(category.sort_order) || 0
-        })
+        body: JSON.stringify(payload)
       });
       
       let result;
@@ -228,7 +232,10 @@ export default function NewCategoryPage() {
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1">صورة الفئة</label>
               <ImageUpload
-                onImageUploaded={(imageUrl) => setCategory(prev => ({ ...prev, image: imageUrl }))}
+                onImageUploaded={(imageUrl) => {
+                  console.log('📥 تحديث صورة التصنيف في state:', imageUrl);
+                  setCategory(prev => ({ ...prev, image: imageUrl }));
+                }}
                 currentImage={category.image}
               />
             </div>
