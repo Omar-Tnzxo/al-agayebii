@@ -259,7 +259,7 @@ export default function EditCategoryPage() {
                 type="text"
                 id="name"
                 name="name"
-                value={category.name}
+                value={category?.name || ''}
                 onChange={handleChange}
                 className={`w-full rounded-md border ${
                   errors.name ? 'border-red-500' : 'border-gray-300'
@@ -278,7 +278,7 @@ export default function EditCategoryPage() {
                 type="text"
                 id="type"
                 name="type"
-                value={category.type}
+                value={category?.type || ''}
                 onChange={handleChange}
                 className={`w-full rounded-md border ${errors.type ? 'border-red-500' : 'border-gray-300'} py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
                 pattern="^[a-z0-9-]+$"
@@ -300,7 +300,7 @@ export default function EditCategoryPage() {
                 id="description"
                 name="description"
                 rows={4}
-                value={category.description}
+                value={category?.description || ''}
                 onChange={handleChange}
                 className={`w-full rounded-md border ${
                   errors.description ? 'border-red-500' : 'border-gray-300'
@@ -324,7 +324,7 @@ export default function EditCategoryPage() {
                   type="checkbox"
                   id="is_active"
                   name="is_active"
-                  checked={category.is_active}
+                  checked={category?.is_active || false}
                   onChange={handleActiveChange}
                   className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                 />

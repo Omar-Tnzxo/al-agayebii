@@ -159,7 +159,7 @@ async function fetchHomepageSections(): Promise<HomepageSection[]> {
               const p = sp.product_id;
               const originalPrice = p.discount_percentage > 0 
                 ? p.price / (1 - p.discount_percentage / 100)
-                : null;
+                : undefined;
               
               return {
                 id: p.id,
@@ -172,7 +172,7 @@ async function fetchHomepageSections(): Promise<HomepageSection[]> {
                 rating: p.rating,
                 reviewCount: p.reviews_count,
                 inStock: p.stock_quantity > 0,
-                badge: p.discount_percentage > 0 ? `خصم ${Math.round(p.discount_percentage)}%` : null
+                badge: p.discount_percentage > 0 ? `خصم ${Math.round(p.discount_percentage)}%` : undefined
               };
             });
         } else {
@@ -204,7 +204,7 @@ async function fetchHomepageSections(): Promise<HomepageSection[]> {
           products = (productsData || []).map((p: any) => {
             const originalPrice = p.discount_percentage > 0 
               ? p.price / (1 - p.discount_percentage / 100)
-              : null;
+              : undefined;
             
             return {
               id: p.id,
@@ -217,7 +217,7 @@ async function fetchHomepageSections(): Promise<HomepageSection[]> {
               rating: p.rating,
               reviewCount: p.reviews_count,
               inStock: p.stock_quantity > 0,
-              badge: p.discount_percentage > 0 ? `خصم ${Math.round(p.discount_percentage)}%` : null
+              badge: p.discount_percentage > 0 ? `خصم ${Math.round(p.discount_percentage)}%` : undefined
             };
           });
         }
