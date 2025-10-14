@@ -29,6 +29,7 @@ export default function NewCategoryPage() {
   
   // حالة النموذج
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   // معالج تغيير بيانات الفئة
@@ -237,7 +238,11 @@ export default function NewCategoryPage() {
                   setCategory(prev => ({ ...prev, image: imageUrl }));
                 }}
                 currentImage={category.image}
+                onUploadingChange={setImageUploading}
               />
+              {imageUploading && (
+                <p className="text-sm text-blue-600 mt-2">⏳ جاري رفع الصورة، الرجاء الانتظار...</p>
+              )}
             </div>
             <div>
               <label htmlFor="sort_order" className="block text-sm font-bold text-gray-800 mb-1">
@@ -279,13 +284,18 @@ export default function NewCategoryPage() {
           </Link>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || imageUploading}
             className="flex items-center justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
           >
             {loading ? (
               <>
                 <span className="inline-block h-4 w-4 border-2 border-transparent border-t-white rounded-full animate-spin ml-2"></span>
                 <span>جاري الحفظ...</span>
+              </>
+            ) : imageUploading ? (
+              <>
+                <span className="inline-block h-4 w-4 border-2 border-transparent border-t-white rounded-full animate-spin ml-2"></span>
+                <span>جاري رفع الصورة...</span>
               </>
             ) : (
               <>

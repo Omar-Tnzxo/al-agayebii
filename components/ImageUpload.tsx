@@ -8,9 +8,10 @@ interface ImageUploadProps {
   onImageUploaded: (imageUrl: string) => void;
   currentImage?: string;
   className?: string;
+  onUploadingChange?: (isUploading: boolean) => void;
 }
 
-export default function ImageUpload({ onImageUploaded, currentImage, className = '' }: ImageUploadProps) {
+export default function ImageUpload({ onImageUploaded, currentImage, className = '', onUploadingChange }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
 
     setError(null);
     setUploading(true);
+    onUploadingChange?.(true); // إخبار المكون الأب أن الرفع بدأ
 
     try {
       // عرض معاينة فورية
@@ -74,6 +76,7 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
       setPreview(currentImage || null);
     } finally {
       setUploading(false);
+      onUploadingChange?.(false); // إخبار المكون الأب أن الرفع انتهى
     }
   };
 
