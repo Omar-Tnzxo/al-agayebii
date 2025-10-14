@@ -37,9 +37,38 @@ class ProductsApiHandler extends BaseApiHandler {
         query = query.or(`name.ilike.%${params.search}%,description.ilike.%${params.search}%`);
       }
 
+      // فلترة حسب التصنيف (دعم category_type أو category_id)
       if (params.category) {
-        console.log('🔍 فلترة حسب category_type:', params.category);
-        query = query.eq('category_type', params.category);
+        console.log('🔍 فلترة حسب category:', params.category);
+        
+        // أولاً: جرب category_type
+        const { data: byType } = await supabase
+          .from('products')
+          .select('id')
+          .eq('category_type', params.category)
+          .limit(1);
+        
+        if (byType && byType.length > 0) {
+          // يوجد منتجات بـ category_type
+          console.log('✅ استخدام category_type للفلترة');
+          query = query.eq('category_type', params.category);
+        } else {
+          // جرب البحث عن category من خلال categories table
+          console.log('🔍 البحث عن category_id من خلال type');
+          const { data: category } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('type', params.category)
+            .single();
+          
+          if (category) {
+            console.log('✅ استخدام category_id للفلترة');
+            query = query.eq('category_id', category.id);
+          } else {
+            console.log('❌ لم يتم العثور على تصنيف');
+            query = query.eq('category_type', params.category); // استخدام الأصلي
+          }
+        }
       }
 
       if (params.featured) {
