@@ -15,6 +15,16 @@ interface Category {
   name: string;
 }
 
+// واجهة قسم الصفحة الرئيسية
+interface HomepageSection {
+  id: string;
+  title: string;
+  section_type: string;
+  settings: {
+    product_source: string;
+  };
+}
+
 // واجهة الإشعار
 interface Notification {
   type: 'success' | 'error' | 'warning' | 'info';
@@ -43,12 +53,6 @@ interface ProductFormData {
   colors?: Array<{ name: string; hex: string; stock: number }>;
   sku: string;
   slug: string;
-  // حقول الصفحة الرئيسية
-  show_in_hero?: boolean;
-  show_in_trending?: boolean;
-  show_in_flash_deals?: boolean;
-  show_in_best_sellers?: boolean;
-  deal_end_date?: string;
 }
 
 // Tooltip (نفس الكود من صفحة التعديل)
@@ -109,6 +113,10 @@ export default function NewProductPage() {
   // حالة التصنيفات
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  
+  // حالة أقسام الصفحة الرئيسية
+  const [homepageSections, setHomepageSections] = useState<HomepageSection[]>([]);
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
   
   // حالة النموذج
   const [loading, setLoading] = useState(false);
@@ -173,8 +181,52 @@ export default function NewProductPage() {
         setLoadingCategories(false);
       }
     };
-    
+
     fetchCategories();
+  }, []);
+
+  // جلب أقسام الصفحة الرئيسية (اليدوية فقط)
+  useEffect(() => {
+    const fetchHomepageSections = async () => {
+      try {
+        console.log('🔍 بدء جلب الأقسام...');
+        const response = await fetch('/api/homepage-sections?active=true');
+        const result = await response.json();
+        
+        console.log('📦 استجابة API للأقسام:', result);
+        
+        if (result.success && result.data) {
+          console.log('📋 إجمالي الأقسام:', result.data.length);
+          
+          // عرض جميع الأقسام للتشخيص
+          result.data.forEach((section: any) => {
+            console.log('- قسم:', section.title, '| نوع:', section.section_type, '| مصدر:', section.settings?.product_source);
+          });
+          
+          // فقط الأقسام اليدوية
+          const manualSections = result.data.filter(
+            (section: HomepageSection) => 
+              section.settings?.product_source === 'manual' &&
+              section.section_type === 'products'
+          );
+          
+          setHomepageSections(manualSections);
+          console.log('✅ الأقسام اليدوية المتاحة:', manualSections.length);
+          
+          if (manualSections.length === 0) {
+            console.warn('⚠️ لا توجد أقسام يدوية! تحتاج لإنشاء قسم يدوي من /dashboard/homepage/sections');
+          } else {
+            console.log('📋 الأقسام اليدوية:', manualSections.map((s: HomepageSection) => s.title));
+          }
+        } else {
+          console.error('❌ فشل جلب الأقسام:', result);
+        }
+      } catch (error) {
+        console.error('❌ خطأ في جلب الأقسام:', error);
+      }
+    };
+
+    fetchHomepageSections();
   }, []);
   
   // دعم التحديث الفوري realtime للتصنيفات
@@ -327,13 +379,7 @@ export default function NewProductPage() {
         rating: parseFloat(product.rating.toString()),
         reviews_count: parseInt(product.reviews_count.toString()),
         sku: product.sku.trim() || null,
-        slug: product.slug.trim(),
-        // حقول الصفحة الرئيسية
-        show_in_hero: product.show_in_hero || false,
-        show_in_trending: product.show_in_trending || false,
-        show_in_flash_deals: product.show_in_flash_deals || false,
-        show_in_best_sellers: product.show_in_best_sellers || false,
-        deal_end_date: product.show_in_flash_deals && product.deal_end_date ? product.deal_end_date : null
+        slug: product.slug.trim()
       };
       
       console.log('🚀 إرسال بيانات المنتج:', productData);
@@ -380,6 +426,32 @@ export default function NewProductPage() {
       // التأكد من نجاح العملية
       if (result.success) {
         console.log('🎉 تم إضافة المنتج بنجاح في قاعدة البيانات');
+        
+        const productId = result.product?.id;
+        
+        // إضافة المنتج للأقسام المحددة
+        if (productId && selectedSections.length > 0) {
+          try {
+            console.log('📋 إضافة المنتج للأقسام:', selectedSections);
+            
+            for (const sectionId of selectedSections) {
+              await fetch('/api/homepage-sections/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  section_id: sectionId,
+                  product_id: productId,
+                  sort_order: 999 // سيتم ترتيبه في النهاية
+                })
+              });
+            }
+            
+            console.log('✅ تم إضافة المنتج للأقسام بنجاح');
+          } catch (sectionError) {
+            console.error('⚠️ خطأ في إضافة المنتج للأقسام:', sectionError);
+            // لا نوقف العملية، فقط نسجل الخطأ
+          }
+        }
         
         // عرض إشعار النجاح
         showNotification(
@@ -993,94 +1065,53 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* قسم فرعي: عرض في الصفحة الرئيسية */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              عرض في الصفحة الرئيسية
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              اختر الأقسام التي سيظهر فيها هذا المنتج في الصفحة الرئيسية
-            </p>
+          {/* قسم فرعي: الأقسام */}
+          {homepageSections.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                إضافة المنتج إلى أقسام الصفحة الرئيسية
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                اختر الأقسام التي تريد ظهور هذا المنتج فيها في الصفحة الرئيسية
+              </p>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="flex items-center p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200">
-                <input
-                  id="show_in_hero"
-                  name="show_in_hero"
-                  type="checkbox"
-                  checked={product.show_in_hero || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
-                />
-                <label htmlFor="show_in_hero" className="mr-3 block text-sm text-purple-900 font-medium">
-                  عرض في القسم الرئيسي (Hero)
-                </label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {homepageSections.map((section) => (
+                  <div
+                    key={section.id}
+                    className="flex items-center p-3 bg-indigo-50 rounded-lg border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                  >
+                    <input
+                      id={`section-${section.id}`}
+                      type="checkbox"
+                      checked={selectedSections.includes(section.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedSections(prev => [...prev, section.id]);
+                        } else {
+                          setSelectedSections(prev => prev.filter(id => id !== section.id));
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <label
+                      htmlFor={`section-${section.id}`}
+                      className="mr-3 block text-sm text-indigo-900 font-medium cursor-pointer"
+                    >
+                      {section.title}
+                    </label>
+                  </div>
+                ))}
               </div>
 
-              <div className="flex items-center p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border border-pink-200">
-                <input
-                  id="show_in_trending"
-                  name="show_in_trending"
-                  type="checkbox"
-                  checked={product.show_in_trending || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 rounded border-pink-300 text-pink-600 focus:ring-pink-500"
-                />
-                <label htmlFor="show_in_trending" className="mr-3 block text-sm text-pink-900 font-medium">
-                  المنتجات الرائجة (Trending)
-                </label>
-              </div>
-
-              <div className="flex items-center p-3 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                <input
-                  id="show_in_flash_deals"
-                  name="show_in_flash_deals"
-                  type="checkbox"
-                  checked={product.show_in_flash_deals || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
-                />
-                <label htmlFor="show_in_flash_deals" className="mr-3 block text-sm text-red-900 font-medium">
-                  العروض السريعة (Flash Deals)
-                </label>
-              </div>
-
-              <div className="flex items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200">
-                <input
-                  id="show_in_best_sellers"
-                  name="show_in_best_sellers"
-                  type="checkbox"
-                  checked={product.show_in_best_sellers || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 rounded border-yellow-300 text-yellow-600 focus:ring-yellow-500"
-                />
-                <label htmlFor="show_in_best_sellers" className="mr-3 block text-sm text-yellow-900 font-medium">
-                  الأكثر مبيعاً (Best Sellers)
-                </label>
-              </div>
-
-              {/* حقل تاريخ انتهاء العرض - يظهر فقط إذا كان show_in_flash_deals محدداً */}
-              {product.show_in_flash_deals && (
-                <div className="sm:col-span-2 p-4 bg-red-50 rounded-lg border border-red-200">
-                  <label htmlFor="deal_end_date" className="block text-sm font-medium text-red-900 mb-2">
-                    تاريخ انتهاء العرض السريع
-                  </label>
-                  <input
-                    type="datetime-local"
-                    id="deal_end_date"
-                    name="deal_end_date"
-                    value={product.deal_end_date || ''}
-                    onChange={handleChange}
-                    className="w-full rounded-md border border-red-300 py-2 px-3 shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                  />
-                  <p className="mt-1 text-xs text-red-600">
-                    سيظهر عداد تنازلي للعملاء حتى هذا التاريخ
-                  </p>
-                </div>
+              {selectedSections.length > 0 && (
+                <p className="mt-3 text-xs text-indigo-600 bg-indigo-50 p-2 rounded">
+                  ✓ سيظهر المنتج في {selectedSections.length} {selectedSections.length === 1 ? 'قسم' : 'أقسام'}
+                </p>
               )}
             </div>
-          </div>
+          )}
         </div>
         
         {/* أزرار الحفظ */}

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Eye, EyeOff, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Plus, Edit, Trash2, GripVertical, Eye, EyeOff, Settings, List } from 'lucide-react';
 
 interface HomepageSection {
   id: string;
-  section_type: 'hero_carousel' | 'categories' | 'products';
+  section_type: 'categories' | 'products';
   title: string;
   subtitle?: string;
   is_active: boolean;
@@ -21,6 +22,7 @@ interface HomepageSection {
 }
 
 export default function HomepageSectionsPage() {
+  const router = useRouter();
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<HomepageSection | null>(null);
@@ -111,6 +113,44 @@ export default function HomepageSectionsPage() {
     }
   };
 
+  const moveSection = async (sectionId: string, direction: 'up' | 'down') => {
+    const currentIndex = sections.findIndex(s => s.id === sectionId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sections.length) return;
+
+    const currentSection = sections[currentIndex];
+    const targetSection = sections[targetIndex];
+
+    try {
+      // تبديل sort_order بين القسمين
+      await Promise.all([
+        fetch('/api/homepage-sections', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: currentSection.id,
+            sort_order: targetSection.sort_order
+          })
+        }),
+        fetch('/api/homepage-sections', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: targetSection.id,
+            sort_order: currentSection.sort_order
+          })
+        })
+      ]);
+
+      await fetchSections();
+    } catch (error) {
+      console.error('Error moving section:', error);
+      alert('حدث خطأ أثناء نقل القسم');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -159,21 +199,48 @@ export default function HomepageSectionsPage() {
             <p className="text-gray-400 text-sm mt-2">ابدأ بإضافة قسم جديد</p>
           </div>
         ) : (
-          sections.map((section) => (
+          sections.map((section, index) => (
             <div
               key={section.id}
               className="bg-white rounded-lg shadow-md p-4 flex items-center gap-4"
             >
-              {/* Drag Handle */}
-              <div className="cursor-move text-gray-400">
-                <GripVertical className="w-5 h-5" />
+              {/* Move Up/Down Buttons */}
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => moveSection(section.id, 'up')}
+                  disabled={index === 0}
+                  className={`p-1 rounded transition-colors ${
+                    index === 0
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-600 hover:text-primary hover:bg-gray-100'
+                  }`}
+                  title="تحريك لأعلى"
+                >
+                  <GripVertical className="w-5 h-5 rotate-90" />
+                </button>
+                <button
+                  onClick={() => moveSection(section.id, 'down')}
+                  disabled={index === sections.length - 1}
+                  className={`p-1 rounded transition-colors ${
+                    index === sections.length - 1
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-600 hover:text-primary hover:bg-gray-100'
+                  }`}
+                  title="تحريك لأسفل"
+                >
+                  <GripVertical className="w-5 h-5 -rotate-90" />
+                </button>
+              </div>
+
+              {/* Order Number Badge */}
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-700 font-bold text-sm flex-shrink-0">
+                {index + 1}
               </div>
 
               {/* Icon */}
               <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                 section.section_type === 'products' ? 'bg-blue-100 text-blue-600' :
-                section.section_type === 'categories' ? 'bg-green-100 text-green-600' :
-                'bg-purple-100 text-purple-600'
+                'bg-green-100 text-green-600'
               }`}>
                 <Settings className="w-6 h-6" />
               </div>
@@ -186,11 +253,9 @@ export default function HomepageSectionsPage() {
                   </h3>
                   <span className={`text-xs px-2 py-1 rounded-full ${
                     section.section_type === 'products' ? 'bg-blue-100 text-blue-700' :
-                    section.section_type === 'categories' ? 'bg-green-100 text-green-700' :
-                    'bg-purple-100 text-purple-700'
+                    'bg-green-100 text-green-700'
                   }`}>
-                    {section.section_type === 'products' ? 'منتجات' :
-                     section.section_type === 'categories' ? 'فئات' : 'Hero'}
+                    {section.section_type === 'products' ? 'منتجات' : 'فئات'}
                   </span>
                 </div>
                 {section.subtitle && (
@@ -209,6 +274,17 @@ export default function HomepageSectionsPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-2">
+                {/* زر إدارة المنتجات (للأقسام اليدوية فقط) */}
+                {section.section_type === 'products' && section.settings.product_source === 'manual' && (
+                  <button
+                    onClick={() => router.push(`/dashboard/homepage/sections/${section.id}`)}
+                    className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+                    title="إدارة المنتجات"
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                )}
+
                 <button
                   onClick={() => toggleActive(section)}
                   className={`p-2 rounded-lg transition-colors ${
@@ -271,7 +347,7 @@ function SectionForm({
   onCancel: () => void;
 }) {
   const [formData, setFormData] = useState({
-    section_type: section?.section_type || 'products' as 'hero_carousel' | 'categories' | 'products',
+    section_type: section?.section_type || 'products' as 'categories' | 'products',
     title: section?.title || '',
     subtitle: section?.subtitle || '',
     is_active: section?.is_active ?? true,
@@ -315,14 +391,13 @@ function SectionForm({
                 value={formData.section_type}
                 onChange={(e) => setFormData({
                   ...formData,
-                  section_type: e.target.value as 'hero_carousel' | 'categories' | 'products'
+                  section_type: e.target.value as 'categories' | 'products'
                 })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               >
                 <option value="products">قسم منتجات</option>
                 <option value="categories">قسم فئات</option>
-                <option value="hero_carousel">Hero Carousel</option>
               </select>
             </div>
 

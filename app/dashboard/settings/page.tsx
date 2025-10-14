@@ -53,13 +53,13 @@ const SettingsSection = ({
 );
 
 // مكون حقل الإدخال المحسن
-const FormField = ({ 
-  label, 
-  name, 
-  type = "text", 
-  value, 
-  onChange, 
-  placeholder, 
+const FormField = ({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
   description,
   required = false,
   rows = 3,
@@ -84,7 +84,7 @@ const FormField = ({
       <textarea
         id={name}
         name={name}
-        value={value}
+        value={value || ''}
         onChange={onChange}
         rows={rows}
         placeholder={placeholder}
@@ -96,7 +96,7 @@ const FormField = ({
         type={type}
         id={name}
         name={name}
-        value={value}
+        value={value || ''}
         onChange={onChange}
         placeholder={placeholder}
         step={type === 'number' ? '0.01' : undefined}
@@ -670,7 +670,7 @@ export default function SettingsPage() {
                 label="البريد الإلكتروني"
                 name="contactEmail"
                 type="email"
-                value={settings.contactEmail ?? ''}
+                value={settings.contactEmail}
                 onChange={handleChange}
                 placeholder="info@example.com"
                 description="البريد الإلكتروني الرسمي للمتجر"

@@ -5,12 +5,12 @@ import { createClient } from '@supabase/supabase-js';
 export async function GET(request: NextRequest) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({ error: 'خطأ في إعدادات قاعدة البيانات' }, { status: 500 });
     }
-    
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // جلب إعدادات نظام شركات الشحن
@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
       ]);
 
     if (error) {
-      console.error('خطأ في جلب إعدادات نظام شركات الشحن:', error);
+      // لا تطبع الخطأ لتجنب الـ spam
+      // console.error('خطأ في جلب إعدادات نظام شركات الشحن:', error);
       return NextResponse.json({ error: 'خطأ في جلب الإعدادات' }, { status: 500 });
     }
 
@@ -61,8 +62,8 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({ error: 'خطأ في إعدادات قاعدة البيانات' }, { status: 500 });
     }

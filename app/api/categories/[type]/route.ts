@@ -164,9 +164,19 @@ export async function PATCH(
       if (updateFields.type && updateFields.type !== type) {
         const { data: existing, error: existError } = await supabase
           .from('categories')
-          .select('id')
+          .select('id, type')
           .eq('type', updateFields.type)
-          .single();
+          .maybeSingle();
+        
+        // تجاهل خطأ "لا توجد نتائج" (PGRST116)
+        if (existError && existError.code !== 'PGRST116') {
+          console.error('خطأ أثناء التحقق من type:', existError);
+          return NextResponse.json(
+            { error: 'خطأ أثناء التحقق من التكرار', details: existError.message },
+            { status: 500 }
+          );
+        }
+        
         if (existing) {
           return NextResponse.json(
             { error: 'يوجد تصنيف آخر بنفس type الجديد' },
@@ -174,13 +184,34 @@ export async function PATCH(
           );
         }
       }
-      const { error } = await supabase
+      
+      const { data: updatedData, error } = await supabase
         .from('categories')
         .update(updateFields)
-        .eq('type', type);
-      if (!error) {
-        return NextResponse.json({ success: true, message: 'تم تحديث التصنيف بنجاح' });
+        .eq('type', type)
+        .select()
+        .maybeSingle();
+      
+      if (error) {
+        console.error('خطأ في تحديث التصنيف:', error);
+        return NextResponse.json(
+          { error: 'فشل في تحديث التصنيف', details: error.message },
+          { status: 500 }
+        );
       }
+      
+      if (!updatedData) {
+        return NextResponse.json(
+          { error: 'التصنيف غير موجود' },
+          { status: 404 }
+        );
+      }
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'تم تحديث التصنيف بنجاح',
+        data: updatedData 
+      });
     }
 
     // تحديث وهمي للبيانات الوهمية (للتطوير فقط)

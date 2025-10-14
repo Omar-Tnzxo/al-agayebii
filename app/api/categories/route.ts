@@ -86,16 +86,44 @@ export async function POST(request: NextRequest) {
     }
 
     // تحقق من عدم تكرار الاسم أو النوع
-    const { data: existing, error: checkError } = await supabase
+    const { data: existingByType, error: checkTypeError } = await supabase
       .from('categories')
-      .select('id')
-      .or(`name.eq.${name},type.eq.${type}`)
+      .select('id, type')
+      .eq('type', type)
       .maybeSingle();
-    if (checkError) {
-      return NextResponse.json({ error: 'خطأ أثناء التحقق من التكرار', details: checkError.message }, { status: 500 });
+    
+    if (checkTypeError && checkTypeError.code !== 'PGRST116') {
+      console.error('خطأ أثناء التحقق من type:', checkTypeError);
+      return NextResponse.json({ 
+        error: 'خطأ أثناء التحقق من التكرار', 
+        details: checkTypeError.message 
+      }, { status: 500 });
     }
-    if (existing) {
-      return NextResponse.json({ error: 'اسم أو نوع التصنيف مستخدم من قبل' }, { status: 409 });
+    
+    if (existingByType) {
+      return NextResponse.json({ 
+        error: 'نوع التصنيف (type) مستخدم من قبل. يرجى استخدام type مختلف' 
+      }, { status: 409 });
+    }
+    
+    const { data: existingByName, error: checkNameError } = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('name', name)
+      .maybeSingle();
+    
+    if (checkNameError && checkNameError.code !== 'PGRST116') {
+      console.error('خطأ أثناء التحقق من name:', checkNameError);
+      return NextResponse.json({ 
+        error: 'خطأ أثناء التحقق من التكرار', 
+        details: checkNameError.message 
+      }, { status: 500 });
+    }
+    
+    if (existingByName) {
+      return NextResponse.json({ 
+        error: 'اسم التصنيف مستخدم من قبل. يرجى استخدام اسم مختلف' 
+      }, { status: 409 });
     }
 
     // إضافة التصنيف

@@ -7,11 +7,16 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const activeOnly = searchParams.get('active') === 'true';
     const sectionType = searchParams.get('type');
+    const id = searchParams.get('id');
 
     let query = supabase
       .from('homepage_sections')
       .select('*')
       .order('sort_order', { ascending: true });
+
+    if (id) {
+      query = query.eq('id', id);
+    }
 
     if (activeOnly) {
       query = query.eq('is_active', true);
@@ -53,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     // التحقق من نوع القسم
-    const validTypes = ['hero_carousel', 'categories', 'products'];
+    const validTypes = ['categories', 'products'];
     if (!validTypes.includes(section_type)) {
       return NextResponse.json(
         { success: false, error: 'Invalid section type' },

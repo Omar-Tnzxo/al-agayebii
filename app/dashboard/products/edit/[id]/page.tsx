@@ -16,6 +16,16 @@ interface Category {
   name: string;
 }
 
+// واجهة قسم الصفحة الرئيسية
+interface HomepageSection {
+  id: string;
+  title: string;
+  section_type: string;
+  settings: {
+    product_source: string;
+  };
+}
+
 // واجهة المنتج
 interface Product {
   name: string;
@@ -106,6 +116,11 @@ export default function EditProductPage() {
   // حالة التصنيفات
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  
+  // حالة أقسام الصفحة الرئيسية
+  const [homepageSections, setHomepageSections] = useState<HomepageSection[]>([]);
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  const [initialSections, setInitialSections] = useState<string[]>([]);
   
   // حالة النموذج
   const [loading, setLoading] = useState(false);
@@ -252,6 +267,67 @@ export default function EditProductPage() {
     
     fetchCategories();
   }, []);
+
+  // جلب أقسام الصفحة الرئيسية (اليدوية فقط)
+  useEffect(() => {
+    const fetchHomepageSections = async () => {
+      try {
+        console.log('🔍 [تعديل] بدء جلب الأقسام...');
+        const response = await fetch('/api/homepage-sections?active=true');
+        const result = await response.json();
+        
+        console.log('📦 [تعديل] استجابة API للأقسام:', result);
+        
+        if (result.success && result.data) {
+          console.log('📋 [تعديل] إجمالي الأقسام:', result.data.length);
+          
+          // فقط الأقسام اليدوية
+          const manualSections = result.data.filter(
+            (section: HomepageSection) => 
+              section.settings?.product_source === 'manual' &&
+              section.section_type === 'products'
+          );
+          
+          setHomepageSections(manualSections);
+          console.log('✅ [تعديل] الأقسام اليدوية المتاحة:', manualSections.length);
+          
+          if (manualSections.length === 0) {
+            console.warn('⚠️ [تعديل] لا توجد أقسام يدوية!');
+          } else {
+            console.log('📋 [تعديل] الأقسام:', manualSections.map((s: HomepageSection) => s.title));
+          }
+        }
+      } catch (error) {
+        console.error('❌ [تعديل] خطأ في جلب الأقسام:', error);
+      }
+    };
+
+    fetchHomepageSections();
+  }, []);
+
+  // جلب الأقسام الحالية للمنتج
+  useEffect(() => {
+    if (!productId) return;
+
+    const fetchProductSections = async () => {
+      try {
+        // جلب جميع الأقسام التي تحتوي على هذا المنتج
+        const response = await fetch(`/api/homepage-sections/products?product_id=${productId}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const sectionIds = result.data.map((item: any) => item.section_id);
+          setSelectedSections(sectionIds);
+          setInitialSections(sectionIds);
+          console.log('✅ المنتج موجود في', sectionIds.length, 'أقسام');
+        }
+      } catch (error) {
+        console.error('خطأ في جلب أقسام المنتج:', error);
+      }
+    };
+
+    fetchProductSections();
+  }, [productId]);
   
   // دعم التحديث الفوري realtime
   useSupabaseRealtime({
@@ -418,6 +494,57 @@ export default function EditProductPage() {
         className: 'bg-white text-green-700 border-green-300 shadow-lg font-tajawal',
         icon: <CheckCircle className="text-green-500 w-6 h-6 animate-bounce" />
       });
+
+      // تحديث الأقسام
+      if (productId) {
+        try {
+          console.log('📋 تحديث أقسام المنتج...', {
+            initialSections,
+            selectedSections,
+            productId
+          });
+          
+          // 1. حذف الأقسام التي تم إلغاؤها
+          const removedSections = initialSections.filter(id => !selectedSections.includes(id));
+          for (const sectionId of removedSections) {
+            // جلب الـ link_id من الجدول
+            const linkResponse = await fetch(`/api/homepage-sections/products?section_id=${sectionId}&product_id=${productId}`);
+            const linkData = await linkResponse.json();
+            
+            if (linkData.success && linkData.data && linkData.data.length > 0) {
+              const linkId = linkData.data[0].id;
+              await fetch(`/api/homepage-sections/products?id=${linkId}`, {
+                method: 'DELETE'
+              });
+              console.log(`✅ تم حذف المنتج من قسم: ${sectionId}`);
+            }
+          }
+          
+          // 2. إضافة الأقسام الجديدة
+          const addedSections = selectedSections.filter(id => !initialSections.includes(id));
+          for (const sectionId of addedSections) {
+            await fetch('/api/homepage-sections/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                section_id: sectionId,
+                product_id: productId,
+                sort_order: 999
+              })
+            });
+            console.log(`✅ تم إضافة المنتج إلى قسم: ${sectionId}`);
+          }
+          
+          console.log('✅ تم تحديث الأقسام:', {
+            removed: removedSections.length,
+            added: addedSections.length
+          });
+          
+        } catch (sectionError) {
+          console.error('⚠️ خطأ في تحديث الأقسام:', sectionError);
+          // لا نوقف العملية، فقط نسجل الخطأ
+        }
+      }
       
       // إعادة توجيه بعد ثانيتين
       setTimeout(() => {
@@ -937,6 +1064,59 @@ export default function EditProductPage() {
             </div>
           </div>
         </div>
+
+        {/* قسم فرعي: الأقسام */}
+        {homepageSections.length > 0 && (
+          <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+              إضافة المنتج إلى أقسام الصفحة الرئيسية
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              اختر الأقسام التي تريد ظهور هذا المنتج فيها في الصفحة الرئيسية
+            </p>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {homepageSections.map((section) => (
+                <div
+                  key={section.id}
+                  className="flex items-center p-3 bg-indigo-50 rounded-lg border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                >
+                  <input
+                    id={`section-${section.id}`}
+                    type="checkbox"
+                    checked={selectedSections.includes(section.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedSections(prev => [...prev, section.id]);
+                      } else {
+                        setSelectedSections(prev => prev.filter(id => id !== section.id));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label
+                    htmlFor={`section-${section.id}`}
+                    className="mr-3 block text-sm text-indigo-900 font-medium cursor-pointer"
+                  >
+                    {section.title}
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            {selectedSections.length > 0 && (
+              <p className="mt-3 text-xs text-indigo-600 bg-indigo-50 p-2 rounded">
+                ✓ المنتج {initialSections.length > 0 ? 'موجود' : 'سيظهر'} في {selectedSections.length} {selectedSections.length === 1 ? 'قسم' : 'أقسام'}
+                {initialSections.length !== selectedSections.length && (
+                  <span className="mr-2 text-amber-600">
+                    (تم التعديل - احفظ لتطبيق التغييرات)
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
+        )}
         
         {/* أزرار الإجراءات */}
         <div className="flex justify-end space-x-4 space-x-reverse">

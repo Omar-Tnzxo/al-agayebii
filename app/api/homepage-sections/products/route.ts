@@ -1,31 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-// GET - جلب المنتجات المرتبطة بقسم معين
+// GET - جلب المنتجات المرتبطة بقسم معين أو الأقسام المرتبطة بمنتج معين
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const sectionId = searchParams.get('section_id');
+    const productId = searchParams.get('product_id');
 
-    if (!sectionId) {
+    // يجب توفير واحد على الأقل
+    if (!sectionId && !productId) {
       return NextResponse.json(
-        { success: false, error: 'Section ID is required' },
+        { success: false, error: 'Section ID or Product ID is required' },
         { status: 400 }
       );
     }
 
-    const { data, error } = await supabase
-      .from('homepage_section_products')
-      .select(`
-        id,
-        sort_order,
-        products:product_id (
-          id, name, description, price, original_price,
-          images, rating, reviews_count, in_stock, badge
-        )
-      `)
-      .eq('section_id', sectionId)
-      .order('sort_order', { ascending: true });
+    let query = supabase.from('homepage_section_products').select('*');
+
+    if (sectionId && productId) {
+      // البحث عن رابط محدد (section + product)
+      query = supabase
+        .from('homepage_section_products')
+        .select('id, section_id, product_id, sort_order')
+        .eq('section_id', sectionId)
+        .eq('product_id', productId);
+    } else if (sectionId) {
+      // جلب منتجات قسم معين
+      query = supabase
+        .from('homepage_section_products')
+        .select(`
+          id,
+          sort_order,
+          product_id (
+            id, name, price, image, stock_quantity, is_active
+          )
+        `)
+        .eq('section_id', sectionId)
+        .order('sort_order', { ascending: true });
+    } else if (productId) {
+      // جلب الأقسام التي تحتوي على منتج معين
+      query = supabase
+        .from('homepage_section_products')
+        .select('id, section_id, sort_order')
+        .eq('product_id', productId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json(

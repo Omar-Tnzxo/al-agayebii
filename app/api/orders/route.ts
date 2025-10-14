@@ -9,20 +9,22 @@ import { getSiteSettings } from '@/lib/site-settings';
 const createSupabaseClient = () => {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
     if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase environment variables:', { 
-        hasUrl: !!supabaseUrl, 
-        hasKey: !!supabaseKey 
-      });
+      // لا تطبع الخطأ في الـ console لتجنب الـ spam
+      // console.error('Missing Supabase environment variables:', {
+      //   hasUrl: !!supabaseUrl,
+      //   hasKey: !!supabaseKey
+      // });
       return null;
     }
-    
+
     console.log('Creating Supabase client with URL:', supabaseUrl);
     return createClient(supabaseUrl, supabaseKey);
   } catch (error) {
-    console.error('Error creating Supabase client:', error);
+    // لا تطبع الخطأ في الـ console لتجنب الـ spam
+    // console.error('Error creating Supabase client:', error);
     return null;
   }
 };
@@ -132,7 +134,8 @@ export async function GET(request: NextRequest) {
         if (error.code === 'PGRST116' || error.message?.includes('No rows')) {
           return NextResponse.json({ error: 'الطلب غير موجود' }, { status: 404 });
         }
-        console.error('خطأ في جلب الطلب:', error);
+        // لا تطبع الخطأ في الـ console لتجنب الـ spam
+        // console.error('خطأ في جلب الطلب:', error);
         return NextResponse.json({ error: 'فشل في جلب الطلب', details: process.env.NODE_ENV !== 'production' ? error.message : undefined }, { status: 500 });
       }
       if (!order) {
@@ -215,7 +218,8 @@ export async function GET(request: NextRequest) {
     const { data: orders, error, count } = await query;
 
     if (error) {
-      console.error('خطأ في جلب الطلبات:', error);
+      // لا تطبع الخطأ في الـ console لتجنب الـ spam
+      // console.error('خطأ في جلب الطلبات:', error);
       return NextResponse.json(
         {
           error: 'فشل في جلب الطلبات',
@@ -260,11 +264,12 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('خطأ في API الطلبات:', error);
+    // لا تطبع الخطأ في الـ console لتجنب الـ spam
+    // console.error('خطأ في API الطلبات:', error);
     return NextResponse.json(
-      { 
-        error: 'خطأ داخلي في الخادم', 
-        details: process.env.NODE_ENV !== 'production' ? error.message : undefined 
+      {
+        error: 'خطأ داخلي في الخادم',
+        details: process.env.NODE_ENV !== 'production' ? error.message : undefined
       },
       { status: 500 }
     );
@@ -344,11 +349,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) {
-      console.error('خطأ في إضافة الطلب:', orderError);
+      // لا تطبع الخطأ في الـ console لتجنب الـ spam
+      // console.error('خطأ في إضافة الطلب:', orderError);
       return NextResponse.json(
-        { 
-          error: 'فشل في إضافة الطلب', 
-          details: process.env.NODE_ENV !== 'production' ? orderError.message : undefined 
+        {
+          error: 'فشل في إضافة الطلب',
+          details: process.env.NODE_ENV !== 'production' ? orderError.message : undefined
         },
         { status: 500 }
       );
@@ -370,7 +376,8 @@ export async function POST(request: NextRequest) {
       .insert(orderItems);
 
     if (itemsError) {
-      console.error('خطأ في إضافة عناصر الطلب:', itemsError);
+      // لا تطبع الخطأ في الـ console لتجنب الـ spam
+      // console.error('خطأ في إضافة عناصر الطلب:', itemsError);
       // حذف الطلب في حالة فشل إضافة العناصر
       await supabase.from('orders').delete().eq('id', order.id);
       return NextResponse.json(
@@ -420,11 +427,12 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('خطأ في إضافة الطلب:', error);
+    // لا تطبع الخطأ في الـ console لتجنب الـ spam
+    // console.error('خطأ في إضافة الطلب:', error);
     return NextResponse.json(
-      { 
-        error: 'خطأ داخلي في الخادم', 
-        details: process.env.NODE_ENV !== 'production' ? error.message : undefined 
+      {
+        error: 'خطأ داخلي في الخادم',
+        details: process.env.NODE_ENV !== 'production' ? error.message : undefined
       },
       { status: 500 }
     );
@@ -463,11 +471,12 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('خطأ في تحديث الطلب:', error);
+      // لا تطبع الخطأ في الـ console لتجنب الـ spam
+      // console.error('خطأ في تحديث الطلب:', error);
       return NextResponse.json(
-        { 
-          error: 'فشل في تحديث الطلب', 
-          details: process.env.NODE_ENV !== 'production' ? error.message : undefined 
+        {
+          error: 'فشل في تحديث الطلب',
+          details: process.env.NODE_ENV !== 'production' ? error.message : undefined
         },
         { status: 500 }
       );
@@ -480,11 +489,12 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('خطأ في تحديث الطلب:', error);
+    // لا تطبع الخطأ في الـ console لتجنب الـ spam
+    // console.error('خطأ في تحديث الطلب:', error);
     return NextResponse.json(
-      { 
-        error: 'خطأ داخلي في الخادم', 
-        details: process.env.NODE_ENV !== 'production' ? error.message : undefined 
+      {
+        error: 'خطأ داخلي في الخادم',
+        details: process.env.NODE_ENV !== 'production' ? error.message : undefined
       },
       { status: 500 }
     );

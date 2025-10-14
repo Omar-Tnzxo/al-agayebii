@@ -10,7 +10,8 @@ export interface SiteSettings {
  */
 export async function getSiteSettings(): Promise<SiteSettings> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // استخدم ANON_KEY فقط لأن SERVICE_ROLE_KEY مقطوع
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
     console.warn('[getSiteSettings] Supabase credentials are missing');
@@ -24,7 +25,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       .select('key,value');
 
     if (error) {
-      console.error('[getSiteSettings] Error fetching settings:', error.message);
+      // لا تطبع الخطأ في الـ console لتجنب الـ spam
+      // console.error('[getSiteSettings] Error fetching settings:', error.message);
       return {};
     }
 
@@ -35,7 +37,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
     return settings;
   } catch (err) {
-    console.error('[getSiteSettings] Unexpected error:', err);
+    // console.error('[getSiteSettings] Unexpected error:', err);
     return {};
   }
 } 

@@ -91,18 +91,28 @@ export default function NewCategoryPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: category.name,
-          description: category.description,
-          type: category.type,
-          image: category.image,
+          name: category.name.trim(),
+          description: category.description.trim(),
+          type: category.type.trim().toLowerCase(),
+          image: category.image || '',
           is_active: category.is_active,
-          sort_order: category.sort_order
+          sort_order: Number(category.sort_order) || 0
         })
       });
       
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        throw new Error('خطأ في تحليل استجابة الخادم');
+      }
       
       if (!response.ok) {
+        // إذا كان الخطأ بسبب تكرار، أظهره في حقل محدد
+        if (response.status === 409) {
+          setErrors({ type: result.error || 'النوع مستخدم من قبل' });
+          return;
+        }
         throw new Error(result.error || 'فشل في إضافة الفئة');
       }
       

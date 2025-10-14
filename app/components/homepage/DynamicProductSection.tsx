@@ -21,6 +21,7 @@ const calculateDiscount = (original: number, current: number) => {
 
 interface Product {
   id: string;
+  slug: string;
   name: string;
   description?: string;
   price: number;
@@ -193,7 +194,7 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link
-      href={`/product/${product.id}`}
+      href={`/product/${product.slug}`}
       className="group bg-white rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col shadow-sm"
     >
       {/* Image Container */}

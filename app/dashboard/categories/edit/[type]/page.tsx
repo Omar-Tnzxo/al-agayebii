@@ -44,17 +44,27 @@ export default function EditCategoryPage() {
   useEffect(() => {
     const fetchCategory = async () => {
       setFetchLoading(true);
+      setErrors({});
       try {
         const response = await fetch(`/api/categories/${categoryType}`);
+        
         if (!response.ok) {
+          if (response.status === 404) {
+            setErrors({ general: 'التصنيف غير موجود' });
+          } else {
+            setErrors({ general: 'فشل في تحميل بيانات التصنيف' });
+          }
           setCategory(null);
           return;
         }
+        
         const data = await response.json();
         setCategory(data);
         setImageUrl(data.image || '');
-        setSortOrder(data.sort_order ?? '');
-      } catch (error) {
+        setSortOrder(data.sort_order ?? 0);
+      } catch (error: any) {
+        console.error('خطأ في جلب التصنيف:', error);
+        setErrors({ general: 'حدث خطأ أثناء تحميل بيانات التصنيف' });
         setCategory(null);
       } finally {
         setFetchLoading(false);
@@ -119,24 +129,46 @@ export default function EditCategoryPage() {
     }
     
     setLoading(true);
+    setErrors({});
     
     try {
       const payload = {
-        ...category,
-        sort_order: sortOrder === '' ? undefined : sortOrder,
-        image: imageUrl,
+        name: category?.name.trim(),
+        description: category?.description.trim(),
+        type: category?.type.trim().toLowerCase(),
+        sort_order: sortOrder === '' ? 0 : Number(sortOrder),
+        image: imageUrl || '',
+        is_active: category?.is_active,
       };
-      await fetch(`/api/categories/${categoryType}`, {
+      
+      const response = await fetch(`/api/categories/${categoryType}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        throw new Error('خطأ في تحليل استجابة الخادم');
+      }
+      
+      if (!response.ok) {
+        // إذا كان الخطأ بسبب تكرار type
+        if (response.status === 409) {
+          setErrors({ type: result.error || 'النوع مستخدم من قبل' });
+          return;
+        }
+        throw new Error(result.error || 'فشل في تحديث الفئة');
+      }
+      
       // إعادة التوجيه إلى صفحة الفئات بعد التعديل بنجاح
       router.push('/dashboard/categories');
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating category:', error);
+      setErrors({ general: error.message || 'حدث خطأ أثناء تحديث الفئة' });
     } finally {
       setLoading(false);
     }
@@ -148,11 +180,16 @@ export default function EditCategoryPage() {
     event: '*',
     onChange: () => {
       if (categoryType) {
-        fetch(`/api/categories/${categoryType}`).then(r => r.ok && r.json()).then(data => {
-          setCategory(data);
-          setImageUrl(data?.image || '');
-          setSortOrder(data?.sort_order ?? '');
-        });
+        fetch(`/api/categories/${categoryType}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data) {
+              setCategory(data);
+              setImageUrl(data?.image || '');
+              setSortOrder(data?.sort_order ?? 0);
+            }
+          })
+          .catch(err => console.error('خطأ في تحديث البيانات:', err));
       }
     },
   });
@@ -168,12 +205,13 @@ export default function EditCategoryPage() {
   }
   
   // إظهار رسالة خطأ إذا لم يتم العثور على الفئة
-  if (!category) {
+  if (!category && !fetchLoading) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">الفئة غير موجودة</h1>
-          <p className="text-gray-600 mb-6">لم يتم العثور على الفئة المطلوبة</p>
+          <p className="text-gray-600 mb-2">{errors.general || 'لم يتم العثور على الفئة المطلوبة'}</p>
+          <p className="text-sm text-gray-500 mb-6">النوع المطلوب: {categoryType}</p>
           <Link 
             href="/dashboard/categories"
             className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
@@ -191,7 +229,7 @@ export default function EditCategoryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">تعديل فئة</h1>
-          <p className="text-neutral-500">تعديل بيانات الفئة: {category.name}</p>
+          <p className="text-neutral-500">تعديل بيانات الفئة: {category?.name || categoryType}</p>
         </div>
         <Link 
           href="/dashboard/categories"
@@ -203,6 +241,12 @@ export default function EditCategoryPage() {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-8">
+        {errors.general && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600 text-sm">{errors.general}</p>
+          </div>
+        )}
+        
         <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
           <h2 className="text-lg font-medium mb-4">معلومات الفئة</h2>
           

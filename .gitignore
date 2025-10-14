@@ -27,6 +27,7 @@ coverage/
 # Misc
 .env.local
 .env.*.local
+nul
 
 # Docs & reports not needed in production
 REPAIR_REPORT.md

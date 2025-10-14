@@ -39,6 +39,7 @@ interface Category {
 
 interface Product {
   id: string;
+  slug: string;
   name: string;
   description?: string;
   price: number;
@@ -136,63 +137,89 @@ async function fetchHomepageSections(): Promise<HomepageSection[]> {
         // جلب المنتجات حسب المصدر
         if (settings.product_source === 'manual') {
           // جلب المنتجات المحددة يدوياً
-          const { data: sectionProducts } = await supabase
+          const { data: sectionProducts, error: sectionError } = await supabase
             .from('homepage_section_products')
             .select(`
               sort_order,
-              products:product_id (
-                id, name, description, price, original_price,
-                images, rating, reviews_count, in_stock, badge
+              product_id (
+                id, name, description, price, discount_percentage, slug,
+                image, rating, reviews_count, stock_quantity, is_active
               )
             `)
             .eq('section_id', section.id)
             .order('sort_order', { ascending: true });
 
-          products = (sectionProducts || []).map((sp: any) => ({
-            id: sp.products.id,
-            name: sp.products.name,
-            description: sp.products.description,
-            price: sp.products.price,
-            originalPrice: sp.products.original_price,
-            images: sp.products.images || [],
-            rating: sp.products.rating,
-            reviewCount: sp.products.reviews_count,
-            inStock: sp.products.in_stock,
-            badge: sp.products.badge
-          }));
+          if (sectionError) {
+            logger.error('Error fetching manual section products:', sectionError);
+          }
+
+          products = (sectionProducts || [])
+            .filter((sp: any) => sp.product_id && sp.product_id.is_active)
+            .map((sp: any) => {
+              const p = sp.product_id;
+              const originalPrice = p.discount_percentage > 0 
+                ? p.price / (1 - p.discount_percentage / 100)
+                : null;
+              
+              return {
+                id: p.id,
+                slug: p.slug,
+                name: p.name,
+                description: p.description,
+                price: p.price,
+                originalPrice: originalPrice,
+                images: p.image ? [p.image] : [],
+                rating: p.rating,
+                reviewCount: p.reviews_count,
+                inStock: p.stock_quantity > 0,
+                badge: p.discount_percentage > 0 ? `خصم ${Math.round(p.discount_percentage)}%` : null
+              };
+            });
         } else {
           // جلب المنتجات تلقائياً حسب النوع
           let query = supabase
             .from('products')
-            .select('id, name, description, price, original_price, images, rating, reviews_count, in_stock, badge')
+            .select('id, name, description, price, discount_percentage, slug, image, rating, reviews_count, stock_quantity, created_at')
             .eq('is_active', true);
 
           if (settings.product_source === 'category' && settings.category_type) {
             query = query.eq('category_type', settings.category_type);
           } else if (settings.product_source === 'best_sellers') {
-            query = query.order('sales_count', { ascending: false });
+            // ترتيب حسب view_count إذا لم يكن هناك sales_count
+            query = query.order('view_count', { ascending: false });
           } else if (settings.product_source === 'new') {
             query = query.order('created_at', { ascending: false });
           } else if (settings.product_source === 'deals') {
-            query = query.not('original_price', 'is', null);
+            query = query.gt('discount_percentage', 0);
           }
 
           query = query.limit(settings.product_count || 8);
 
-          const { data: productsData } = await query;
+          const { data: productsData, error: productsError } = await query;
 
-          products = (productsData || []).map((p: any) => ({
-            id: p.id,
-            name: p.name,
-            description: p.description,
-            price: p.price,
-            originalPrice: p.original_price,
-            images: p.images || [],
-            rating: p.rating,
-            reviewCount: p.reviews_count,
-            inStock: p.in_stock,
-            badge: p.badge
-          }));
+          if (productsError) {
+            logger.error('Error fetching auto section products:', productsError);
+          }
+
+          products = (productsData || []).map((p: any) => {
+            const originalPrice = p.discount_percentage > 0 
+              ? p.price / (1 - p.discount_percentage / 100)
+              : null;
+            
+            return {
+              id: p.id,
+              slug: p.slug,
+              name: p.name,
+              description: p.description,
+              price: p.price,
+              originalPrice: originalPrice,
+              images: p.image ? [p.image] : [],
+              rating: p.rating,
+              reviewCount: p.reviews_count,
+              inStock: p.stock_quantity > 0,
+              badge: p.discount_percentage > 0 ? `خصم ${Math.round(p.discount_percentage)}%` : null
+            };
+          });
         }
 
         return {
