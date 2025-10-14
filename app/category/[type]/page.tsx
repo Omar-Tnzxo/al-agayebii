@@ -7,6 +7,8 @@ import ProductCard from '../../components/ProductCard';
 // جلب بيانات التصنيف والمنتجات عبر type
 async function getCategoryDataByType(type: string) {
   try {
+    console.log('🔍 جلب بيانات التصنيف:', type);
+    
     // جلب بيانات التصنيف
     const categoryResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/categories?type=${type}`, {
       cache: 'no-store'
@@ -16,23 +18,32 @@ async function getCategoryDataByType(type: string) {
       const categories = await categoryResponse.json();
       // ابحث عن أول تصنيف يطابق type
       category = (categories.data || []).find((cat: any) => cat.type?.toLowerCase() === type.toLowerCase());
+      console.log('📦 التصنيف المطابق:', category);
     }
     if (!category || !category.type) {
+      console.log('❌ لم يتم العثور على التصنيف');
       return { category: null, products: [] };
     }
-    // جلب منتجات التصنيف عبر type
-    const productsResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/products?category_type=${category.type}`, {
+    
+    // جلب منتجات التصنيف عبر category_type
+    const productsUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/products?category=${category.type}`;
+    console.log('🔍 جلب المنتجات من:', productsUrl);
+    
+    const productsResponse = await fetch(productsUrl, {
       cache: 'no-store'
     });
     let products = [];
     if (productsResponse.ok) {
       const productsData = await productsResponse.json();
-      const arr = Array.isArray(productsData.data) ? productsData.data : [];
+      console.log('📊 بيانات المنتجات المستلمة:', productsData);
+      const arr = Array.isArray(productsData.data?.data) ? productsData.data.data : 
+                   Array.isArray(productsData.data) ? productsData.data : [];
       products = arr.filter((product: any) => product.category_type === category.type);
+      console.log('✅ المنتجات بعد الفلترة:', products.length, 'منتج');
     }
     return { category, products };
   } catch (error) {
-    console.error('Error in getCategoryDataByType:', error);
+    console.error('❌ Error in getCategoryDataByType:', error);
     return { category: null, products: [] };
   }
 }

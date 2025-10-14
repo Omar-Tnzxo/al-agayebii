@@ -9,6 +9,8 @@ class ProductsApiHandler extends BaseApiHandler {
     return this.handleRequest(async () => {
       let params: any = this.getQueryParams(request);
       
+      console.log('🔍 API Products - Parameters:', params);
+      
       // دعم color_id في الباراميترات
       if (request.nextUrl && request.nextUrl.searchParams) {
         params.color_id = request.nextUrl.searchParams.get('color_id') || '';
@@ -20,6 +22,7 @@ class ProductsApiHandler extends BaseApiHandler {
       
       if (cachedData) {
         this.logOperation('GET Products (from cache)', { params });
+        console.log('📦 من Cache:', cachedData.data?.data?.length || 0, 'منتج');
         return cachedData;
       }
 
@@ -35,6 +38,7 @@ class ProductsApiHandler extends BaseApiHandler {
       }
 
       if (params.category) {
+        console.log('🔍 فلترة حسب category_type:', params.category);
         query = query.eq('category_type', params.category);
       }
 
@@ -108,8 +112,11 @@ class ProductsApiHandler extends BaseApiHandler {
       const { data, error, count } = await query;
 
       if (error) {
+        console.error('❌ خطأ في جلب المنتجات:', error);
         throw new Error(`خطأ في جلب المنتجات: ${error.message}`);
       }
+
+      console.log('✅ عدد المنتجات المسترجعة:', data?.length || 0);
 
       const result = {
         success: true,
