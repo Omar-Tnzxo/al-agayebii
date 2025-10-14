@@ -101,11 +101,11 @@ export default function EditCategoryPage() {
     
     const newErrors: Record<string, string> = {};
     
-    if (!category.name.trim()) {
+    if (!category.name?.trim()) {
       newErrors.name = 'اسم الفئة مطلوب';
     }
     
-    if (!category.description.trim()) {
+    if (!category.description?.trim()) {
       newErrors.description = 'وصف الفئة مطلوب';
     }
     
