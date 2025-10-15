@@ -22,7 +22,7 @@ class ProductsApiHandler extends BaseApiHandler {
       
       if (cachedData) {
         this.logOperation('GET Products (from cache)', { params });
-        console.log('📦 من Cache:', cachedData.data?.data?.length || 0, 'منتج');
+        console.log('📦 من Cache:', (cachedData as any)?.data?.data?.length || 0, 'منتج');
         return cachedData;
       }
 

@@ -11,6 +11,7 @@ import { useSupabaseRealtime } from '@/lib/hooks/useSupabaseRealtime';
 
 // واجهة التصنيف
 interface Category {
+  id: string;
   type: string;
   name: string;
 }
@@ -169,7 +170,7 @@ export default function NewProductPage() {
         const result = await response.json();
         
         if (result.success && result.data) {
-          setCategories(result.data.map((cat: any) => ({ type: cat.type, name: cat.name })));
+          setCategories(result.data.map((cat: any) => ({ id: cat.id, type: cat.type, name: cat.name })));
           console.log('✅ تم جلب التصنيفات بنجاح:', result.data.length);
         } else {
           throw new Error('لا توجد تصنيفات متاحة');
@@ -237,7 +238,7 @@ export default function NewProductPage() {
       // إعادة جلب التصنيفات عند أي تغيير
       fetch('/api/categories').then(r => r.ok && r.json()).then(result => {
         if (result && result.success && result.data) {
-          setCategories(result.data.map((cat: any) => ({ type: cat.type, name: cat.name })));
+          setCategories(result.data.map((cat: any) => ({ id: cat.id, type: cat.type, name: cat.name })));
         }
       });
     },
@@ -315,6 +316,10 @@ export default function NewProductPage() {
       newErrors.discount_percentage = 'نسبة الخصم يجب أن تكون بين 0 و 100';
     }
     
+    if (!product.sku.trim()) {
+      newErrors.sku = 'كود المنتج (SKU) مطلوب';
+    }
+    
     if (!product.slug.trim()) {
       newErrors.slug = 'الرابط المخصص (slug) مطلوب';
     } else if (!/^[a-z0-9\-]+$/.test(product.slug.trim())) {
@@ -360,11 +365,18 @@ export default function NewProductPage() {
         throw new Error('يجب إضافة صورة واحدة على الأقل للمنتج. اختر صورة وارفعها أولاً.');
       }
       
+      // استخراج category_id من التصنيف المختار
+      const selectedCategory = categories.find(cat => cat.type === product.category_type);
+      if (!selectedCategory || !selectedCategory.id) {
+        throw new Error('يجب اختيار تصنيف صحيح للمنتج.');
+      }
+      
       // إعداد بيانات المنتج للإرسال
       const productData = {
         name: product.name.trim(),
         description: product.description.trim(),
         price: parseFloat(product.price.toString()),
+        category_id: selectedCategory.id, // إضافة category_id
         category_type: product.category_type,
         stock_quantity: parseInt(product.stock_quantity.toString()),
         image: finalImageUrl,
@@ -378,7 +390,7 @@ export default function NewProductPage() {
         discount_percentage: parseInt(product.discount_percentage.toString()),
         rating: parseFloat(product.rating.toString()),
         reviews_count: parseInt(product.reviews_count.toString()),
-        sku: product.sku.trim() || null,
+        sku: product.sku.trim(),
         slug: product.slug.trim()
       };
       
