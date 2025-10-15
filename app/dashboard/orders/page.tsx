@@ -117,6 +117,9 @@ export default function OrdersManagement() {
 
   // نظام التنبيهات الذكية
   const { alerts, criticalCount, warningCount, totalCount } = useOrderAlerts(orders);
+  
+  // تتبع الفلتر النشط من الإشعارات
+  const [activeAlertFilter, setActiveAlertFilter] = useState<string | null>(null);
 
   // حالة الفلاتر المتقدمة
   const [filters, setFilters] = useState<FilterState>({
@@ -361,6 +364,11 @@ export default function OrdersManagement() {
 
   // إعادة تعيين الفلاتر
   const handleResetFilters = () => {
+    console.log('🔄 إعادة تعيين جميع الفلاتر');
+    
+    // إزالة الفلتر النشط من الإشعارات
+    setActiveAlertFilter(null);
+    
     setFilters({
       search: '',
       status: 'all',
@@ -379,6 +387,9 @@ export default function OrdersManagement() {
       paymentMethod: '',
       hasProfit: 'all'
     });
+    
+    // Reset الصفحة الحالية
+    setCurrentPage(1);
   };
 
   // التحديد المتعدد للطلبات
@@ -745,6 +756,9 @@ export default function OrdersManagement() {
                     
                     console.log('✅ تطبيق الفلتر:', newStatus);
                     
+                    // حفظ معرف الإشعار النشط
+                    setActiveAlertFilter(alert.id);
+                    
                     // تطبيق فلتر سريع لإظهار الطلبات المتعلقة بهذا التنبيه
                     setFilters(prev => ({
                       ...prev,
@@ -763,9 +777,9 @@ export default function OrdersManagement() {
                       });
                     }, 100);
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors font-medium"
                 >
-                  عرض الطلبات
+                  عرض الطلبات ({alert.count})
                 </button>
                 <span className={cn(
                   "px-3 py-1 rounded-full text-xs font-medium",
@@ -1044,6 +1058,31 @@ export default function OrdersManagement() {
           </button>
         </div>
       </div>
+      
+      {/* مؤشر الفلتر النشط من الإشعارات */}
+      {activeAlertFilter && (
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Filter className="w-5 h-5 text-blue-600" />
+            <div>
+              <p className="font-medium text-blue-900">
+                يتم عرض الطلبات المفلترة من الإشعار
+              </p>
+              <p className="text-sm text-blue-700">
+                {alerts.find(a => a.id === activeAlertFilter)?.title} - {filteredOrders.length} طلب
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleResetFilters}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          >
+            <X className="w-4 h-4" />
+            إلغاء الفلتر
+          </button>
+        </div>
+      )}
+      
       <div ref={ordersTableRef} className="bg-white dark:bg-gray-900 rounded-b-xl shadow overflow-x-auto scrollbar-thin border border-gray-100 dark:border-gray-800">
         <table className="min-w-[1300px] divide-y divide-gray-200 dark:divide-gray-800 text-sm">
           <thead>
