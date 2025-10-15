@@ -157,6 +157,9 @@ export default function OrdersManagement() {
 
   // تطبيق الفلاتر والبحث والترتيب
   useEffect(() => {
+    console.log('🔄 تطبيق الفلاتر - filters.status:', filters.status);
+    console.log('📊 عدد الطلبات الكلي:', orders.length);
+    
     if (!Array.isArray(orders)) {
       setFilteredOrders([]);
       return;
@@ -178,7 +181,10 @@ export default function OrdersManagement() {
 
     // فلترة حسب حالة الطلب
     if (filters.status !== 'all') {
+      console.log('🔍 تطبيق فلتر الحالة:', filters.status);
+      const beforeFilter = filtered.length;
       filtered = filtered.filter(order => order && order.status === filters.status);
+      console.log('✅ بعد الفلترة:', filtered.length, 'من', beforeFilter);
     }
 
     // فلترة حسب حالة الدفع
@@ -285,6 +291,7 @@ export default function OrdersManagement() {
       }
     });
 
+    console.log('✅ النتيجة النهائية:', filtered.length, 'طلب');
     setFilteredOrders(filtered);
     setCurrentPage(1); // إعادة تعيين الصفحة عند التصفية
   }, [orders, filters, sortBy, sortOrder]);
