@@ -3,48 +3,48 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ProductCard from '../../components/ProductCard';
+import { supabase } from '@/lib/supabase';
 
-// جلب بيانات التصنيف والمنتجات عبر type
+// جلب بيانات التصنيف والمنتجات عبر type مباشرة من Supabase
 async function getCategoryDataByType(type: string) {
   try {
     console.log('🔍 جلب بيانات التصنيف:', type);
     
-    // استخدام URL الصحيح مع fallback
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-agayebii.netlify.app';
+    // جلب بيانات التصنيف من Supabase مباشرة
+    const { data: categories, error: categoryError } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('type', type.toLowerCase())
+      .limit(1);
     
-    // جلب بيانات التصنيف
-    const categoryResponse = await fetch(`${baseUrl}/api/categories?type=${type}`, {
-      cache: 'no-store'
-    });
-    let category = null;
-    if (categoryResponse.ok) {
-      const categories = await categoryResponse.json();
-      // ابحث عن أول تصنيف يطابق type
-      category = (categories.data || []).find((cat: any) => cat.type?.toLowerCase() === type.toLowerCase());
-      console.log('📦 التصنيف المطابق:', category);
+    if (categoryError) {
+      console.error('❌ خطأ في جلب التصنيف:', categoryError);
+      return { category: null, products: [] };
     }
-    if (!category || !category.type) {
+    
+    const category = categories && categories.length > 0 ? categories[0] : null;
+    
+    if (!category) {
       console.log('❌ لم يتم العثور على التصنيف');
       return { category: null, products: [] };
     }
     
-    // جلب منتجات التصنيف عبر category_type
-    const productsUrl = `${baseUrl}/api/products?category=${category.type}`;
-    console.log('🔍 جلب المنتجات من:', productsUrl);
+    console.log('📦 التصنيف المطابق:', category);
     
-    const productsResponse = await fetch(productsUrl, {
-      cache: 'no-store'
-    });
-    let products = [];
-    if (productsResponse.ok) {
-      const productsData = await productsResponse.json();
-      console.log('📊 بيانات المنتجات المستلمة:', productsData);
-      const arr = Array.isArray(productsData.data?.data) ? productsData.data.data : 
-                   Array.isArray(productsData.data) ? productsData.data : [];
-      products = arr.filter((product: any) => product.category_type === category.type);
-      console.log('✅ المنتجات بعد الفلترة:', products.length, 'منتج');
+    // جلب منتجات التصنيف من Supabase مباشرة
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category_type', category.type);
+    
+    if (productsError) {
+      console.error('❌ خطأ في جلب المنتجات:', productsError);
+      return { category, products: [] };
     }
-    return { category, products };
+    
+    console.log('✅ المنتجات:', products?.length || 0, 'منتج');
+    
+    return { category, products: products || [] };
   } catch (error) {
     console.error('❌ Error in getCategoryDataByType:', error);
     return { category: null, products: [] };
