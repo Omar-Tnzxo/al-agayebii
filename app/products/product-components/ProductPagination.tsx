@@ -98,9 +98,9 @@ export function ProductPagination({
           {showPageInfo && (
             <div className="text-sm text-gray-700">
               <p>
-                عرض <span className="font-medium">{startItem.toLocaleString('ar')}</span> إلى{' '}
-                <span className="font-medium">{endItem.toLocaleString('ar')}</span> من{' '}
-                <span className="font-medium">{totalItems.toLocaleString('ar')}</span> منتج
+                عرض <span className="font-medium">{startItem.toLocaleString('en-US')}</span> إلى{' '}
+                <span className="font-medium">{endItem.toLocaleString('en-US')}</span> من{' '}
+                <span className="font-medium">{totalItems.toLocaleString('en-US')}</span> منتج
               </p>
             </div>
           )}
@@ -178,7 +178,7 @@ export function ProductPagination({
                       : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                   }`}
                 >
-                  {pageNumber.toLocaleString('ar')}
+                  {pageNumber.toLocaleString('en-US')}
                 </button>
               );
             })}
@@ -217,7 +217,7 @@ export function ProductPagination({
 
         {/* معلومات إضافية */}
         <div className="mt-4 text-center text-xs text-gray-500">
-          صفحة {currentPage.toLocaleString('ar')} من {totalPages.toLocaleString('ar')}
+          صفحة {currentPage.toLocaleString('en-US')} من {totalPages.toLocaleString('en-US')}
         </div>
       </div>
     </div>

@@ -644,7 +644,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, onOrderUpd
                                 </div>
 
                                 <p className="text-sm text-gray-600 mb-2">
-                                  {new Date(item.created_at).toLocaleString('ar-EG')}
+                                  {new Date(item.created_at).toLocaleString('en-US')}
                                 </p>
 
                                 {item.changed_by && (

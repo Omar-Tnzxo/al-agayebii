@@ -103,15 +103,15 @@ export default function TrackOrderPage() {
     }
   };
 
-  // تنسيق السعر بطريقة ذكية
+  // تنسيق السعر بطريقة ذكية (أرقام إنجليزية)
   const formatCurrency = (price: number) => {
     // التحقق من أن القيمة رقم صحيح
     if (Number.isInteger(price)) {
-      return price.toLocaleString('ar-EG') + ' ج.م';
+      return price.toLocaleString('en-US') + ' ج.م';
     }
     
     // إذا كان عشري، نعرض رقمين عشريين فقط
-    return price.toLocaleString('ar-EG', {
+    return price.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }) + ' ج.م';

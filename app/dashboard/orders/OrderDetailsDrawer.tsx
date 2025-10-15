@@ -178,7 +178,7 @@ function OrderStatusHistorySection({ orderId }: { orderId: string }) {
                 </div>
               </div>
               <div className="text-xs text-gray-500">
-                {new Date(h.created_at).toLocaleString('ar-EG')}
+                {new Date(h.created_at).toLocaleString('en-US')}
               </div>
             </div>
             {(h.changed_by || h.notes) && (

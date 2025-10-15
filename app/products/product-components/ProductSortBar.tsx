@@ -121,9 +121,9 @@ export function ProductSortBar({
               <span>جاري البحث...</span>
             ) : (
               <span>
-                عرض {resultsCount.toLocaleString('ar')} منتج
+                عرض {resultsCount.toLocaleString('en-US')} منتج
                 {totalCount && totalCount !== resultsCount && (
-                  <span> من أصل {totalCount.toLocaleString('ar')}</span>
+                  <span> من أصل {totalCount.toLocaleString('en-US')}</span>
                 )}
               </span>
             )}

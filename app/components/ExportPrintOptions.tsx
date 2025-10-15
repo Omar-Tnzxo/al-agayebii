@@ -416,7 +416,7 @@ export default function ExportPrintOptions({ orders, selectedOrders, onClose }: 
 
             <div class="footer">
               <p>شكراً لكم لاختياركم خدماتنا</p>
-              <p>تم إنشاء هذه الفاتورة في: ${new Date().toLocaleString('ar-EG')}</p>
+              <p>تم إنشاء هذه الفاتورة في: ${new Date().toLocaleString('en-US')}</p>
             </div>
           </body>
           </html>

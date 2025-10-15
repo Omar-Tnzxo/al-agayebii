@@ -276,7 +276,7 @@ export default function OrderNotifications({ orders, onOrderSelect }: OrderNotif
                             {notification.message}
                           </p>
                           <p className="text-xs text-gray-400 mt-2">
-                            {notification.timestamp.toLocaleString('ar-EG')}
+                            {notification.timestamp.toLocaleString('en-US')}
                           </p>
                         </div>
 
