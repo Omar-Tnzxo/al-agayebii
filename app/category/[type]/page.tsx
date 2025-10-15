@@ -15,14 +15,15 @@ async function getCategoryDataByType(type: string) {
       .from('categories')
       .select('*')
       .eq('type', type.toLowerCase())
-      .limit(1);
+      .limit(1)
+      .single();
     
     if (categoryError) {
       console.error('❌ خطأ في جلب التصنيف:', categoryError);
       return { category: null, products: [] };
     }
     
-    const category = categories && categories.length > 0 ? categories[0] : null;
+    const category = categories;
     
     if (!category) {
       console.log('❌ لم يتم العثور على التصنيف');
@@ -35,7 +36,8 @@ async function getCategoryDataByType(type: string) {
     const { data: products, error: productsError } = await supabase
       .from('products')
       .select('*')
-      .eq('category_type', category.type);
+      .eq('category_type', category.type)
+      .order('created_at', { ascending: false });
     
     if (productsError) {
       console.error('❌ خطأ في جلب المنتجات:', productsError);
@@ -51,7 +53,7 @@ async function getCategoryDataByType(type: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { type: string } }) {
+export async function generateMetadata({ params }: { params: { type: string } }): Promise<Metadata> {
   const { type } = params;
   const { category } = await getCategoryDataByType(type);
   if (!category) {
@@ -65,6 +67,10 @@ export async function generateMetadata({ params }: { params: { type: string } })
     description: category.description || `منتجات تصنيف ${category.name}`
   };
 }
+
+// إضافة dynamic config
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function CategoryTypePage({ params }: { params: { type: string } }) {
   const { type } = params;
