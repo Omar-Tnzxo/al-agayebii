@@ -348,23 +348,8 @@ export async function PATCH(
       );
     }
 
-    // إضافة سجل تغيير الحالة إذا تم تغيير الحالة
-    if (status !== undefined && status !== oldStatus) {
-      try {
-        await supabaseAdmin
-          .from('order_status_history')
-          .insert({
-            order_id: id,
-            old_status: oldStatus,
-            new_status: status,
-            changed_by: 'مدير النظام',
-            notes: `تم تحديث الحالة من ${oldStatus || 'غير محدد'} إلى ${status}`
-          });
-        console.log('✅ تم إضافة سجل تغيير الحالة');
-      } catch (historyError) {
-        console.warn('تحذير: فشل في إضافة سجل تغيير الحالة:', historyError);
-      }
-    }
+    // لا حاجة لإضافة سجل يدوياً - الـ trigger في قاعدة البيانات سيتولى ذلك
+    // تم إزالة الكود المكرر لتجنب التسجيل المزدوج
 
     console.log('✅ تم تحديث الطلب بنجاح');
     return NextResponse.json({ success: true, message: 'تم تحديث الطلب بنجاح' });
