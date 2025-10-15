@@ -203,10 +203,22 @@ export default function OrderNotifications({ orders, onOrderSelect }: OrderNotif
   };
 
   const handleOrderClick = (orderId?: string) => {
-    if (orderId && onOrderSelect) {
-      onOrderSelect(orderId);
-      setIsOpen(false);
+    console.log('🔍 OrderNotifications - handleOrderClick called with:', orderId);
+    console.log('🔍 OrderNotifications - onOrderSelect function:', onOrderSelect);
+    
+    if (!orderId) {
+      console.warn('⚠️ No orderId provided');
+      return;
     }
+    
+    if (!onOrderSelect) {
+      console.warn('⚠️ onOrderSelect callback is not defined');
+      return;
+    }
+    
+    console.log('✅ Calling onOrderSelect with orderId:', orderId);
+    onOrderSelect(orderId);
+    setIsOpen(false);
   };
 
   return (
@@ -283,8 +295,11 @@ export default function OrderNotifications({ orders, onOrderSelect }: OrderNotif
                         <div className="flex items-center gap-1">
                           {notification.orderId && (
                             <button
-                              onClick={() => handleOrderClick(notification.orderId)}
-                              className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOrderClick(notification.orderId);
+                              }}
+                              className="p-1 text-blue-600 hover:bg-blue-100 rounded transition-colors"
                               title="عرض الطلب"
                             >
                               <Eye className="w-4 h-4" />
