@@ -6,6 +6,7 @@ import { ArrowRight, MessageCircle } from 'lucide-react';
 import fs from 'fs';
 import path from 'path';
 import { createWhatsAppLink } from '@/lib/utils/helpers';
+import { formatPrice } from '@/lib/utils/format-number';
 import PrintButton from '@/components/PrintButton';
 
 export const metadata: Metadata = {
@@ -124,7 +125,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
                       <div className="text-sm text-gray-600 mt-1">
                         <span>الكمية: {item.quantity}</span>
                         <span className="mx-2">•</span>
-                        <span>سعر الوحدة: {item.price} جنيه</span>
+                        <span>سعر الوحدة: {formatPrice(item.price)}</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -356,7 +357,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
                       <div className="text-sm text-gray-600 mt-1">
                         <span>الكمية: {item.quantity}</span>
                         <span className="mx-2">•</span>
-                        <span>سعر الوحدة: {item.price} جنيه</span>
+                        <span>سعر الوحدة: {formatPrice(item.price)}</span>
                       </div>
                     </div>
                     <div className="text-right">

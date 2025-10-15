@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { formatOrderId } from '@/lib/utils/helpers';
 import { showErrorToast } from '@/lib/utils/show-error-toast';
+import { formatPrice } from '@/lib/utils/format-number';
 
 // واجهات محدثة حسب schema قاعدة البيانات الفعلية
 interface OrderItem {
@@ -708,7 +709,7 @@ export function OrderDetailsDrawer({ order, open, onClose }: OrderDetailsDrawerP
                   <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
                     <p className="text-sm text-gray-500 dark:text-gray-400">إجمالي الطلب</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {order.total.toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ج.م
+                      {formatPrice(order.total)}
                     </p>
                   </div>
 
@@ -817,13 +818,13 @@ export function OrderDetailsDrawer({ order, open, onClose }: OrderDetailsDrawerP
                               <div className="flex items-center gap-2">
                                 <span className="text-gray-500">سعر الوحدة:</span>
                                 <span className="font-medium text-gray-900 dark:text-white">
-                                  {item.price.toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ج.م
+                                  {formatPrice(item.price)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 col-span-2">
                                 <span className="text-gray-500">الإجمالي:</span>
                                 <span className="font-bold text-lg text-indigo-600 dark:text-indigo-400">
-                                  {(item.total_price || (item.quantity * item.price)).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ج.م
+                                  {formatPrice(item.total_price || (item.quantity * item.price))}
                                 </span>
                               </div>
                             </div>
@@ -837,7 +838,7 @@ export function OrderDetailsDrawer({ order, open, onClose }: OrderDetailsDrawerP
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-medium">إجمالي الطلب:</span>
                         <span className="text-2xl font-bold">
-                          {order.total.toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ج.م
+                          {formatPrice(order.total)}
                         </span>
                       </div>
                     </div>
