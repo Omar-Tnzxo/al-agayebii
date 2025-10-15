@@ -13,7 +13,7 @@ SELECT
 FROM order_status_history
 GROUP BY order_id, old_status, new_status, DATE_TRUNC('second', created_at)
 HAVING COUNT(*) > 1
-ORDER BY created_at DESC;
+ORDER BY time_group DESC;
 
 -- 2. حذف السجلات المكررة (الاحتفاظ بواحد فقط لكل مجموعة)
 WITH duplicates AS (
@@ -28,7 +28,8 @@ WITH duplicates AS (
       ORDER BY 
         CASE 
           WHEN changed_by = 'مدير النظام' THEN 1
-          ELSE 2
+          WHEN notes = 'تم تغيير الحالة تلقائياً' THEN 2
+          ELSE 3
         END,
         created_at DESC,
         id DESC
@@ -59,4 +60,5 @@ SELECT
 FROM order_status_history
 ORDER BY created_at DESC
 LIMIT 20;
+
 
