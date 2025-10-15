@@ -120,6 +120,7 @@ export default function OrdersManagement() {
   
   // تتبع الفلتر النشط من الإشعارات
   const [activeAlertFilter, setActiveAlertFilter] = useState<string | null>(null);
+  const [alertFilterOrderIds, setAlertFilterOrderIds] = useState<string[]>([]);
 
   // حالة الفلاتر المتقدمة
   const [filters, setFilters] = useState<FilterState>({
@@ -159,6 +160,8 @@ export default function OrdersManagement() {
   useEffect(() => {
     console.log('🔄 تطبيق الفلاتر - filters.status:', filters.status);
     console.log('📊 عدد الطلبات الكلي:', orders.length);
+    console.log('🎯 Alert Filter Active:', activeAlertFilter);
+    console.log('📋 Alert Order IDs:', alertFilterOrderIds.length);
     
     if (!Array.isArray(orders)) {
       setFilteredOrders([]);
@@ -166,29 +169,37 @@ export default function OrdersManagement() {
     }
 
     let filtered = [...orders];
+    
+    // فلترة حسب IDs من الإشعار (أولوية أعلى)
+    if (activeAlertFilter && alertFilterOrderIds.length > 0) {
+      console.log('🔍 تطبيق فلتر الإشعار بناءً على IDs');
+      filtered = filtered.filter(order => alertFilterOrderIds.includes(order.id));
+      console.log('✅ بعد فلترة IDs:', filtered.length, 'طلب');
+    } else {
+      // الفلاتر العادية
+      
+      // البحث
+      if (filters.search && filters.search.trim()) {
+        const searchLower = filters.search.toLowerCase().trim();
+        filtered = filtered.filter(order =>
+          order && (
+            (order.order_number?.toLowerCase() || '').includes(searchLower) ||
+            (order.customer_name?.toLowerCase() || '').includes(searchLower) ||
+            (order.customer_phone || '').includes(filters.search)
+          )
+        );
+      }
 
-    // البحث
-    if (filters.search && filters.search.trim()) {
-      const searchLower = filters.search.toLowerCase().trim();
-      filtered = filtered.filter(order =>
-        order && (
-          (order.order_number?.toLowerCase() || '').includes(searchLower) ||
-          (order.customer_name?.toLowerCase() || '').includes(searchLower) ||
-          (order.customer_phone || '').includes(filters.search)
-        )
-      );
-    }
+      // فلترة حسب حالة الطلب
+      if (filters.status !== 'all') {
+        console.log('🔍 تطبيق فلتر الحالة:', filters.status);
+        const beforeFilter = filtered.length;
+        filtered = filtered.filter(order => order && order.status === filters.status);
+        console.log('✅ بعد الفلترة:', filtered.length, 'من', beforeFilter);
+      }
 
-    // فلترة حسب حالة الطلب
-    if (filters.status !== 'all') {
-      console.log('🔍 تطبيق فلتر الحالة:', filters.status);
-      const beforeFilter = filtered.length;
-      filtered = filtered.filter(order => order && order.status === filters.status);
-      console.log('✅ بعد الفلترة:', filtered.length, 'من', beforeFilter);
-    }
-
-    // فلترة حسب حالة الدفع
-    if (filters.paymentStatus !== 'all') {
+      // فلترة حسب حالة الدفع
+      if (filters.paymentStatus !== 'all') {
       filtered = filtered.filter(order => order && order.payment_status === filters.paymentStatus);
     }
 
@@ -260,6 +271,7 @@ export default function OrdersManagement() {
         return true;
       });
     }
+    } // إغلاق الـ else للفلاتر العادية
 
     // الترتيب
     filtered.sort((a, b) => {
@@ -294,7 +306,7 @@ export default function OrdersManagement() {
     console.log('✅ النتيجة النهائية:', filtered.length, 'طلب');
     setFilteredOrders(filtered);
     setCurrentPage(1); // إعادة تعيين الصفحة عند التصفية
-  }, [orders, filters, sortBy, sortOrder]);
+  }, [orders, filters, sortBy, sortOrder, activeAlertFilter, alertFilterOrderIds]);
 
   const fetchOrders = async () => {
     try {
@@ -375,6 +387,7 @@ export default function OrdersManagement() {
     
     // إزالة الفلتر النشط من الإشعارات
     setActiveAlertFilter(null);
+    setAlertFilterOrderIds([]);
     
     setFilters({
       search: '',
@@ -753,25 +766,11 @@ export default function OrdersManagement() {
                 <button
                   onClick={() => {
                     console.log('🔍 عرض الطلبات - Alert ID:', alert.id);
+                    console.log('📋 Order IDs:', alert.orders);
                     
-                    // تحديد الحالة المناسبة
-                    const newStatus = alert.id === 'pending-orders' ? 'pending' :
-                            alert.id === 'replacement-requests' ? 'replacement_requested' :
-                            alert.id === 'confirmed-not-shipped' ? 'confirmed' :
-                            alert.id === 'long-shipped' ? 'shipped' :
-                            alert.id === 'unpaid-delivered' ? 'delivered' : 'all';
-                    
-                    console.log('✅ تطبيق الفلتر:', newStatus);
-                    
-                    // حفظ معرف الإشعار النشط
+                    // حفظ معرف الإشعار النشط و IDs الطلبات
                     setActiveAlertFilter(alert.id);
-                    
-                    // تطبيق فلتر سريع لإظهار الطلبات المتعلقة بهذا التنبيه
-                    setFilters(prev => ({
-                      ...prev,
-                      search: '',
-                      status: newStatus
-                    }));
+                    setAlertFilterOrderIds(alert.orders || []);
                     
                     // Reset current page
                     setCurrentPage(1);
