@@ -103,13 +103,18 @@ export default function TrackOrderPage() {
     }
   };
 
-  // تنسيق السعر
+  // تنسيق السعر بطريقة ذكية
   const formatCurrency = (price: number) => {
-    return new Intl.NumberFormat('ar-EG', {
-      style: 'decimal',
+    // التحقق من أن القيمة رقم صحيح
+    if (Number.isInteger(price)) {
+      return price.toLocaleString('ar-EG') + ' ج.م';
+    }
+    
+    // إذا كان عشري، نعرض رقمين عشريين فقط
+    return price.toLocaleString('ar-EG', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(price) + ' ج.م';
+    }) + ' ج.م';
   };
 
   // نسخ النص للحافظة

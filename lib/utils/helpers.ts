@@ -10,12 +10,20 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * تنسيق سعر المنتج بالجنيه المصري
+ * - إذا كان الرقم صحيح (مثل 100) يظهر بدون أصفار عشرية
+ * - إذا كان الرقم عشري (مثل 100.50) يظهر الجزء العشري
  */
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('ar-EG-u-nu-latn', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(price).trim();
+  // التحقق من أن القيمة رقم صحيح
+  if (Number.isInteger(price)) {
+    return price.toLocaleString('ar-EG');
+  }
+  
+  // إذا كان عشري، نعرض رقمين عشريين فقط
+  return price.toLocaleString('ar-EG', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }
 
 /**
