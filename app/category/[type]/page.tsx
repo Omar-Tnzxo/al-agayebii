@@ -9,8 +9,11 @@ async function getCategoryDataByType(type: string) {
   try {
     console.log('🔍 جلب بيانات التصنيف:', type);
     
+    // استخدام URL الصحيح مع fallback
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-agayebii.netlify.app';
+    
     // جلب بيانات التصنيف
-    const categoryResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/categories?type=${type}`, {
+    const categoryResponse = await fetch(`${baseUrl}/api/categories?type=${type}`, {
       cache: 'no-store'
     });
     let category = null;
@@ -26,7 +29,7 @@ async function getCategoryDataByType(type: string) {
     }
     
     // جلب منتجات التصنيف عبر category_type
-    const productsUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/products?category=${category.type}`;
+    const productsUrl = `${baseUrl}/api/products?category=${category.type}`;
     console.log('🔍 جلب المنتجات من:', productsUrl);
     
     const productsResponse = await fetch(productsUrl, {
