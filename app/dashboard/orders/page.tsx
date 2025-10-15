@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -111,6 +111,9 @@ export default function OrdersManagement() {
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  
+  // Reference للجدول للـ scroll
+  const ordersTableRef = useRef<HTMLDivElement>(null);
 
   // نظام التنبيهات الذكية
   const { alerts, criticalCount, warningCount, totalCount } = useOrderAlerts(orders);
@@ -731,18 +734,36 @@ export default function OrdersManagement() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
+                    console.log('🔍 عرض الطلبات - Alert ID:', alert.id);
+                    
+                    // تحديد الحالة المناسبة
+                    const newStatus = alert.id === 'pending-orders' ? 'pending' :
+                            alert.id === 'replacement-requests' ? 'replacement_requested' :
+                            alert.id === 'confirmed-not-shipped' ? 'confirmed' :
+                            alert.id === 'long-shipped' ? 'shipped' :
+                            alert.id === 'unpaid-delivered' ? 'delivered' : 'all';
+                    
+                    console.log('✅ تطبيق الفلتر:', newStatus);
+                    
                     // تطبيق فلتر سريع لإظهار الطلبات المتعلقة بهذا التنبيه
                     setFilters(prev => ({
                       ...prev,
                       search: '',
-                      status: alert.id === 'pending-orders' ? 'pending' :
-                              alert.id === 'replacement-requests' ? 'replacement_requested' :
-                              alert.id === 'confirmed-not-shipped' ? 'confirmed' :
-                              alert.id === 'long-shipped' ? 'shipped' :
-                              alert.id === 'unpaid-delivered' ? 'delivered' : 'all'
+                      status: newStatus
                     }));
+                    
+                    // Reset current page
+                    setCurrentPage(1);
+                    
+                    // Scroll إلى الجدول بعد وقت قصير
+                    setTimeout(() => {
+                      ordersTableRef.current?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }, 100);
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
                 >
                   عرض الطلبات
                 </button>
@@ -1023,7 +1044,7 @@ export default function OrdersManagement() {
           </button>
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-900 rounded-b-xl shadow overflow-x-auto scrollbar-thin border border-gray-100 dark:border-gray-800">
+      <div ref={ordersTableRef} className="bg-white dark:bg-gray-900 rounded-b-xl shadow overflow-x-auto scrollbar-thin border border-gray-100 dark:border-gray-800">
         <table className="min-w-[1300px] divide-y divide-gray-200 dark:divide-gray-800 text-sm">
           <thead>
             <tr>
