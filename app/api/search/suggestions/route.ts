@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       .select('id, name, slug, image, price, discount_percentage')
       .eq('is_active', true)
       .ilike('name', `%${query}%`)
-      .order('view_count', { ascending: false, nullsLast: true })
+      .order('view_count', { ascending: false })
       .limit(8);
 
     if (error) {

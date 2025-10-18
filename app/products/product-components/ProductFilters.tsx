@@ -38,7 +38,6 @@ interface FilterState {
   isNew: boolean;
   isFeatured: boolean;
   isPopular: boolean;
-  isExclusive: boolean;
   rating: number;
   colors: string[];
   ratingMode: 'exact' | 'atLeast';
@@ -57,7 +56,6 @@ interface ProductFiltersProps {
     isNew: number;
     isFeatured: number;
     isPopular: number;
-    isExclusive: number;
   };
 }
 
@@ -139,7 +137,6 @@ export function ProductFilters({
       isNew: false,
       isFeatured: false,
       isPopular: false,
-      isExclusive: false,
       rating: 0,
       colors: [],
       ratingMode: 'exact'

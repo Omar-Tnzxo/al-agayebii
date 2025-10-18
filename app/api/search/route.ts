@@ -51,17 +51,17 @@ export async function GET(request: NextRequest) {
         queryBuilder = queryBuilder.order('price', { ascending: false });
         break;
       case 'rating':
-        queryBuilder = queryBuilder.order('rating', { ascending: false, nullsLast: true });
+        queryBuilder = queryBuilder.order('rating', { ascending: false });
         break;
       case 'newest':
         queryBuilder = queryBuilder.order('created_at', { ascending: false });
         break;
       case 'popular':
-        queryBuilder = queryBuilder.order('view_count', { ascending: false, nullsLast: true });
+        queryBuilder = queryBuilder.order('view_count', { ascending: false });
         break;
       default:
         // relevance - ترتيب افتراضي حسب المشاهدات والتقييم
-        queryBuilder = queryBuilder.order('view_count', { ascending: false, nullsLast: true });
+        queryBuilder = queryBuilder.order('view_count', { ascending: false });
     }
 
     // تحديد عدد النتائج
