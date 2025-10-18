@@ -129,6 +129,7 @@ export default function AdminLogin() {
                 className="appearance-none rounded-lg relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm transition-all"
                 placeholder="admin@example.com"
                 disabled={isLoading}
+                suppressHydrationWarning
               />
             </div>
             
@@ -148,6 +149,7 @@ export default function AdminLogin() {
                   className="appearance-none rounded-lg relative block w-full px-4 py-3 pl-12 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm transition-all"
                   placeholder="أدخل كلمة المرور"
                   disabled={isLoading}
+                  suppressHydrationWarning
                 />
                 <button
                   type="button"
