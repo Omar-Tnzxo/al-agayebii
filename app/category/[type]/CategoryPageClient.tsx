@@ -89,19 +89,6 @@ export default function CategoryPageClient({ category, initialProducts }: Catego
         <p className="text-gray-600">تسوق أفضل {category.name} في متجر العجايبي</p>
       </div>
 
-      {/* صورة التصنيف الرئيسية */}
-      {category.image && (
-        <div className="relative h-64 w-full mb-8 rounded-lg overflow-hidden">
-          <Image
-            src={category.image}
-            alt={category.name}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-      )}
-
       {/* عدد المنتجات */}
       <div className="mb-6">
         <p className="text-gray-600">
