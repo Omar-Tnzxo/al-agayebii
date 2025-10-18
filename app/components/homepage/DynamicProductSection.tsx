@@ -177,7 +177,7 @@ export default function DynamicProductSection({
               {title}
             </h2>
             {subtitle && (
-              <p className="text-xs sm:text-sm md:text-base text-accent/70 font-tajawal">
+              <p className="text-xs sm:text-sm md:text-base text-gray-600 font-tajawal">
                 {subtitle}
               </p>
             )}
