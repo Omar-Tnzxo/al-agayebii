@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { 
   Star, Trash2, Eye, Calendar, User, Package, Search, Filter, 
   ChevronDown, AlertCircle, Check, X, MessageSquare, CheckCircle, 
-  Loader2, EyeOff, Settings, List
+  Loader2, EyeOff, Settings, List, Trash
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Review {
   id: string;
@@ -53,6 +54,10 @@ export default function ReviewsManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'rating'>('newest');
+
+  // Bulk delete
+  const [selectedReviews, setSelectedReviews] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -118,6 +123,9 @@ export default function ReviewsManagementPage() {
     });
 
     setFilteredReviews(filtered);
+    
+    // مسح التحديدات عند تغيير الفلتر
+    setSelectedReviews(new Set());
   }, [searchTerm, filterRating, sortBy, reviews]);
 
   const handleToggleReviews = async () => {
@@ -166,7 +174,55 @@ export default function ReviewsManagementPage() {
         showMessage('error', data.error || 'حدث خطأ في الحذف');
       }
     } catch (error) {
-      showMessage('error', 'حذف خطأ في حذف التقييم');
+      showMessage('error', 'خطأ في حذف التقييم');
+    }
+  };
+
+  // حذف متعدد
+  const handleBulkDelete = async () => {
+    if (selectedReviews.size === 0) {
+      showMessage('error', 'يرجى اختيار تقييمات للحذف');
+      return;
+    }
+
+    if (!confirm(`هل أنت متأكد من حذف ${selectedReviews.size} تقييم؟`)) return;
+
+    setIsDeleting(true);
+    try {
+      const deletePromises = Array.from(selectedReviews).map(reviewId =>
+        fetch('/api/dashboard/reviews-settings', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewId })
+        })
+      );
+
+      await Promise.all(deletePromises);
+      showMessage('success', `تم حذف ${selectedReviews.size} تقييم بنجاح`);
+      setSelectedReviews(new Set());
+      fetchData();
+    } catch (error) {
+      showMessage('error', 'حدث خطأ في حذف التقييمات');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const toggleSelectReview = (reviewId: string) => {
+    const newSelected = new Set(selectedReviews);
+    if (newSelected.has(reviewId)) {
+      newSelected.delete(reviewId);
+    } else {
+      newSelected.add(reviewId);
+    }
+    setSelectedReviews(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedReviews.size === filteredReviews.length) {
+      setSelectedReviews(new Set());
+    } else {
+      setSelectedReviews(new Set(filteredReviews.map(r => r.id)));
     }
   };
 
@@ -301,43 +357,84 @@ export default function ReviewsManagementPage() {
 
           {/* أدوات البحث والفلترة */}
           <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* البحث */}
-              <div className="relative">
-                <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="بحث في التقييمات..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+            <div className="grid grid-cols-1 gap-4">
+              {/* الصف الأول: البحث والفلاتر */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* البحث */}
+                <div className="relative">
+                  <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="بحث في التقييمات..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* فلتر التقييم */}
+                <select
+                  value={filterRating === null ? '' : filterRating}
+                  onChange={(e) => setFilterRating(e.target.value === '' ? null : Number(e.target.value))}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">جميع التقييمات</option>
+                  <option value="5">5 نجوم</option>
+                  <option value="4">4 نجوم</option>
+                  <option value="3">3 نجوم</option>
+                  <option value="2">نجمتان</option>
+                  <option value="1">نجمة واحدة</option>
+                </select>
+
+                {/* الترتيب */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="newest">الأحدث أولاً</option>
+                  <option value="oldest">الأقدم أولاً</option>
+                  <option value="rating">الأعلى تقييماً</option>
+                </select>
               </div>
 
-              {/* فلتر التقييم */}
-              <select
-                value={filterRating === null ? '' : filterRating}
-                onChange={(e) => setFilterRating(e.target.value === '' ? null : Number(e.target.value))}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">جميع التقييمات</option>
-                <option value="5">5 نجوم</option>
-                <option value="4">4 نجوم</option>
-                <option value="3">3 نجوم</option>
-                <option value="2">نجمتان</option>
-                <option value="1">نجمة واحدة</option>
-              </select>
+              {/* الصف الثاني: أدوات الحذف الجماعي */}
+              {filteredReviews.length > 0 && (
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedReviews.size === filteredReviews.length && filteredReviews.length > 0}
+                      onChange={toggleSelectAll}
+                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-600">
+                      {selectedReviews.size > 0 ? (
+                        <span className="font-medium text-blue-600">
+                          تم تحديد {selectedReviews.size} تقييم
+                        </span>
+                      ) : (
+                        'تحديد الكل'
+                      )}
+                    </span>
+                  </div>
 
-              {/* الترتيب */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="newest">الأحدث أولاً</option>
-                <option value="oldest">الأقدم أولاً</option>
-                <option value="rating">الأعلى تقييماً</option>
-              </select>
+                  {selectedReviews.size > 0 && (
+                    <button
+                      onClick={handleBulkDelete}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash className="h-4 w-4" />
+                      )}
+                      حذف المحددة ({selectedReviews.size})
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -362,15 +459,37 @@ export default function ReviewsManagementPage() {
                 <div className="space-y-4">
                   {filteredReviews.map((review) => (
                     <div key={review.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
+                      <div className="flex items-start gap-4">
+                        {/* Checkbox للحذف الجماعي */}
+                        <input
+                          type="checkbox"
+                          checked={selectedReviews.has(review.id)}
+                          onChange={() => toggleSelectReview(review.id)}
+                          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1 flex-shrink-0"
+                        />
+
+                        {/* صورة المنتج */}
+                        {review.product && review.product.image && (
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <Image
+                              src={review.product.image}
+                              alt={review.product.name}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+
+                        {/* المحتوى */}
+                        <div className="flex-1 min-w-0">
                           {/* المستخدم والتقييم */}
                           <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                               <User className="h-5 w-5 text-blue-600" />
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <h3 className="font-semibold text-gray-900">{review.reviewer_name}</h3>
                                 <StarRating rating={review.rating} />
                               </div>
@@ -383,10 +502,11 @@ export default function ReviewsManagementPage() {
                           {/* المنتج */}
                           {review.product && (
                             <div className="flex items-center gap-2 mb-3 bg-gray-50 rounded-lg p-2">
-                              <Package className="h-4 w-4 text-gray-600" />
+                              <Package className="h-4 w-4 text-gray-600 flex-shrink-0" />
                               <Link 
                                 href={`/product/${review.product.slug}`}
-                                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium truncate"
+                                target="_blank"
                               >
                                 {review.product.name}
                               </Link>
@@ -394,7 +514,7 @@ export default function ReviewsManagementPage() {
                           )}
 
                           {/* التعليق */}
-                          <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                          <p className="text-gray-700 leading-relaxed break-words">{review.comment}</p>
                         </div>
 
                         {/* زر الحذف */}
