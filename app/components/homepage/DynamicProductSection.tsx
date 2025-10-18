@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import UnifiedProductCard from '@/components/UnifiedProductCard';
 
 // Helper functions
 const formatPrice = (price: number) => {
@@ -77,7 +77,15 @@ export default function DynamicProductSection({
     return (
       <div className={`grid ${gridCols[2]} ${gridCols[3]} ${settings.columns >= 4 ? gridCols[settings.columns as keyof typeof gridCols] : ''} gap-3 sm:gap-4 md:gap-6`}>
         {products.slice(0, settings.product_count).map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <UnifiedProductCard 
+            key={product.id} 
+            product={{
+              ...product,
+              image: product.images[0],
+              discount_percentage: product.originalPrice ? calculateDiscount(product.originalPrice, product.price) : 0,
+              stock_quantity: product.inStock ? 1 : 0
+            }} 
+          />
         ))}
       </div>
     );
@@ -126,7 +134,15 @@ export default function DynamicProductSection({
         {/* Products Grid */}
         <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(slidesPerView, 3)} lg:grid-cols-${slidesPerView} gap-3 sm:gap-4 md:gap-6`}>
           {visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <UnifiedProductCard 
+              key={product.id} 
+              product={{
+                ...product,
+                image: product.images[0],
+                discount_percentage: product.originalPrice ? calculateDiscount(product.originalPrice, product.price) : 0,
+                stock_quantity: product.inStock ? 1 : 0
+              }} 
+            />
           ))}
         </div>
 
@@ -186,91 +202,3 @@ export default function DynamicProductSection({
   );
 }
 
-// Product Card Component
-function ProductCard({ product }: { product: Product }) {
-  const discount = product.originalPrice
-    ? calculateDiscount(product.originalPrice, product.price)
-    : 0;
-
-  return (
-    <Link
-      href={`/product/${product.slug}`}
-      className="group bg-white rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col shadow-sm"
-    >
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
-        <Image
-          src={product.images[0] || '/placeholder.png'}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-        />
-
-        {/* Badges */}
-        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 flex flex-col gap-1 sm:gap-1.5">
-          {discount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
-              -{discount}%
-            </span>
-          )}
-          {product.badge && (
-            <span className="bg-primary text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
-              {product.badge}
-            </span>
-          )}
-          {!product.inStock && (
-            <span className="bg-gray-800 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
-              نفذ
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Product Info */}
-      <div className="p-2 sm:p-3 md:p-4 flex flex-col flex-grow">
-        {/* Product Name */}
-        <h3 className="text-xs sm:text-sm md:text-base font-semibold text-accent mb-1 sm:mb-2 line-clamp-2 font-tajawal group-hover:text-primary transition-colors">
-          {product.name}
-        </h3>
-
-        {/* Rating */}
-        {product.rating && (
-          <div className="flex items-center gap-0.5 sm:gap-1 mb-1 sm:mb-2">
-            <div className="flex">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 ${
-                    i < Math.floor(product.rating!)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            {product.reviewCount && (
-              <span className="text-[10px] sm:text-xs text-accent/60 mr-0.5 sm:mr-1">
-                ({product.reviewCount})
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Price */}
-        <div className="mt-auto">
-          <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
-            <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-primary font-tajawal">
-              {formatPrice(product.price)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-[10px] sm:text-xs md:text-sm text-accent/50 line-through font-tajawal">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}

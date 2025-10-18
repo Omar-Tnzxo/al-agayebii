@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Grid3X3, List, Loader2, AlertCircle, Package } from 'lucide-react';
-import ProductCard from './ProductCard';
+import UnifiedProductCard from '@/components/UnifiedProductCard';
 
 interface Product {
   id: string;
@@ -128,15 +128,9 @@ export function ProductGrid({
   return (
     <div className={`${gridClasses} ${className}`}>
       {products.map((product) => (
-        <ProductCard
+        <UnifiedProductCard
           key={product.id}
           product={product}
-          viewMode={viewMode}
-          onQuickView={onProductQuickView}
-          onAddToCart={onProductAddToCart}
-          onToggleWishlist={onProductToggleWishlist}
-          isWishlisted={wishlistedProducts.has(product.id)}
-          currency={currency} // ✅ مرر العملة
         />
       ))}
     </div>

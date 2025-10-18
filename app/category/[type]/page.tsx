@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import ProductCard from '../../components/ProductCard';
+import UnifiedProductCard from '@/components/UnifiedProductCard';
 import { supabase } from '@/lib/supabase';
 
 // جلب بيانات التصنيف والمنتجات عبر type مباشرة من Supabase
@@ -121,7 +121,7 @@ export default async function CategoryTypePage({ params }: { params: { type: str
       {categoryProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {categoryProducts.map((product: any) => (
-            <ProductCard key={product.id} product={product} />
+            <UnifiedProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (

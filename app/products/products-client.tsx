@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { safeCreateClient } from '@/lib/auth';
 import { useSupabaseRealtime } from '@/lib/hooks/useSupabaseRealtime';
 import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
+import UnifiedProductCard from '@/components/UnifiedProductCard';
 import { 
-  ProductCard,
   ProductGrid,
   ProductFilters,
   ProductSortBar,

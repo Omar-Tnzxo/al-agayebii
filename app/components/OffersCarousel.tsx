@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import ProductCard from './ProductCard';
+import UnifiedProductCard from '@/components/UnifiedProductCard';
 
 interface Product {
   id: string;
@@ -119,7 +119,7 @@ const OffersCarousel = ({
       <div className={`${className}`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <UnifiedProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
@@ -149,7 +149,7 @@ const OffersCarousel = ({
               className="flex-shrink-0 px-3"
               style={{ width: `${100 / products.length}%` }}
             >
-              <ProductCard product={product} />
+              <UnifiedProductCard product={product} />
             </div>
           ))}
         </div>
