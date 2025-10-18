@@ -113,7 +113,18 @@ export default async function RootLayout({
     <html lang="ar" dir="rtl" className={`${tajawal.variable} ${cairo.variable}`} suppressHydrationWarning>
       <head />
       <body suppressHydrationWarning className={`font-tajawal antialiased bg-background min-h-screen flex flex-col`}>
-        <Toaster richColors position="top-center" closeButton />
+        <Toaster 
+          richColors 
+          position="top-center" 
+          closeButton
+          dir="rtl"
+          toastOptions={{
+            style: {
+              fontFamily: 'Tajawal, sans-serif',
+              direction: 'rtl',
+            },
+          }}
+        />
         <SiteSettingsProvider initialSettings={initialSettings}>
           <Suspense fallback={null}>
             <PublicLayoutShell>{children}</PublicLayoutShell>

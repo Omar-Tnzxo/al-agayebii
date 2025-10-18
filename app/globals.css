@@ -24,3 +24,48 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.7s cubic-bezier(.4,1.7,.6,.97);
 }
+
+/* تخصيص Sonner Toast للعربية */
+[data-sonner-toast] {
+  font-family: 'Tajawal', sans-serif !important;
+  direction: rtl !important;
+}
+
+[data-sonner-toast][data-styled='true'] {
+  padding: 16px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* تحسين ألوان success toast */
+[data-sonner-toast][data-type='success'] {
+  background-color: #10b981 !important;
+  border: none !important;
+  color: white !important;
+}
+
+[data-sonner-toast][data-type='success'] [data-icon] {
+  color: white !important;
+}
+
+[data-sonner-toast][data-type='success'] [data-content] {
+  color: white !important;
+}
+
+/* تحسين ألوان error toast */
+[data-sonner-toast][data-type='error'] {
+  background-color: #ef4444 !important;
+  border: none !important;
+  color: white !important;
+}
+
+/* تحسين زر الإغلاق */
+[data-sonner-toast] [data-button] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  color: white !important;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}

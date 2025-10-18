@@ -114,9 +114,24 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
         updated_at: new Date().toISOString(),
       } as any, 1);
       
-      toast.success(`تمت إضافة ${product.name} للسلة`, {
-        duration: 2000,
-      });
+      toast.success(
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0">
+            <ShoppingCart className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <p className="font-bold text-sm">تمت الإضافة بنجاح!</p>
+            <p className="text-xs opacity-90">{product.name}</p>
+          </div>
+        </div>,
+        {
+          duration: 2500,
+          style: {
+            fontFamily: 'Tajawal, sans-serif',
+            direction: 'rtl',
+          },
+        }
+      );
       
     } catch (error) {
       console.error('Error adding to cart:', error);
