@@ -22,7 +22,8 @@ import {
   Phone,
   Building,
   Image as ImageIcon,
-  LayoutGrid
+  LayoutGrid,
+  Star
 } from 'lucide-react';
 import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 import AdminNotifications from '@/app/components/AdminNotifications';
@@ -207,6 +208,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 icon={Layers}
                 text="إدارة الفئات"
                 href="/dashboard/categories"
+              />
+              <SidebarItem
+                icon={Star}
+                text="إدارة التقييمات"
+                href="/dashboard/reviews"
               />
             </SidebarGroup>
 

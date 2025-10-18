@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, RefreshCw, Upload, Check, AlertTriangle, Info, Settings, Globe, Palette, Store, CreditCard, User, Shield, Truck, ToggleLeft, ToggleRight, MapPin } from 'lucide-react';
+import { Save, RefreshCw, Upload, Check, AlertTriangle, Info, Settings, Globe, Palette, Store, CreditCard, User, Shield, Truck, ToggleLeft, ToggleRight, MapPin, Star } from 'lucide-react';
 import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -261,6 +261,8 @@ export default function SettingsPage() {
     shipping_max_days: '3',
     pickup_enabled: 'false',
     shipping_phone_message: 'سيتم تحديد تكلفة الشحن عند التواصل معك هاتفياً',
+    // Reviews settings
+    reviews_enabled: 'true',
   };
 
   const [settings, setSettings] = useState<Record<string, string>>(defaultSettings);
@@ -1013,6 +1015,45 @@ export default function SettingsPage() {
                   ))}
                 </select>
                 <span className="text-xs text-gray-500">مثال: 14 يوم، 30 يوم، 1 شهر ...</span>
+              </div>
+            </div>
+          </SettingsSection>
+
+          {/* Reviews Settings Section */}
+          <SettingsSection
+            icon={Star}
+            title="إعدادات التقييمات"
+            description="التحكم في نظام تقييمات العملاء للمنتجات"
+          >
+            {/* Toggle Reviews Enabled */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">تفعيل نظام التقييمات</h4>
+                <p className="text-xs text-gray-600">السماح للعملاء بإضافة تقييماتهم على المنتجات</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.reviews_enabled === 'true'}
+                  onChange={(e) => setSettings(prev => ({ ...prev, reviews_enabled: e.target.checked ? 'true' : 'false' }))}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-amber-500 transition-colors"></div>
+                <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+              </label>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">ملاحظة:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>عند تعطيل التقييمات، لن يظهر قسم التقييمات في صفحات المنتجات</li>
+                    <li>التقييمات الموجودة ستبقى في قاعدة البيانات ولن تُحذف</li>
+                    <li>يمكنك إدارة التقييمات من <Link href="/dashboard/reviews" className="text-blue-600 underline hover:text-blue-700">صفحة إدارة التقييمات</Link></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </SettingsSection>

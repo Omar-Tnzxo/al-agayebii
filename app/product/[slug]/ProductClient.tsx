@@ -60,6 +60,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SimpleBranchSelector } from '@/app/components/BranchSelector';
 import FormField from '@/app/checkout/FormField';
 import { Home, MessageSquare } from 'lucide-react';
+import ProductReviews from '@/app/components/ProductReviews';
 
 // مكون معرض الصور المتقدم
 const ProductImageGallery = ({ images, mainImage, productName }: { 
@@ -1334,6 +1335,11 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
           </div>
         </div>
         
+        {/* قسم التقييمات */}
+        <div className="mb-16">
+          <ProductReviews productId={product.id} />
+        </div>
+
         {/* المنتجات المقترحة */}
         {recommendedProducts.length > 0 && (
           <div className="mb-16">
