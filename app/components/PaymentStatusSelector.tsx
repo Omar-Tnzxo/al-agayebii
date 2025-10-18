@@ -87,17 +87,15 @@ export default function PaymentStatusSelector({
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
       
       // ارتفاع القائمة المتوقع (5 عناصر × 40px تقريباً)
       const dropdownHeight = 250;
       
       // المسافة المطلوبة للأمان
-      const safetyBuffer = 50;
+      const safetyBuffer = 20;
 
-      // قرار ذكي: افتح للأعلى فقط إذا كانت المساحة أسفلاً غير كافية 
-      // AND المساحة أعلى أكبر من المساحة أسفلاً
-      if (spaceBelow < (dropdownHeight + safetyBuffer) && spaceAbove > (dropdownHeight + safetyBuffer)) {
+      // قرار ذكي محسّن: افتح للأعلى إذا كانت المساحة أسفلاً قليلة
+      if (spaceBelow < dropdownHeight + safetyBuffer) {
         setDropdownPosition('top');
       } else {
         setDropdownPosition('bottom');
@@ -167,9 +165,19 @@ export default function PaymentStatusSelector({
 
           {/* Dropdown */}
           <div className={cn(
-            'absolute left-0 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-[120px] max-h-[250px] overflow-y-auto',
-            dropdownPosition === 'bottom' ? 'top-full mt-1' : 'bottom-full mb-1'
-          )}>
+            'fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-2xl py-1 min-w-[120px] max-h-[250px] overflow-y-auto',
+            dropdownPosition === 'bottom' && 'mt-1',
+            dropdownPosition === 'top' && 'mb-1'
+          )}
+          style={{
+            left: buttonRef.current ? `${buttonRef.current.getBoundingClientRect().left}px` : 0,
+            [dropdownPosition === 'bottom' ? 'top' : 'bottom']: buttonRef.current 
+              ? dropdownPosition === 'bottom'
+                ? `${buttonRef.current.getBoundingClientRect().bottom + 4}px`
+                : `${window.innerHeight - buttonRef.current.getBoundingClientRect().top + 4}px`
+              : 0
+          }}
+          >
             {availableOptions.map((option) => {
               const Icon = option.icon;
               const isSelected = option.value === currentStatus;

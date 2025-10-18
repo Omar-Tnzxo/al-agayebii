@@ -3,9 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/utils/logger';
 
 // استيراد المكونات الجديدة
-import HeroCarousel from './components/homepage/HeroCarousel';
-import CategorySection from './components/homepage/CategoryGrid';
-import DynamicProductSection from './components/homepage/DynamicProductSection';
+import RealtimeHomepage from './components/homepage/RealtimeHomepage';
 
 // إعدادات محددة للصفحة الرئيسية (SEO)
 export const metadata: Metadata = {
@@ -249,59 +247,11 @@ export default async function HomePage() {
     logger.info('🏠 Homepage rendered successfully');
 
     return (
-      <main dir="rtl" className="bg-white">
-        {/* Hero Carousel - البنر الدوار */}
-        {heroSlides.length > 0 && <HeroCarousel slides={heroSlides} />}
-
-        {/* Category Section - الفئات الرئيسية */}
-        {categories.length > 0 && (
-          <CategorySection
-            categories={categories}
-            title="تسوق حسب الفئة"
-            subtitle="اختر الفئة المناسبة لاحتياجاتك"
-          />
-        )}
-
-        {/* Dynamic Product Sections - الأقسام الديناميكية */}
-        {sections.map((section) => {
-          if (section.section_type === 'products' && section.products && section.products.length > 0) {
-            // تحديد رابط "عرض الكل" حسب نوع القسم
-            let viewAllLink = '/products';
-            const settings = section.settings || {};
-
-            if (settings.product_source === 'category' && settings.category_type) {
-              viewAllLink = `/category/${settings.category_type}`;
-            } else if (settings.product_source === 'best_sellers') {
-              viewAllLink = '/products?filter=best_sellers';
-            } else if (settings.product_source === 'new') {
-              viewAllLink = '/products?filter=new';
-            } else if (settings.product_source === 'deals') {
-              viewAllLink = '/products?filter=deals';
-            }
-
-            return (
-              <DynamicProductSection
-                key={section.id}
-                sectionId={section.id}
-                title={section.title}
-                subtitle={section.subtitle}
-                settings={settings}
-                products={section.products}
-                viewAllLink={viewAllLink}
-              />
-            );
-          }
-          return null;
-        })}
-
-        {/* رسالة افتراضية في حال عدم وجود أقسام */}
-        {sections.filter(s => s.section_type === 'products').length === 0 && (
-          <div className="container mx-auto px-4 py-16 text-center">
-            <p className="text-gray-500 text-lg">لا توجد أقسام معروضة حالياً</p>
-            <p className="text-gray-400 text-sm mt-2">يمكنك إضافة أقسام من لوحة التحكم</p>
-          </div>
-        )}
-      </main>
+      <RealtimeHomepage 
+        initialHeroSlides={heroSlides}
+        initialCategories={categories}
+        initialSections={sections}
+      />
     );
   } catch (error) {
     logger.error('Error rendering HomePage:', error);

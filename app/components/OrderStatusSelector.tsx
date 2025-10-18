@@ -50,11 +50,10 @@ export default function OrderStatusSelector({
       const dropdownHeight = 320;
       
       // المسافة المطلوبة للأمان
-      const safetyBuffer = 50;
+      const safetyBuffer = 20;
 
-      // قرار ذكي: افتح للأعلى فقط إذا كانت المساحة أسفلاً غير كافية 
-      // AND المساحة أعلى أكبر من المساحة أسفلاً
-      if (spaceBelow < (dropdownHeight + safetyBuffer) && spaceAbove > (dropdownHeight + safetyBuffer)) {
+      // قرار ذكي محسّن: افتح للأعلى إذا كانت المساحة أسفلاً قليلة
+      if (spaceBelow < dropdownHeight + safetyBuffer) {
         setDropdownPosition('top');
       } else {
         setDropdownPosition('bottom');
@@ -121,9 +120,19 @@ export default function OrderStatusSelector({
 
           {/* Dropdown */}
           <div className={cn(
-            'absolute left-0 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-[140px] max-h-[320px] overflow-y-auto',
-            dropdownPosition === 'bottom' ? 'top-full mt-1' : 'bottom-full mb-1'
-          )}>
+            'fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-2xl py-1 min-w-[140px] max-h-[320px] overflow-y-auto',
+            dropdownPosition === 'bottom' && 'mt-1',
+            dropdownPosition === 'top' && 'mb-1'
+          )}
+          style={{
+            left: buttonRef.current ? `${buttonRef.current.getBoundingClientRect().left}px` : 0,
+            [dropdownPosition === 'bottom' ? 'top' : 'bottom']: buttonRef.current 
+              ? dropdownPosition === 'bottom'
+                ? `${buttonRef.current.getBoundingClientRect().bottom + 4}px`
+                : `${window.innerHeight - buttonRef.current.getBoundingClientRect().top + 4}px`
+              : 0
+          }}
+          >
             {statusOptions.map((option) => {
               const Icon = option.icon;
               const isSelected = option.value === currentStatus;
