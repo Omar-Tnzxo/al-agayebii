@@ -143,7 +143,6 @@ export async function calculateShipping(subtotal: number): Promise<ShippingCalcu
   const allSettings = result.data;
   const shippingEnabled = allSettings.shipping_enabled === 'true';
   const pickupEnabled = allSettings.pickup_enabled === 'true';
-  const freeShippingEnabled = allSettings.freeShippingEnabled === 'true';
   const shippingCostType = allSettings.shipping_cost_type;
   const shippingCost = parseFloat(allSettings.shipping_cost || '30');
   const freeThreshold = parseFloat(allSettings.free_shipping_threshold || '500');
@@ -166,16 +165,6 @@ export async function calculateShipping(subtotal: number): Promise<ShippingCalcu
       type: 'disabled',
       cost: 0,
       message: 'الشحن غير متاح - الاستلام من الفرع فقط'
-    };
-  }
-
-  // إذا كان الشحن المجاني مفعل من إعدادات المتجر، يكون الشحن مجاني دائماً
-  if (freeShippingEnabled) {
-    return {
-      type: 'free',
-      cost: 0,
-      message: 'شحن مجاني',
-      delivery_time: `${minDays}-${maxDays} أيام`
     };
   }
 
