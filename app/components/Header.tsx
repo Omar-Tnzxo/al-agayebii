@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Menu, Search, Phone, MapPin } from 'lucide-react';
+import { ShoppingCart, Menu, Phone, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { SocialLinks } from './SocialLinks';
 import { useState, useEffect } from 'react';
@@ -120,9 +120,6 @@ export function Header() {
           
           {/* أيقونات الإجراءات */}
           <div className="flex items-center space-x-1">
-            <button className="p-2 rounded-full hover:bg-primary/10 transition-colors">
-              <Search className="w-5 h-5 text-accent" />
-            </button>
             <button
               className="p-2 rounded-full hover:bg-primary/10 transition-colors relative focus:outline-none focus:ring-2 focus:ring-primary header-cart-icon"
               aria-label="سلة التسوق"

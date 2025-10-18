@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Search, 
   ShoppingCart, 
   Menu, 
   X, 
@@ -11,11 +10,9 @@ import {
   Package,
   Grid
 } from 'lucide-react';
-import SearchBar from '@/components/SearchBar';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   
@@ -33,18 +30,8 @@ export default function Header() {
     };
   }, []);
 
-  const handleToggleSearch = () => {
-    setIsSearchOpen(!isSearchOpen);
-    if (!isSearchOpen) {
-      setIsMenuOpen(false);
-    }
-  };
-
   const handleToggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    if (!isMenuOpen) {
-      setIsSearchOpen(false);
-    }
   };
   
   return (
@@ -76,20 +63,6 @@ export default function Header() {
           
           {/* أزرار الإجراءات */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* زر البحث - يعمل في جميع الأحجام */}
-            <button 
-              onClick={handleToggleSearch}
-              className="p-2 rounded-full hover:bg-accent/5 transition-colors"
-              aria-label="البحث"
-              aria-expanded={isSearchOpen}
-            >
-              {isSearchOpen ? (
-                <X className="h-5 w-5 text-accent" />
-              ) : (
-                <Search className="h-5 w-5 text-accent" />
-              )}
-            </button>
-            
             {/* زر عربة التسوق */}
             <Link 
               href="/cart" 
@@ -120,14 +93,6 @@ export default function Header() {
             </button>
           </div>
         </div>
-
-        {/* شريط البحث - يظهر عند الضغط على زر البحث في أي حجم شاشة */}
-        {isSearchOpen && (
-          <div className="mt-4 animate-in slide-in-from-top-2 duration-200">
-            <SearchBar variant="hero" autoFocus />
-          </div>
-        )}
-      </div>
       
       {/* القائمة للشاشات الصغيرة */}
       {isMenuOpen && (
