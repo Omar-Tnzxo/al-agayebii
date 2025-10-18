@@ -36,6 +36,9 @@ export default function CategoriesPage() {
         const categoriesData = await categoriesRes.json();
         const productsData = await productsRes.json();
 
+        console.log('Categories Data:', categoriesData);
+        console.log('Products Data:', productsData);
+
         // التأكد من أن البيانات arrays
         const categoriesArray = Array.isArray(categoriesData) 
           ? categoriesData 
@@ -44,6 +47,9 @@ export default function CategoriesPage() {
         const productsArray = Array.isArray(productsData) 
           ? productsData 
           : (productsData.data && Array.isArray(productsData.data) ? productsData.data : []);
+
+        console.log('Categories Array:', categoriesArray);
+        console.log('Products Array:', productsArray);
 
         setCategories(categoriesArray);
         setProducts(productsArray);
@@ -140,7 +146,12 @@ export default function CategoriesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {categories.map((category) => {
             // حساب عدد المنتجات في كل فئة
-            const productCount = products.filter(p => p.category_type === category.type).length;
+            const productCount = products.filter(p => {
+              console.log(`Product category_type: ${p.category_type}, Category type: ${category.type}`);
+              return p.category_type === category.type;
+            }).length;
+
+            console.log(`Category ${category.name} has ${productCount} products`);
 
             const getCategoryIcon = () => {
               switch (category.type) {
