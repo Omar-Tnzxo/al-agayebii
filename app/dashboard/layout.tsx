@@ -161,14 +161,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Link>
         <div className="flex-1" />
         {/* جرس الإشعارات وزر الخروج */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <AdminNotifications />
           <button 
             onClick={handleLogout}
-            className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+            className="p-1.5 sm:p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
             title="تسجيل الخروج"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
       </header>
@@ -296,7 +296,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </aside>
         {/* محتوى الصفحة الرئيسي */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
           {/* تظليل خلفي للقائمة الجانبية على الهواتف */}
           {sidebarOpen && (
             <div 
@@ -305,7 +305,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             />
           )}
           {/* محتوى الصفحة */}
-          <div>
+          <div className="max-w-full">
             {children}
           </div>
         </main>

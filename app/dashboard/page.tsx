@@ -129,34 +129,36 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8 p-4 md:p-0">
       {/* رأس الصفحة */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">لوحة التحكم</h1>
-          <p className="text-lg text-gray-600">نظرة شاملة على أداء متجرك</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">لوحة التحكم</h1>
+          <p className="text-base md:text-lg text-gray-600">نظرة شاملة على أداء متجرك</p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
           {isClient && lastUpdated && (
-            <div className="text-sm text-gray-500">
+            <div className="text-xs sm:text-sm text-gray-500 order-2 sm:order-1">
               آخر تحديث: {lastUpdated.toLocaleTimeString('ar-EG')}
             </div>
           )}
 
-          <DateRangeSelector
-            selectedRange={selectedDateRange}
-            onRangeChange={handleDateRangeChange}
-            isLoading={loading}
-          />
+          <div className="w-full sm:w-auto order-1 sm:order-2">
+            <DateRangeSelector
+              selectedRange={selectedDateRange}
+              onRangeChange={handleDateRangeChange}
+              isLoading={loading}
+            />
+          </div>
 
           <button
             onClick={() => fetchAnalyticsData()}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors order-3"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            تحديث
+            <span className="sm:inline">تحديث</span>
           </button>
         </div>
       </div>
@@ -164,15 +166,15 @@ export default function Dashboard() {
       {/* مؤشر الفترة المحددة */}
       {analyticsData?.dateRange?.isFiltered && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <Calendar className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-medium text-blue-900">
+              <h3 className="font-medium text-blue-900 text-sm md:text-base">
                 البيانات محدودة بفترة: {selectedDateRange.label}
               </h3>
-              <p className="text-sm text-blue-700">
+              <p className="text-xs md:text-sm text-blue-700 mt-1">
                 {isClient && analyticsData.dateRange.startDate && analyticsData.dateRange.endDate ?
                   `من ${new Date(analyticsData.dateRange.startDate).toLocaleDateString('ar-EG')} إلى ${new Date(analyticsData.dateRange.endDate).toLocaleDateString('ar-EG')}` :
                   'البيانات مفلترة حسب الفترة المحددة'
@@ -210,84 +212,71 @@ export default function Dashboard() {
       />
 
       {/* روابط سريعة */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-indigo-100 rounded-lg">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+        <div className="flex items-start sm:items-center gap-3 mb-4 md:mb-6">
+          <div className="p-2 bg-indigo-100 rounded-lg flex-shrink-0">
             <Activity className="h-5 w-5 text-indigo-600" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">إجراءات سريعة</h3>
-            <p className="text-sm text-gray-600">الوصول السريع للمهام الشائعة</p>
+            <h3 className="text-base md:text-lg font-bold text-gray-900">إجراءات سريعة</h3>
+            <p className="text-xs md:text-sm text-gray-600">الوصول السريع للمهام الشائعة</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <Link
             href="/dashboard/products/new"
-            className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl hover:shadow-md transition-all group"
+            className="flex items-center gap-3 p-3 md:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl hover:shadow-md transition-all group"
           >
-            <div className="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform">
-              <TrendingUp className="h-5 w-5" />
+            <div className="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+              <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">إضافة منتج</h4>
-              <p className="text-sm text-gray-600">منتج جديد للمتجر</p>
+              <h4 className="font-medium text-gray-900 text-sm md:text-base">إضافة منتج</h4>
+              <p className="text-xs md:text-sm text-gray-600">منتج جديد للمتجر</p>
             </div>
           </Link>
 
           <Link
             href="/dashboard/orders"
-            className="flex items-center gap-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl hover:shadow-md transition-all group"
+            className="flex items-center gap-3 p-3 md:p-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl hover:shadow-md transition-all group"
           >
-            <div className="p-2 bg-emerald-500 text-white rounded-lg group-hover:scale-110 transition-transform">
-              <Activity className="h-5 w-5" />
+            <div className="p-2 bg-emerald-500 text-white rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+              <Activity className="h-4 w-4 md:h-5 md:w-5" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">إدارة الطلبات</h4>
-              <p className="text-sm text-gray-600">متابعة الطلبات</p>
+              <h4 className="font-medium text-gray-900 text-sm md:text-base">إدارة الطلبات</h4>
+              <p className="text-xs md:text-sm text-gray-600">متابعة الطلبات</p>
             </div>
           </Link>
 
           <Link
             href="/dashboard/contact-settings"
-            className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-xl hover:shadow-md transition-all group"
+            className="flex items-center gap-3 p-3 md:p-4 bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-xl hover:shadow-md transition-all group"
           >
-            <div className="p-2 bg-purple-500 text-white rounded-lg group-hover:scale-110 transition-transform">
-              <Phone className="h-5 w-5" />
+            <div className="p-2 bg-purple-500 text-white rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+              <Phone className="h-4 w-4 md:h-5 md:w-5" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">صفحة الاتصال</h4>
-              <p className="text-sm text-gray-600">إدارة المحتوى</p>
+              <h4 className="font-medium text-gray-900 text-sm md:text-base">صفحة الاتصال</h4>
+              <p className="text-xs md:text-sm text-gray-600">إدارة المحتوى</p>
             </div>
           </Link>
 
           <Link
             href="/dashboard/settings"
-            className="flex items-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl hover:shadow-md transition-all group"
+            className="flex items-center gap-3 p-3 md:p-4 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl hover:shadow-md transition-all group"
           >
-            <div className="p-2 bg-orange-500 text-white rounded-lg group-hover:scale-110 transition-transform">
-              <Settings className="h-5 w-5" />
+            <div className="p-2 bg-orange-500 text-white rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+              <Settings className="h-4 w-4 md:h-5 md:w-5" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">الإعدادات</h4>
-              <p className="text-sm text-gray-600">إعدادات الموقع</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/dashboard/settings"
-            className="flex items-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl hover:shadow-md transition-all group"
-          >
-            <div className="p-2 bg-orange-500 text-white rounded-lg group-hover:scale-110 transition-transform">
-              <Settings className="h-5 w-5" />
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-900">الإعدادات</h4>
-              <p className="text-sm text-gray-600">إعدادات الموقع</p>
+              <h4 className="font-medium text-gray-900 text-sm md:text-base">الإعدادات</h4>
+              <p className="text-xs md:text-sm text-gray-600">إعدادات الموقع</p>
             </div>
           </Link>
         </div>
       </div>
     </div>
   );
-} 
+}
