@@ -7,6 +7,7 @@ import SafeImage from './SafeImage';
 import { formatPrice } from '@/lib/utils/helpers';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
 
 interface Product {
   id: string;
@@ -33,6 +34,9 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, className = '' }: ProductCardProps) => {
   const router = useRouter();
+  const { settings } = useLiveSiteSettings();
+  const reviewsEnabled = settings.reviews_enabled === 'true';
+  
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [flyImage, setFlyImage] = useState<null | { src: string; x: number; y: number; size: number }>();

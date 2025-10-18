@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
+import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
 
 interface Product {
   id: string;
@@ -23,6 +24,9 @@ interface UnifiedProductCardProps {
 }
 
 export default function UnifiedProductCard({ product, className = '' }: UnifiedProductCardProps) {
+  const { settings } = useLiveSiteSettings();
+  const reviewsEnabled = settings.reviews_enabled === 'true';
+  
   // حساب السعر بعد الخصم
   const discountedPrice = product.discount_percentage && product.discount_percentage > 0
     ? product.price * (1 - product.discount_percentage / 100)
@@ -81,7 +85,7 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
         )}
 
         {/* التقييم */}
-        {product.rating && product.rating > 0 && (
+        {reviewsEnabled && product.rating && product.rating > 0 && (
           <div className="flex items-center gap-1 mb-2">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
             <span className="text-sm font-medium">{product.rating}</span>

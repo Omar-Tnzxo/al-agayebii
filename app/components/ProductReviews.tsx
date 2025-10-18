@@ -153,17 +153,9 @@ export default function ProductReviews({ productId }: { productId: string }) {
     );
   };
 
-  // إذا كانت التقييمات معطلة، عرض رسالة
+  // إذا كانت التقييمات معطلة، لا تعرض أي شيء
   if (!reviewsEnabled) {
-    return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-        <MessageSquare className="h-12 w-12 text-yellow-600 mx-auto mb-3" />
-        <h3 className="text-lg font-bold text-gray-900 mb-2">التقييمات معطلة حالياً</h3>
-        <p className="text-sm text-gray-600">
-          نظام التقييمات غير مفعّل في الموقع. يرجى التواصل مع الإدارة لتفعيله.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   if (isLoading) {
