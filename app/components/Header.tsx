@@ -124,6 +124,7 @@ export function Header() {
               className="p-2 rounded-full hover:bg-primary/10 transition-colors relative focus:outline-none focus:ring-2 focus:ring-primary header-cart-icon"
               aria-label="سلة التسوق"
               onClick={() => setIsMiniCartOpen(true)}
+              data-cart-icon
             >
               <ShoppingCart className="w-5 h-5 text-accent" />
               {cartCount > 0 && (

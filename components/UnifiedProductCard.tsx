@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Star, ShoppingCart } from 'lucide-react';
 import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
 import { toast } from 'sonner';
+import { addToCart } from '@/lib/store/cart';
+import { useState } from 'react';
 
 interface Product {
   id: string;
@@ -17,6 +19,8 @@ interface Product {
   reviews_count?: number;
   stock_quantity?: number;
   slug: string;
+  category_type?: string;
+  sku?: string;
 }
 
 interface UnifiedProductCardProps {
@@ -27,6 +31,7 @@ interface UnifiedProductCardProps {
 export default function UnifiedProductCard({ product, className = '' }: UnifiedProductCardProps) {
   const { settings } = useLiveSiteSettings();
   const reviewsEnabled = settings.reviews_enabled === 'true';
+  const [isAdding, setIsAdding] = useState(false);
   
   // حساب السعر بعد الخصم
   const discountedPrice = product.discount_percentage && product.discount_percentage > 0
@@ -36,25 +41,89 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
   const isDiscounted = product.discount_percentage && product.discount_percentage > 0;
   const isOutOfStock = product.stock_quantity === 0;
 
-  // إضافة للسلة
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // إضافة للسلة مع أنيميشن
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isOutOfStock) return;
+    if (isOutOfStock || isAdding) return;
     
-    // إضافة المنتج للسلة
-    const cartEvent = new CustomEvent('addToCart', {
-      detail: {
-        product_id: product.id,
-        name: product.name,
-        price: discountedPrice,
-        image: product.image,
-        quantity: 1
+    setIsAdding(true);
+    
+    try {
+      // الحصول على موقع الزر
+      const button = e.currentTarget;
+      const buttonRect = button.getBoundingClientRect();
+      
+      // الحصول على موقع أيقونة السلة في الهيدر
+      const cartIcon = document.querySelector('[data-cart-icon]');
+      const cartRect = cartIcon?.getBoundingClientRect();
+      
+      // إنشاء صورة مؤقتة للأنيميشن
+      if (product.image && cartRect) {
+        const flyingImage = document.createElement('div');
+        flyingImage.style.position = 'fixed';
+        flyingImage.style.left = `${buttonRect.left}px`;
+        flyingImage.style.top = `${buttonRect.top}px`;
+        flyingImage.style.width = '60px';
+        flyingImage.style.height = '60px';
+        flyingImage.style.zIndex = '9999';
+        flyingImage.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        flyingImage.style.pointerEvents = 'none';
+        
+        flyingImage.innerHTML = `
+          <img 
+            src="${product.image}" 
+            alt="${product.name}"
+            style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"
+          />
+        `;
+        
+        document.body.appendChild(flyingImage);
+        
+        // بدء الأنيميشن
+        setTimeout(() => {
+          flyingImage.style.left = `${cartRect.left + cartRect.width / 2 - 30}px`;
+          flyingImage.style.top = `${cartRect.top + cartRect.height / 2 - 30}px`;
+          flyingImage.style.transform = 'scale(0.3)';
+          flyingImage.style.opacity = '0';
+        }, 50);
+        
+        // حذف العنصر بعد انتهاء الأنيميشن
+        setTimeout(() => {
+          document.body.removeChild(flyingImage);
+        }, 900);
       }
-    });
-    window.dispatchEvent(cartEvent);
-    toast.success(`تمت إضافة ${product.name} للسلة`);
+      
+      // إضافة المنتج للسلة
+      await addToCart({
+        id: product.id,
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        image: product.image || '',
+        discount_percentage: product.discount_percentage || 0,
+        slug: product.slug,
+        stock_quantity: product.stock_quantity || 0,
+        category_type: product.category_type || 'other',
+        sku: product.sku || product.id,
+        is_active: true,
+        is_popular: false,
+        is_new: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any, 1);
+      
+      toast.success(`تمت إضافة ${product.name} للسلة`, {
+        duration: 2000,
+      });
+      
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('حدث خطأ أثناء إضافة المنتج للسلة');
+    } finally {
+      setTimeout(() => setIsAdding(false), 1000);
+    }
   };
 
   return (
@@ -135,15 +204,17 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
         {/* زر إضافة للسلة */}
         <button
           onClick={handleAddToCart}
-          disabled={isOutOfStock}
+          disabled={isOutOfStock || isAdding}
           className={`w-full py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            isOutOfStock
+            isOutOfStock || isAdding
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-primary text-white hover:bg-primary/90 active:scale-95'
           }`}
         >
-          <ShoppingCart className="h-4 w-4" />
-          <span>{isOutOfStock ? 'نفذ المخزون' : 'أضف للسلة'}</span>
+          <ShoppingCart className={`h-4 w-4 ${isAdding ? 'animate-bounce' : ''}`} />
+          <span>
+            {isOutOfStock ? 'نفذ المخزون' : isAdding ? 'جاري الإضافة...' : 'أضف للسلة'}
+          </span>
         </button>
       </div>
     </div>
