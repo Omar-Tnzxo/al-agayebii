@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Star, Trash2, Eye, Calendar, User, Package, Search, Filter, ChevronDown, AlertCircle, Check, X } from 'lucide-react';
+import { 
+  Star, Trash2, Eye, Calendar, User, Package, Search, Filter, 
+  ChevronDown, AlertCircle, Check, X, MessageSquare, CheckCircle, 
+  Loader2, EyeOff, Settings, List
+} from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Link from 'next/link';
@@ -16,40 +20,69 @@ interface Review {
   product?: {
     id: string;
     name: string;
+    slug: string;
     image: string;
   };
 }
 
+interface Stats {
+  totalReviews: number;
+  averageRating: number;
+  reviewsEnabled: boolean;
+  ratingDistribution: { [key: number]: number };
+}
+
 export default function ReviewsManagementPage() {
+  // Tabs
+  const [activeTab, setActiveTab] = useState<'list' | 'settings'>('list');
+  
+  // State
   const [reviews, setReviews] = useState<Review[]>([]);
   const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalReviews: 0,
+    averageRating: 0,
+    reviewsEnabled: false,
+    ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  
+  // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'rating'>('newest');
 
-  // رسائل النجاح/الخطأ
-  const [message, setMessage] = useState({ type: '', text: '' });
-
-  // جلب التقييمات
   useEffect(() => {
-    fetchAllReviews();
+    fetchData();
   }, []);
 
-  const fetchAllReviews = async () => {
+  const fetchData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/reviews/all');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setReviews(data.data);
-          setFilteredReviews(data.data);
-        }
+      const response = await fetch('/api/dashboard/reviews-settings');
+      const data = await response.json();
+      
+      if (data.success) {
+        const reviewsList = data.reviews || [];
+        setReviews(reviewsList);
+        setFilteredReviews(reviewsList);
+        
+        // حساب توزيع التقييمات
+        const distribution: { [key: number]: number } = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        reviewsList.forEach((review: Review) => {
+          distribution[review.rating]++;
+        });
+        
+        setStats({
+          ...data.stats,
+          ratingDistribution: distribution
+        });
       }
     } catch (error) {
-      console.error('خطأ في جلب التقييمات:', error);
-      showMessage('error', 'حدث خطأ في جلب التقييمات');
+      console.error('خطأ في جلب البيانات:', error);
+      showMessage('error', 'حدث خطأ في جلب البيانات');
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +92,6 @@ export default function ReviewsManagementPage() {
   useEffect(() => {
     let filtered = [...reviews];
 
-    // البحث
     if (searchTerm) {
       filtered = filtered.filter(review =>
         review.reviewer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,12 +100,10 @@ export default function ReviewsManagementPage() {
       );
     }
 
-    // فلترة التقييم
     if (filterRating !== null) {
       filtered = filtered.filter(review => review.rating === filterRating);
     }
 
-    // الترتيب
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'newest':
@@ -90,170 +120,205 @@ export default function ReviewsManagementPage() {
     setFilteredReviews(filtered);
   }, [searchTerm, filterRating, sortBy, reviews]);
 
-  // حذف تقييم
+  const handleToggleReviews = async () => {
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/dashboard/reviews-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'toggle',
+          enabled: !stats.reviewsEnabled 
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showMessage('success', `تم ${!stats.reviewsEnabled ? 'تفعيل' : 'تعطيل'} نظام التقييمات بنجاح`);
+        fetchData();
+      } else {
+        showMessage('error', data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      showMessage('error', 'حدث خطأ في حفظ الإعدادات');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleDeleteReview = async (reviewId: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا التقييم؟')) return;
 
     try {
-      const response = await fetch(`/api/reviews/${reviewId}`, {
+      const response = await fetch('/api/dashboard/reviews-settings', {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      
+      if (data.success) {
         showMessage('success', 'تم حذف التقييم بنجاح');
-        fetchAllReviews();
+        fetchData();
       } else {
-        showMessage('error', 'فشل حذف التقييم');
+        showMessage('error', data.error || 'حدث خطأ في الحذف');
       }
     } catch (error) {
-      showMessage('error', 'حدث خطأ أثناء حذف التقييم');
+      showMessage('error', 'حذف خطأ في حذف التقييم');
     }
   };
 
   const showMessage = (type: string, text: string) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  // مكون النجوم
-  const StarRating = ({ rating }: { rating: number }) => {
-    return (
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  // إحصائيات
-  const stats = {
-    total: reviews.length,
-    averageRating: reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0',
-    fiveStars: reviews.filter(r => r.rating === 5).length,
-    fourStars: reviews.filter(r => r.rating === 4).length,
-    threeStars: reviews.filter(r => r.rating === 3).length,
-    twoStars: reviews.filter(r => r.rating === 2).length,
-    oneStar: reviews.filter(r => r.rating === 1).length,
-  };
+  const StarRating = ({ rating }: { rating: number }) => (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+        />
+      ))}
+    </div>
+  );
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-12 bg-gray-200 rounded-lg w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
-              ))}
-            </div>
-            <div className="h-96 bg-gray-200 rounded-xl"></div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* رسالة النجاح/الخطأ */}
-        {message.text && (
-          <div className={`mb-6 p-4 rounded-xl border-2 ${message.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-            <div className="flex items-center gap-2">
-              {message.type === 'success' ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
-              <span className="font-medium">{message.text}</span>
-            </div>
-          </div>
-        )}
-
-        {/* العنوان */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Star className="h-8 w-8 text-yellow-500 fill-yellow-500" />
-            إدارة التقييمات
-          </h1>
-          <p className="text-gray-600 mt-2">عرض وإدارة جميع تقييمات العملاء على المنتجات</p>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* العنوان والـ Tabs */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">إدارة التقييمات</h1>
+        <p className="text-gray-600 mb-6">إدارة وتتبع جميع تقييمات العملاء</p>
+        
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-reverse space-x-8">
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
+                activeTab === 'list'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <List className="h-5 w-5" />
+              قائمة التقييمات
+              <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                {reviews.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
+                activeTab === 'settings'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Settings className="h-5 w-5" />
+              الإعدادات
+            </button>
+          </nav>
         </div>
+      </div>
 
-        {/* الإحصائيات */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">إجمالي التقييمات</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Star className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">متوسط التقييم</p>
-                <p className="text-3xl font-bold text-yellow-500">{stats.averageRating}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                <Star className="h-6 w-6 text-yellow-600 fill-yellow-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">5 نجوم</p>
-                <p className="text-3xl font-bold text-green-600">{stats.fiveStars}</p>
-              </div>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Star key={i} className="h-4 w-4 text-green-600 fill-green-600" />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">1 نجمة</p>
-                <p className="text-3xl font-bold text-red-600">{stats.oneStar}</p>
-              </div>
-              <div className="flex">
-                <Star className="h-4 w-4 text-red-600 fill-red-600" />
-              </div>
-            </div>
+      {/* رسالة النجاح/الخطأ */}
+      {message.text && (
+        <div className={`mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+          <div className="flex items-center gap-2">
+            {message.type === 'success' ? <CheckCircle className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+            <span className="font-medium">{message.text}</span>
           </div>
         </div>
+      )}
 
-        {/* الفلاتر والبحث */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* البحث */}
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="ابحث في التقييمات..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+      {/* المحتوى حسب الـ Tab النشط */}
+      {activeTab === 'list' ? (
+        <div className="space-y-6">
+          {/* الإحصائيات */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">إجمالي التقييمات</p>
+                  <p className="text-3xl font-bold text-blue-600">{stats.totalReviews}</p>
+                </div>
+                <MessageSquare className="h-10 w-10 text-blue-600 opacity-20" />
+              </div>
             </div>
 
-            {/* فلتر التقييم */}
-            <div>
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">متوسط التقييم</p>
+                  <p className="text-3xl font-bold text-yellow-600">{stats.averageRating.toFixed(1)}</p>
+                </div>
+                <Star className="h-10 w-10 text-yellow-600 opacity-20 fill-yellow-600" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">تقييمات 5 نجوم</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.ratingDistribution[5] || 0}</p>
+                </div>
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Star key={i} className="h-4 w-4 fill-green-600 text-green-600" />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">حالة النظام</p>
+                  <p className={`text-xl font-bold ${stats.reviewsEnabled ? 'text-green-600' : 'text-gray-400'}`}>
+                    {stats.reviewsEnabled ? 'مفعّل' : 'معطّل'}
+                  </p>
+                </div>
+                {stats.reviewsEnabled ? (
+                  <Eye className="h-10 w-10 text-green-600 opacity-20" />
+                ) : (
+                  <EyeOff className="h-10 w-10 text-gray-400 opacity-20" />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* أدوات البحث والفلترة */}
+          <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* البحث */}
+              <div className="relative">
+                <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="بحث في التقييمات..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* فلتر التقييم */}
               <select
-                value={filterRating || ''}
-                onChange={(e) => setFilterRating(e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filterRating === null ? '' : filterRating}
+                onChange={(e) => setFilterRating(e.target.value === '' ? null : Number(e.target.value))}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">جميع التقييمات</option>
                 <option value="5">5 نجوم</option>
@@ -262,14 +327,12 @@ export default function ReviewsManagementPage() {
                 <option value="2">نجمتان</option>
                 <option value="1">نجمة واحدة</option>
               </select>
-            </div>
 
-            {/* الترتيب */}
-            <div>
+              {/* الترتيب */}
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'rating')}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="newest">الأحدث أولاً</option>
                 <option value="oldest">الأقدم أولاً</option>
@@ -277,80 +340,160 @@ export default function ReviewsManagementPage() {
               </select>
             </div>
           </div>
-        </div>
 
-        {/* قائمة التقييمات */}
-        {filteredReviews.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-200">
-            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد تقييمات</h3>
-            <p className="text-gray-600">لم يتم العثور على تقييمات بالمعايير المحددة</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredReviews.map((review) => (
-              <div key={review.id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between gap-4">
-                  {/* معلومات المنتج */}
-                  <div className="flex items-start gap-4 flex-1">
-                    {review.product && (
-                      <div className="flex-shrink-0">
-                        <img
-                          src={review.product.image || '/images/drill.png'}
-                          alt={review.product.name}
-                          className="w-16 h-16 object-cover rounded-lg"
-                        />
-                      </div>
-                    )}
+          {/* قائمة التقييمات */}
+          <div className="bg-white rounded-xl shadow-md border border-gray-200">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">
+                التقييمات ({filteredReviews.length})
+              </h2>
+              
+              {filteredReviews.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600 font-medium">
+                    {reviews.length === 0 ? 'لا توجد تقييمات بعد' : 'لا توجد نتائج للبحث'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {reviews.length === 0 ? 'عندما يضيف العملاء تقييمات، ستظهر هنا' : 'جرب تغيير معايير البحث'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredReviews.map((review) => (
+                    <div key={review.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          {/* المستخدم والتقييم */}
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <User className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-gray-900">{review.reviewer_name}</h3>
+                                <StarRating rating={review.rating} />
+                              </div>
+                              <p className="text-xs text-gray-500">
+                                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: ar })}
+                              </p>
+                            </div>
+                          </div>
 
-                    <div className="flex-1 min-w-0">
-                      {/* المنتج */}
-                      {review.product && (
-                        <Link
-                          href={`/product/${review.product.id}`}
-                          className="text-sm text-blue-600 hover:text-blue-700 font-medium mb-2 flex items-center gap-1"
-                        >
-                          <Package className="h-4 w-4" />
-                          {review.product.name}
-                        </Link>
-                      )}
+                          {/* المنتج */}
+                          {review.product && (
+                            <div className="flex items-center gap-2 mb-3 bg-gray-50 rounded-lg p-2">
+                              <Package className="h-4 w-4 text-gray-600" />
+                              <Link 
+                                href={`/product/${review.product.slug}`}
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                {review.product.name}
+                              </Link>
+                            </div>
+                          )}
 
-                      {/* المراجع والتقييم */}
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium text-gray-900">{review.reviewer_name}</span>
+                          {/* التعليق */}
+                          <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                         </div>
-                        <StarRating rating={review.rating} />
-                      </div>
 
-                      {/* التعليق */}
-                      <p className="text-gray-700 text-sm leading-relaxed mb-3">{review.comment}</p>
-
-                      {/* التاريخ */}
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Calendar className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: ar })}
+                        {/* زر الحذف */}
+                        <button
+                          onClick={() => handleDeleteReview(review.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex-shrink-0"
+                          title="حذف التقييم"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* تبويب الإعدادات */
+        <div className="space-y-6">
+          {/* بطاقة التحكم */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">تفعيل/تعطيل نظام التقييمات</h2>
+                <p className="text-sm text-gray-600">تحكم في ظهور قسم التقييمات في صفحات المنتجات</p>
+              </div>
+              <button
+                onClick={handleToggleReviews}
+                disabled={isSaving}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  stats.reviewsEnabled
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg'
+                    : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isSaving ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : stats.reviewsEnabled ? (
+                  <Eye className="h-5 w-5" />
+                ) : (
+                  <EyeOff className="h-5 w-5" />
+                )}
+                {stats.reviewsEnabled ? 'مفعّل' : 'معطّل'}
+              </button>
+            </div>
 
-                  {/* أزرار الإجراءات */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() => handleDeleteReview(review.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="حذف التقييم"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
+            <div className={`p-4 rounded-lg ${stats.reviewsEnabled ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+              <div className="flex items-start gap-3">
+                {stats.reviewsEnabled ? (
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <p className={`font-medium ${stats.reviewsEnabled ? 'text-green-900' : 'text-yellow-900'}`}>
+                    {stats.reviewsEnabled ? 'نظام التقييمات مفعّل' : 'نظام التقييمات معطّل'}
+                  </p>
+                  <p className={`text-sm mt-1 ${stats.reviewsEnabled ? 'text-green-700' : 'text-yellow-700'}`}>
+                    {stats.reviewsEnabled 
+                      ? 'العملاء يمكنهم رؤية وإضافة تقييمات على المنتجات'
+                      : 'قسم التقييمات مخفي عن العملاء. قم بالتفعيل لإظهاره'}
+                  </p>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* توزيع التقييمات */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">توزيع التقييمات</h2>
+            <div className="space-y-4">
+              {[5, 4, 3, 2, 1].map((rating) => {
+                const count = stats.ratingDistribution[rating] || 0;
+                const percentage = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
+
+                return (
+                  <div key={rating} className="flex items-center gap-4">
+                    <div className="flex items-center gap-1 w-28">
+                      <span className="text-sm font-medium text-gray-700 w-4">{rating}</span>
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    </div>
+                    <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-yellow-400 transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600 w-16 text-left font-medium">
+                      {count} ({percentage.toFixed(0)}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
