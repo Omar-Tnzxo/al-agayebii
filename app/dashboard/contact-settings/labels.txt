@@ -1,0 +1,24 @@
+Primary Phone
+Secondary Phone
+WhatsApp
+Primary Email
+Sales Email
+Support Email
+Full Address
+City
+Governorate
+Postal Code
+Landmark
+Working Days
+Working Hours
+Weekend Status
+Facebook
+Instagram
+Twitter
+LinkedIn
+YouTube
+TikTok
+Telegram
+Snapchat
+Pinterest
+WhatsApp Business

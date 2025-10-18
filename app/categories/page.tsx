@@ -36,10 +36,21 @@ export default function CategoriesPage() {
         const categoriesData = await categoriesRes.json();
         const productsData = await productsRes.json();
 
-        setCategories(categoriesData.data || categoriesData || []);
-        setProducts(productsData.data || productsData || []);
+        // التأكد من أن البيانات arrays
+        const categoriesArray = Array.isArray(categoriesData) 
+          ? categoriesData 
+          : (categoriesData.data && Array.isArray(categoriesData.data) ? categoriesData.data : []);
+        
+        const productsArray = Array.isArray(productsData) 
+          ? productsData 
+          : (productsData.data && Array.isArray(productsData.data) ? productsData.data : []);
+
+        setCategories(categoriesArray);
+        setProducts(productsArray);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setCategories([]);
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }

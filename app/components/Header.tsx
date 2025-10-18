@@ -58,13 +58,13 @@ export function Header() {
       {/* شريط المعلومات العلوي */}
       <div className="bg-primary text-white py-2">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          {settings.contactPhone && (
+          {settings.contact_primary_phone && (
             <div className="flex items-center text-xs">
               <Phone className="w-3 h-3 ml-1" />
-              <span>اتصل بنا: {settings.contactPhone}</span>
+              <span>اتصل بنا: {settings.contact_primary_phone}</span>
             </div>
           )}
-          
+
           {/* روابط التواصل الاجتماعي */}
           <SocialLinks className="text-white" />
         </div>

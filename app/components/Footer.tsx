@@ -78,28 +78,30 @@ export function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-4 ar-title">اتصل بنا</h3>
             <ul className="space-y-3">
-              <li className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-primary-100" />
-                <span className="text-primary-100">
-                  الجيزه 6 اكتوبر ابني بيتك المرحلة السادسة
-                </span>
-              </li>
-              {settings.contactPhone && (
+              {settings.contact_full_address && (
+                <li className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-primary-100 mt-0.5" />
+                  <span className="text-primary-100">
+                    {settings.contact_full_address}
+                  </span>
+                </li>
+              )}
+              {settings.contact_primary_phone && (
                 <li className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-primary-100" />
-                  <Link 
-                    href={`tel:${settings.contactPhone}`} 
+                  <Link
+                    href={`tel:${settings.contact_primary_phone}`}
                     className="text-primary-100 hover:text-white transition-colors"
                   >
-                    {settings.contactPhone}
+                    {settings.contact_primary_phone}
                   </Link>
                 </li>
               )}
-              {settings.whatsappNumber && (
+              {settings.contact_whatsapp && (
                 <li className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-primary-100" />
-                  <Link 
-                    href={`https://wa.me/${settings.whatsappNumber.replace(/^\+/, '')}`} 
+                  <Link
+                    href={`https://wa.me/${settings.contact_whatsapp.replace(/^\+/, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary-100 hover:text-white transition-colors"
@@ -108,14 +110,14 @@ export function Footer() {
                   </Link>
                 </li>
               )}
-              {settings.contactEmail && (
+              {settings.contact_primary_email && (
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-primary-100" />
-                  <Link 
-                    href={`mailto:${settings.contactEmail}`}
+                  <Link
+                    href={`mailto:${settings.contact_primary_email}`}
                     className="text-primary-100 hover:text-white transition-colors"
                   >
-                    {settings.contactEmail}
+                    {settings.contact_primary_email}
                   </Link>
                 </li>
               )}

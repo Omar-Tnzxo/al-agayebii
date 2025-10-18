@@ -41,7 +41,9 @@
       "Bash(test -f \"app/components/ProductReviews.tsx\")",
       "Bash(test -f \"app/api/products/[id]/reviews/route.ts\")",
       "Bash(test -f \"app/dashboard/reviews/page.tsx\")",
-      "Bash(node -c \"app/api/contact/route.ts\")"
+      "Bash(node -c \"app/api/contact/route.ts\")",
+      "Bash(exit 0)",
+      "Bash(page.tsx)"
     ],
     "deny": [],
     "ask": []

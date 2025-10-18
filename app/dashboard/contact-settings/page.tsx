@@ -1,445 +1,320 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Save, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Globe,
-  MessageSquare,
-  Settings,
-  AlertCircle,
-  CheckCircle,
-  Loader2
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Save, Loader2, CheckCircle, AlertCircle, Phone, Mail, MapPin, Clock, Globe } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import type { ContactInfo } from '@/lib/types/contact';
+import { Button } from '@/components/ui/button';
+
+interface ContactSettings {
+  company_name: string;
+  tagline: string;
+  description: string;
+  primary_phone: string;
+  secondary_phone: string;
+  whatsapp: string;
+  primary_email: string;
+  sales_email: string;
+  support_email: string;
+  full_address: string;
+  city: string;
+  governorate: string;
+  postal_code: string;
+  landmark: string;
+  working_days: string;
+  working_hours: string;
+  weekend_status: string;
+  facebook_url: string;
+  instagram_url: string;
+  twitter_url: string;
+  linkedin_url: string;
+  youtube_url: string;
+  tiktok_url: string;
+  snapchat_url: string;
+  telegram_url: string;
+  pinterest_url: string;
+  whatsapp_business_url: string;
+}
 
 export default function ContactSettingsPage() {
-  const [settings, setSettings] = useState<Partial<ContactInfo>>({});
+  const [settings, setSettings] = useState<ContactSettings>({
+    company_name: '', tagline: '', description: '', primary_phone: '', secondary_phone: '',
+    whatsapp: '', primary_email: '', sales_email: '', support_email: '', full_address: '',
+    city: '', governorate: '', postal_code: '', landmark: '', working_days: '',
+    working_hours: '', weekend_status: '', facebook_url: '', instagram_url: '',
+    twitter_url: '', linkedin_url: '', youtube_url: '', tiktok_url: '',
+    snapchat_url: '', telegram_url: '', pinterest_url: '', whatsapp_business_url: '',
+  });
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // جلب الإعدادات الحالية
-  useEffect(() => {
-    fetchSettings();
-  }, []);
+  useEffect(() => { fetchSettings(); }, []);
 
   const fetchSettings = async () => {
     try {
       const response = await fetch('/api/contact');
       const result = await response.json();
-      
-      if (result.success) {
-        setSettings(result.data);
+      if (result.success && result.data) {
+        const d = result.data;
+        setSettings({
+          company_name: d.companyName || '', tagline: d.tagline || '', description: d.description || '',
+          primary_phone: d.primaryPhone || '', secondary_phone: d.secondaryPhone || '',
+          whatsapp: d.whatsappNumber || '', primary_email: d.primaryEmail || '',
+          sales_email: d.salesEmail || '', support_email: d.supportEmail || '',
+          full_address: d.fullAddress || '', city: d.city || '', governorate: d.governorate || '',
+          postal_code: d.postalCode || '', landmark: d.landmark || '',
+          working_days: d.workingDays || '', working_hours: d.workingHours || '',
+          weekend_status: d.weekendStatus || '', facebook_url: d.facebookUrl || '',
+          instagram_url: d.instagramUrl || '', twitter_url: d.twitterUrl || '',
+          linkedin_url: d.linkedinUrl || '', youtube_url: d.youtubeUrl || '',
+          tiktok_url: d.tiktokUrl || '', snapchat_url: d.snapchatUrl || '',
+          telegram_url: d.telegramUrl || '', pinterest_url: d.pinterestUrl || '',
+          whatsapp_business_url: d.whatsappBusinessUrl || '',
+        });
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('Error:', error);
+      showMessage('error', 'خطأ في تحميل البيانات');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSaving(true);
     setMessage(null);
-
     try {
       const response = await fetch('/api/contact', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
-
       const result = await response.json();
-
       if (result.success) {
-        setMessage({ type: 'success', text: 'تم حفظ الإعدادات بنجاح!' });
+        showMessage('success', 'تم الحفظ بنجاح');
       } else {
-        setMessage({ type: 'error', text: result.error || 'فشل في حفظ الإعدادات' });
+        showMessage('error', result.error || 'فشل الحفظ');
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'حدث خطأ أثناء الحفظ' });
+      showMessage('error', 'خطأ أثناء الحفظ');
     } finally {
       setSaving(false);
     }
   };
 
-  const updateSetting = (key: keyof ContactInfo, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const handleChange = (field: keyof ContactSettings, value: string) => {
+    setSettings(prev => ({ ...prev, [field]: value }));
+  };
+
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 5000);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">إعدادات صفحة الاتصال</h1>
-          <p className="text-gray-500 mt-2">إدارة محتوى ومعلومات صفحة اتصل بنا</p>
+    <div className="container mx-auto py-8 px-4 max-w-5xl">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-primary mb-2">إعدادات التواصل</h1>
+          <p className="text-gray-600">إدارة معلومات الاتصال ووسائل التواصل الاجتماعي</p>
         </div>
-        <Button 
-          onClick={handleSave} 
-          disabled={saving}
-          className="bg-primary hover:bg-primary/90"
-        >
-          {saving ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin ml-2" />
-              جاري الحفظ...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 ml-2" />
-              حفظ الإعدادات
-            </>
-          )}
-        </Button>
-      </div>
 
-      {message && (
-        <div className={`p-4 rounded-lg mb-6 flex items-center gap-2 ${
-          message.type === 'success' 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
-        }`}>
-          {message.type === 'success' ? (
-            <CheckCircle className="h-5 w-5" />
-          ) : (
-            <AlertCircle className="h-5 w-5" />
-          )}
-          {message.text}
-        </div>
-      )}
+        {message && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+            className={`p-4 rounded-lg mb-6 flex items-center gap-2 ${
+              message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
+            {message.type === 'success' ? <CheckCircle className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+            {message.text}
+          </motion.div>
+        )}
 
-      <div className="space-y-8">
-        {/* المعلومات الأساسية */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Settings className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">المعلومات الأساسية</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="companyName">اسم الشركة</Label>
-              <Input
-                id="companyName"
-                value={settings.companyName || ''}
-                onChange={(e) => updateSetting('companyName', e.target.value)}
-                placeholder="متجر العجايبي"
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-primary">معلومات الشركة</h2>
             </div>
-            
-            <div>
-              <Label htmlFor="tagline">الشعار</Label>
-              <Input
-                id="tagline"
-                value={settings.tagline || ''}
-                onChange={(e) => updateSetting('tagline', e.target.value)}
-                placeholder="متجرك الموثوق للأدوات الكهربائية"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <Label>اسم الشركة</Label>
+                <Input value={settings.company_name} onChange={(e) => handleChange('company_name', e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                <Label>الشعار</Label>
+                <Input value={settings.tagline} onChange={(e) => handleChange('tagline', e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                <Label>الوصف</Label>
+                <Textarea value={settings.description} onChange={(e) => handleChange('description', e.target.value)} rows={3} />
+              </div>
             </div>
-          </div>
-          
-          <div className="mt-4">
-            <Label htmlFor="description">الوصف</Label>
-            <Textarea
-              id="description"
-              value={settings.description || ''}
-              onChange={(e) => updateSetting('description', e.target.value)}
-              placeholder="وصف موجز عن المتجر وخدماته"
-              rows={3}
-            />
-          </div>
-        </Card>
+          </Card>
 
-        {/* معلومات الاتصال */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Phone className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">معلومات الاتصال</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="primaryPhone">الهاتف الأساسي *</Label>
-              <Input
-                id="primaryPhone"
-                value={settings.primaryPhone || ''}
-                onChange={(e) => updateSetting('primaryPhone', e.target.value)}
-                placeholder="01234567890"
-                dir="ltr"
-              />
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Phone className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-primary">معلومات الاتصال</h2>
             </div>
-            
-            <div>
-              <Label htmlFor="secondaryPhone">هاتف إضافي</Label>
-              <Input
-                id="secondaryPhone"
-                value={settings.secondaryPhone || ''}
-                onChange={(e) => updateSetting('secondaryPhone', e.target.value)}
-                placeholder="01987654321"
-                dir="ltr"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>الهاتف الأساسي</Label>
+                <Input value={settings.primary_phone} onChange={(e) => handleChange('primary_phone', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>الهاتف الثانوي</Label>
+                <Input value={settings.secondary_phone} onChange={(e) => handleChange('secondary_phone', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>واتساب</Label>
+                <Input value={settings.whatsapp} onChange={(e) => handleChange('whatsapp', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>البريد الأساسي</Label>
+                <Input type="email" value={settings.primary_email} onChange={(e) => handleChange('primary_email', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>بريد المبيعات</Label>
+                <Input type="email" value={settings.sales_email} onChange={(e) => handleChange('sales_email', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>بريد الدعم</Label>
+                <Input type="email" value={settings.support_email} onChange={(e) => handleChange('support_email', e.target.value)} dir="ltr" />
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="whatsappNumber">رقم واتساب *</Label>
-              <Input
-                id="whatsappNumber"
-                value={settings.whatsappNumber || ''}
-                onChange={(e) => updateSetting('whatsappNumber', e.target.value)}
-                placeholder="+201234567890"
-                dir="ltr"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="primaryEmail">البريد الأساسي *</Label>
-              <Input
-                id="primaryEmail"
-                type="email"
-                value={settings.primaryEmail || ''}
-                onChange={(e) => updateSetting('primaryEmail', e.target.value)}
-                placeholder="info@alagayebi.com"
-                dir="ltr"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="salesEmail">بريد المبيعات</Label>
-              <Input
-                id="salesEmail"
-                type="email"
-                value={settings.salesEmail || ''}
-                onChange={(e) => updateSetting('salesEmail', e.target.value)}
-                placeholder="sales@alagayebi.com"
-                dir="ltr"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="supportEmail">بريد الدعم</Label>
-              <Input
-                id="supportEmail"
-                type="email"
-                value={settings.supportEmail || ''}
-                onChange={(e) => updateSetting('supportEmail', e.target.value)}
-                placeholder="support@alagayebi.com"
-                dir="ltr"
-              />
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        {/* معلومات العنوان */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <MapPin className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">معلومات العنوان</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <Label htmlFor="fullAddress">العنوان الكامل *</Label>
-              <Input
-                id="fullAddress"
-                value={settings.fullAddress || ''}
-                onChange={(e) => updateSetting('fullAddress', e.target.value)}
-                placeholder="الجيزه 6 اكتوبر ابني بيتك المرحلة السادسة"
-              />
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-primary">العنوان</h2>
             </div>
-            
-            <div>
-              <Label htmlFor="city">المدينة *</Label>
-              <Input
-                id="city"
-                value={settings.city || ''}
-                onChange={(e) => updateSetting('city', e.target.value)}
-                placeholder="6 أكتوبر"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <Label>العنوان الكامل</Label>
+                <Input value={settings.full_address} onChange={(e) => handleChange('full_address', e.target.value)} />
+              </div>
+              <div>
+                <Label>المدينة</Label>
+                <Input value={settings.city} onChange={(e) => handleChange('city', e.target.value)} />
+              </div>
+              <div>
+                <Label>المحافظة</Label>
+                <Input value={settings.governorate} onChange={(e) => handleChange('governorate', e.target.value)} />
+              </div>
+              <div>
+                <Label>الرمز البريدي</Label>
+                <Input value={settings.postal_code} onChange={(e) => handleChange('postal_code', e.target.value)} />
+              </div>
+              <div>
+                <Label>علامة مميزة</Label>
+                <Input value={settings.landmark} onChange={(e) => handleChange('landmark', e.target.value)} />
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="governorate">المحافظة *</Label>
-              <Input
-                id="governorate"
-                value={settings.governorate || ''}
-                onChange={(e) => updateSetting('governorate', e.target.value)}
-                placeholder="الجيزة"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="postalCode">الرمز البريدي</Label>
-              <Input
-                id="postalCode"
-                value={settings.postalCode || ''}
-                onChange={(e) => updateSetting('postalCode', e.target.value)}
-                placeholder="12573"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="landmark">معلم مميز</Label>
-              <Input
-                id="landmark"
-                value={settings.landmark || ''}
-                onChange={(e) => updateSetting('landmark', e.target.value)}
-                placeholder="بجوار مسجد النور"
-              />
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        {/* ساعات العمل */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Clock className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">ساعات العمل</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="workingDays">أيام العمل</Label>
-              <Input
-                id="workingDays"
-                value={settings.workingDays || ''}
-                onChange={(e) => updateSetting('workingDays', e.target.value)}
-                placeholder="السبت - الخميس"
-              />
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-primary">ساعات العمل</h2>
             </div>
-            
-            <div>
-              <Label htmlFor="workingHours">ساعات العمل</Label>
-              <Input
-                id="workingHours"
-                value={settings.workingHours || ''}
-                onChange={(e) => updateSetting('workingHours', e.target.value)}
-                placeholder="9:00 صباحاً - 9:00 مساءً"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>أيام العمل</Label>
+                <Input value={settings.working_days} onChange={(e) => handleChange('working_days', e.target.value)} />
+              </div>
+              <div>
+                <Label>ساعات العمل</Label>
+                <Input value={settings.working_hours} onChange={(e) => handleChange('working_hours', e.target.value)} />
+              </div>
+              <div>
+                <Label>حالة العطلة</Label>
+                <Input value={settings.weekend_status} onChange={(e) => handleChange('weekend_status', e.target.value)} />
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="weekendStatus">يوم الراحة</Label>
-              <Input
-                id="weekendStatus"
-                value={settings.weekendStatus || ''}
-                onChange={(e) => updateSetting('weekendStatus', e.target.value)}
-                placeholder="مغلق يوم الجمعة"
-              />
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        {/* وسائل التواصل الاجتماعي */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Globe className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">وسائل التواصل الاجتماعي</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="facebookUrl">فيسبوك</Label>
-              <Input
-                id="facebookUrl"
-                value={settings.facebookUrl || ''}
-                onChange={(e) => updateSetting('facebookUrl', e.target.value)}
-                placeholder="https://facebook.com/alagayebi"
-                dir="ltr"
-              />
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-bold text-primary">وسائل التواصل الاجتماعي</h2>
             </div>
-            
-            <div>
-              <Label htmlFor="instagramUrl">انستغرام</Label>
-              <Input
-                id="instagramUrl"
-                value={settings.instagramUrl || ''}
-                onChange={(e) => updateSetting('instagramUrl', e.target.value)}
-                placeholder="https://instagram.com/alagayebi"
-                dir="ltr"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>فيسبوك</Label>
+                <Input value={settings.facebook_url} onChange={(e) => handleChange('facebook_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>إنستغرام</Label>
+                <Input value={settings.instagram_url} onChange={(e) => handleChange('instagram_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>تويتر</Label>
+                <Input value={settings.twitter_url} onChange={(e) => handleChange('twitter_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>لينكد إن</Label>
+                <Input value={settings.linkedin_url} onChange={(e) => handleChange('linkedin_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>يوتيوب</Label>
+                <Input value={settings.youtube_url} onChange={(e) => handleChange('youtube_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>تيك توك</Label>
+                <Input value={settings.tiktok_url} onChange={(e) => handleChange('tiktok_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>تيليجرام</Label>
+                <Input value={settings.telegram_url} onChange={(e) => handleChange('telegram_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>سناب شات</Label>
+                <Input value={settings.snapchat_url} onChange={(e) => handleChange('snapchat_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>بينترست</Label>
+                <Input value={settings.pinterest_url} onChange={(e) => handleChange('pinterest_url', e.target.value)} dir="ltr" />
+              </div>
+              <div>
+                <Label>واتساب بزنس</Label>
+                <Input value={settings.whatsapp_business_url} onChange={(e) => handleChange('whatsapp_business_url', e.target.value)} dir="ltr" />
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="tiktokUrl">تيك توك</Label>
-              <Input
-                id="tiktokUrl"
-                value={settings.tiktokUrl || ''}
-                onChange={(e) => updateSetting('tiktokUrl', e.target.value)}
-                placeholder="https://tiktok.com/@alagayebi"
-                dir="ltr"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="youtubeUrl">يوتيوب</Label>
-              <Input
-                id="youtubeUrl"
-                value={settings.youtubeUrl || ''}
-                onChange={(e) => updateSetting('youtubeUrl', e.target.value)}
-                placeholder="https://youtube.com/alagayebi"
-                dir="ltr"
-              />
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        {/* إعدادات إضافية */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold">إعدادات إضافية</h2>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={saving} className="bg-primary hover:bg-primary/90 text-white px-8 py-3">
+              {saving ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin ml-2" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                <>
+                  <Save className="h-5 w-5 ml-2" />
+                  حفظ الإعدادات
+                </>
+              )}
+            </Button>
           </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="enableContactForm">تفعيل نموذج الاتصال</Label>
-              <Switch
-                id="enableContactForm"
-                checked={settings.enableContactForm || false}
-                onCheckedChange={(checked) => updateSetting('enableContactForm', checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <Label htmlFor="showMap">إظهار الخريطة</Label>
-              <Switch
-                id="showMap"
-                checked={settings.showMap || false}
-                onCheckedChange={(checked) => updateSetting('showMap', checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <Label htmlFor="enableFaq">تفعيل الأسئلة الشائعة</Label>
-              <Switch
-                id="enableFaq"
-                checked={settings.enableFaq || false}
-                onCheckedChange={(checked) => updateSetting('enableFaq', checked)}
-              />
-            </div>
-          </div>
-        </Card>
-      </div>
+        </form>
+      </motion.div>
     </div>
   );
 }
