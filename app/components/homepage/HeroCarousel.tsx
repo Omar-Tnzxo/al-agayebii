@@ -53,7 +53,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
   if (slides.length === 1) {
     const slide = slides[0];
     const content = (
-      <div className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="relative w-full h-[300px] sm:h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <Image
           src={slide.image_url}
           alt="Hero Image"
@@ -78,7 +78,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
   return (
     <section
-      className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 group"
+      className="relative w-full h-[300px] sm:h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

@@ -137,49 +137,61 @@ export default function OrderStatusChart({ data, isLoading }: OrderStatusChartPr
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-purple-100 rounded-lg">
-          <PieChart className="h-5 w-5 text-purple-600" />
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+      <div className="flex items-center gap-3 mb-4 md:mb-6">
+        <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
+          <PieChart className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">توزيع حالات الطلبات</h3>
-          <p className="text-sm text-gray-600">إجمالي {total} طلب</p>
+          <h3 className="text-base md:text-lg font-bold text-gray-900">توزيع حالات الطلبات</h3>
+          <p className="text-xs md:text-sm text-gray-600">إجمالي {total} طلب</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-6 lg:gap-8">
         {/* الرسم البياني الدائري */}
-        <div className="relative">
-          <svg width="200" height="200" className="transform -rotate-90">
+        <div className="relative flex-shrink-0">
+          <svg width="160" height="160" className="transform -rotate-90 md:w-[200px] md:h-[200px]">
             {segments.map((segment, index) => {
               const colors = ['#eab308', '#3b82f6', '#8b5cf6', '#10b981', '#f97316', '#ef4444']; // yellow, blue, purple, emerald, orange, red
               return segment.value > 0 ? (
                 <path
                   key={index}
+                  d={createPath(80, 80, 65, segment.startAngle, segment.startAngle + segment.angle)}
+                  fill={colors[index]}
+                  className="hover:opacity-80 transition-opacity md:hidden"
+                />
+              ) : null;
+            })}
+            {segments.map((segment, index) => {
+              const colors = ['#eab308', '#3b82f6', '#8b5cf6', '#10b981', '#f97316', '#ef4444'];
+              return segment.value > 0 ? (
+                <path
+                  key={`desktop-${index}`}
                   d={createPath(100, 100, 80, segment.startAngle, segment.startAngle + segment.angle)}
                   fill={colors[index]}
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity hidden md:block"
                 />
               ) : null;
             })}
 
             {/* الدائرة الداخلية */}
-            <circle cx="100" cy="100" r="40" fill="white" />
+            <circle cx="80" cy="80" r="35" fill="white" className="md:hidden" />
+            <circle cx="100" cy="100" r="40" fill="white" className="hidden md:block" />
           </svg>
 
           {/* النص في المنتصف */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{total}</div>
-              <div className="text-xs text-gray-600">إجمالي الطلبات</div>
+              <div className="text-xl md:text-2xl font-bold text-gray-900">{total}</div>
+              <div className="text-[10px] md:text-xs text-gray-600">إجمالي الطلبات</div>
             </div>
           </div>
         </div>
 
         {/* مؤشرات الألوان والإحصائيات */}
-        <div className="flex-1 mr-8">
-          <div className="space-y-4">
+        <div className="flex-1 w-full">
+          <div className="space-y-2 md:space-y-4">
             {statusData.map((status, index) => {
               const percentage = total > 0 ? ((status.value / total) * 100).toFixed(1) : '0';
               const Icon = status.icon;
@@ -187,28 +199,28 @@ export default function OrderStatusChart({ data, isLoading }: OrderStatusChartPr
               return (
                 <div
                   key={status.label}
-                  className={`${status.bgColor} ${status.borderColor} border rounded-lg p-4 transition-all hover:shadow-md`}
+                  className={`${status.bgColor} ${status.borderColor} border rounded-lg p-3 md:p-4 transition-all hover:shadow-md`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${status.color} text-white`}>
-                        <Icon className="h-4 w-4" />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                      <div className={`p-1.5 md:p-2 rounded-lg ${status.color} text-white flex-shrink-0`}>
+                        <Icon className="h-3 w-3 md:h-4 md:w-4" />
                       </div>
-                      <div>
-                        <div className="font-medium text-gray-900">{status.label}</div>
-                        <div className="text-sm text-gray-600">{status.value} طلب</div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-gray-900 text-sm md:text-base truncate">{status.label}</div>
+                        <div className="text-xs md:text-sm text-gray-600">{status.value} طلب</div>
                       </div>
                     </div>
 
-                    <div className="text-left">
-                      <div className="text-lg font-bold text-gray-900">{percentage}%</div>
+                    <div className="text-left flex-shrink-0">
+                      <div className="text-base md:text-lg font-bold text-gray-900">{percentage}%</div>
                     </div>
                   </div>
 
                   {/* شريط التقدم */}
-                  <div className="mt-3 bg-white bg-opacity-50 rounded-full h-2">
+                  <div className="mt-2 md:mt-3 bg-white bg-opacity-50 rounded-full h-1.5 md:h-2">
                     <div
-                      className={`h-2 rounded-full ${status.color} transition-all duration-500`}
+                      className={`h-1.5 md:h-2 rounded-full ${status.color} transition-all duration-500`}
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>

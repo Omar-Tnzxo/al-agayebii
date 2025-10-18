@@ -72,27 +72,27 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-orange-100 rounded-lg">
-          <Star className="h-5 w-5 text-orange-600" />
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+      <div className="flex items-center gap-3 mb-4 md:mb-6">
+        <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
+          <Star className="h-4 w-4 md:h-5 md:w-5 text-orange-600" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">أفضل المنتجات مبيعاً</h3>
-          <p className="text-sm text-gray-600">أداء المنتجات</p>
+          <h3 className="text-base md:text-lg font-bold text-gray-900">أفضل المنتجات مبيعاً</h3>
+          <p className="text-xs md:text-sm text-gray-600">أداء المنتجات</p>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2 md:space-y-4">
         {products.map((product, index) => (
           <div
             key={product.id}
-            className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors group"
+            className="flex items-center gap-2 md:gap-4 p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors group"
           >
             {/* ترتيب المنتج */}
             <div className="flex-shrink-0">
               <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white
+                w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-white
                 ${index === 0 ? 'bg-yellow-500' :
                   index === 1 ? 'bg-gray-400' :
                   index === 2 ? 'bg-orange-600' : 'bg-blue-500'}
@@ -103,7 +103,7 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
 
             {/* صورة المنتج */}
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-gray-100 border">
                 {product.image ? (
                   <Image
                     src={product.image}
@@ -114,7 +114,7 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-6 w-6 text-gray-400" />
+                    <Package className="h-5 w-5 md:h-6 md:w-6 text-gray-400" />
                   </div>
                 )}
               </div>
@@ -122,33 +122,35 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
 
             {/* معلومات المنتج */}
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+              <h4 className="font-medium text-sm md:text-base text-gray-900 truncate group-hover:text-blue-600 transition-colors">
                 {product.name}
               </h4>
-              <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs md:text-sm text-gray-600">
                 <span className="flex items-center gap-1">
                   <Package className="h-3 w-3" />
                   {product.totalQuantity} قطعة
                 </span>
                 <span className="flex items-center gap-1">
                   <TrendingUp className="h-3 w-3" />
-                  {formatPrice(product.totalRevenue)}
+                  <span className="truncate">{formatPrice(product.totalRevenue)}</span>
                 </span>
               </div>
             </div>
 
-            {/* سعر المنتج */}
-            <div className="flex-shrink-0 text-left">
-              <div className="font-bold text-gray-900">
-                {formatPrice(product.price)}
-              </div>
-              <div className="text-xs text-gray-500">
-                سعر الوحدة
+            {/* سعر المنتج - يخفى على الشاشات الصغيرة جداً */}
+            <div className="hidden sm:flex flex-shrink-0 text-left">
+              <div>
+                <div className="font-bold text-sm md:text-base text-gray-900">
+                  {formatPrice(product.price)}
+                </div>
+                <div className="text-xs text-gray-500">
+                  سعر الوحدة
+                </div>
               </div>
             </div>
 
-            {/* مؤشر الأداء */}
-            <div className="flex-shrink-0">
+            {/* مؤشر الأداء - يخفى على الشاشات الصغيرة */}
+            <div className="hidden md:flex flex-shrink-0">
               <div className="w-2 h-8 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`w-full bg-gradient-to-t transition-all duration-500 ${
@@ -169,7 +171,7 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
       {products.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <Package className="h-12 w-12 mx-auto mb-4 text-gray-500" />
-          <p>لا توجد مبيعات متاحة</p>
+          <p className="text-sm">لا توجد مبيعات متاحة</p>
         </div>
       )}
     </div>

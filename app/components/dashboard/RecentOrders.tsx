@@ -92,21 +92,21 @@ export default function RecentOrders({ orders, isLoading }: RecentOrdersProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 md:mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <Clock className="h-5 w-5 text-indigo-600" />
+          <div className="p-2 bg-indigo-100 rounded-lg flex-shrink-0">
+            <Clock className="h-4 w-4 md:h-5 md:w-5 text-indigo-600" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">الطلبات الحديثة</h3>
-            <p className="text-sm text-gray-600">آخر 5 طلبات</p>
+            <h3 className="text-base md:text-lg font-bold text-gray-900">الطلبات الحديثة</h3>
+            <p className="text-xs md:text-sm text-gray-600">آخر 5 طلبات</p>
           </div>
         </div>
 
         <Link
           href="/dashboard/orders"
-          className="flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+          className="flex items-center justify-center sm:justify-start gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
         >
           عرض الكل
           <ArrowRight className="h-4 w-4" />
@@ -114,52 +114,52 @@ export default function RecentOrders({ orders, isLoading }: RecentOrdersProps) {
       </div>
 
       {orders && orders.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           {orders.map((order) => (
             <div
               key={order.id}
-              className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:border-indigo-200 hover:bg-indigo-50/50 transition-all group"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 md:p-4 border border-gray-100 rounded-lg hover:border-indigo-200 hover:bg-indigo-50/50 transition-all group"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                 {/* أيقونة الطلب */}
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm flex-shrink-0">
                   {order.order_number.slice(-2)}
                 </div>
 
                 {/* معلومات الطلب */}
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h4 className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                    <h4 className="font-medium text-sm md:text-base text-gray-900 group-hover:text-indigo-600 transition-colors truncate">
                       #{order.order_number}
                     </h4>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(order.status)}`}>
+                    <span className={`px-2 py-0.5 md:py-1 text-xs font-medium rounded-full border ${getStatusColor(order.status)} w-fit`}>
                       {getStatusText(order.status)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      {order.customer_name}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs md:text-sm text-gray-600">
+                    <span className="flex items-center gap-1 truncate">
+                      <User className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{order.customer_name}</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatDate(order.created_at)}
+                    <span className="flex items-center gap-1 text-[10px] sm:text-xs md:text-sm">
+                      <Clock className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{formatDate(order.created_at)}</span>
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* قيمة الطلب وزر العرض */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-3">
                 <div className="text-left">
-                  <div className="font-bold text-gray-900">
+                  <div className="font-bold text-sm md:text-base text-gray-900">
                     {formatPrice(order.total)}
                   </div>
                 </div>
 
                 <Link
                   href={`/dashboard/orders?order_number=${order.order_number}`}
-                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-100 rounded-lg transition-all"
+                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-100 rounded-lg transition-all flex-shrink-0"
                 >
                   <Eye className="h-4 w-4" />
                 </Link>
@@ -170,7 +170,7 @@ export default function RecentOrders({ orders, isLoading }: RecentOrdersProps) {
       ) : (
         <div className="text-center py-8 text-gray-500">
           <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>لا توجد طلبات حديثة</p>
+          <p className="text-sm">لا توجد طلبات حديثة</p>
         </div>
       )}
     </div>
