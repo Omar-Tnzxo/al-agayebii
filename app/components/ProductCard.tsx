@@ -214,7 +214,7 @@ const ProductCard = ({ product, className = '' }: ProductCardProps) => {
                     key={i}
                     className={`w-4 h-4 ${
                       i < Math.floor(product.rating!)
-                        ? 'text-yellow-400 fill-current'
+                        ? 'text-amber-500 fill-current'
                         : 'text-gray-300'
                     }`}
                   />

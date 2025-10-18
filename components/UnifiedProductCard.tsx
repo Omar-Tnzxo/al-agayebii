@@ -187,7 +187,7 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
           {/* التقييم */}
           {reviewsEnabled && product.rating && product.rating > 0 && (
             <div className="flex items-center gap-1 mb-2">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
               <span className="text-sm font-medium">{product.rating}</span>
               {product.reviews_count && (
                 <span className="text-xs text-gray-500">

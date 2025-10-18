@@ -236,7 +236,7 @@ export default function ReviewsManagementPage() {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+          className={`h-4 w-4 ${star <= rating ? 'fill-amber-500 text-amber-500' : 'text-gray-300'}`}
         />
       ))}
     </div>
@@ -606,11 +606,11 @@ export default function ReviewsManagementPage() {
                   <div key={rating} className="flex items-center gap-4">
                     <div className="flex items-center gap-1 w-28">
                       <span className="text-sm font-medium text-gray-700 w-4">{rating}</span>
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                     </div>
                     <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-yellow-400 transition-all duration-500"
+                        className="h-full bg-amber-500 transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>

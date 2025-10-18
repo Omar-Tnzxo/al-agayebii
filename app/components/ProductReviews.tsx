@@ -145,7 +145,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
             className={`${interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'} transition-transform`}
           >
             <Star
-              className={`h-5 w-5 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+              className={`h-5 w-5 ${star <= rating ? 'fill-amber-500 text-amber-500' : 'text-gray-300'}`}
             />
           </button>
         ))}
@@ -214,11 +214,11 @@ export default function ProductReviews({ productId }: { productId: string }) {
             <div key={rating} className="flex items-center gap-3">
               <div className="flex items-center gap-1 w-24">
                 <span className="text-sm font-medium text-gray-700">{rating}</span>
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
               </div>
               <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-yellow-400 transition-all duration-500"
+                  className="h-full bg-amber-500 transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
