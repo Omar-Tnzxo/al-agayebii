@@ -53,12 +53,12 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
   if (slides.length === 1) {
     const slide = slides[0];
     const content = (
-      <div className="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <Image
           src={slide.image_url}
           alt="Hero Image"
           fill
-          className="object-contain"
+          className="object-cover"
           priority
           sizes="100vw"
         />
@@ -78,7 +78,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
   return (
     <section
-      className="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 group"
+      className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -95,7 +95,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
               src={slide.image_url}
               alt={`Slide ${index + 1}`}
               fill
-              className="object-contain"
+              className="object-cover"
               priority={index === 0}
               sizes="100vw"
             />
@@ -116,18 +116,18 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         {/* أزرار التنقل */}
         <button
           onClick={prevSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 hover:bg-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all md:opacity-0 md:group-hover:opacity-100 hover:scale-110 shadow-lg"
           aria-label="السابق"
         >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-800" />
         </button>
 
         <button
           onClick={nextSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 hover:bg-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all md:opacity-0 md:group-hover:opacity-100 hover:scale-110 shadow-lg"
           aria-label="التالي"
         >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-800" />
         </button>
 
         {/* المؤشرات (Dots) */}
@@ -146,29 +146,8 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
           ))}
         </div>
 
-      {/* شريط التقدم (اختياري) */}
-      {!isPaused && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-30">
-          <div
-            className="h-full bg-primary transition-all"
-            style={{
-              width: '100%',
-              animation: `progress ${(slides[currentSlide]?.duration || 5)}s linear`
-            }}
-          />
-        </div>
-      )}
-
       {/* CSS Animation */}
       <style jsx>{`
-        @keyframes progress {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
         @keyframes fade-in {
           from {
             opacity: 0;
