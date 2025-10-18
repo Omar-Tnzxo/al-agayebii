@@ -67,8 +67,21 @@ export default async function CategoriesPage() {
             >
               <div className="bg-white rounded-lg shadow-sm border border-accent/10 hover:border-accent/40 hover:shadow-md transition-all p-6">
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getAccentColor()}`}>
-                    {getCategoryIcon()}
+                  {/* صورة التصنيف */}
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 relative">
+                    {category.image ? (
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center ${getAccentColor()}`}>
+                        {getCategoryIcon()}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-primary mb-2">{category.name}</h2>
