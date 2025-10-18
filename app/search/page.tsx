@@ -3,9 +3,9 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Search, Filter, Grid3X3, LayoutList, X, SlidersHorizontal, Star, ChevronDown } from 'lucide-react';
+import { Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
+import UnifiedProductCard from '@/components/UnifiedProductCard';
 
 interface Product {
   id: string;
@@ -43,7 +43,6 @@ function SearchContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [categories, setCategories] = useState<Category[]>([{ value: 'all', label: 'جميع الفئات' }]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -211,9 +210,8 @@ function SearchContent() {
               )}
             </div>
 
-            {/* الترتيب وطريقة العرض */}
+            {/* الترتيب */}
             <div className="flex items-center gap-3">
-              {/* الترتيب */}
               <div className="relative">
                 <select
                   value={selectedSort}
@@ -227,32 +225,6 @@ function SearchContent() {
                   ))}
                 </select>
                 <ChevronDown className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* طريقة العرض */}
-              <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-primary text-white'
-                      : 'bg-white hover:bg-gray-50'
-                  }`}
-                  aria-label="عرض شبكي"
-                >
-                  <Grid3X3 className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-primary text-white'
-                      : 'bg-white hover:bg-gray-50'
-                  }`}
-                  aria-label="عرض قائمة"
-                >
-                  <LayoutList className="h-5 w-5" />
-                </button>
               </div>
             </div>
           </div>
@@ -341,95 +313,23 @@ function SearchContent() {
             </div>
           </div>
         ) : products.length > 0 ? (
-          <div
-            className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-                : 'space-y-4'
-            }
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <Link
+              <UnifiedProductCard
                 key={product.id}
-                href={`/product/${product.slug}`}
-                className={`group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
-                  viewMode === 'list' ? 'flex gap-4' : 'block'
-                }`}
-              >
-                {/* صورة المنتج */}
-                <div
-                  className={`relative bg-gray-100 ${
-                    viewMode === 'grid'
-                      ? 'aspect-square'
-                      : 'w-40 h-40 flex-shrink-0'
-                  }`}
-                >
-                  {product.image ? (
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-300">
-                      <Search className="h-12 w-12" />
-                    </div>
-                  )}
-
-                  {/* شارة الخصم */}
-                  {product.discount && product.discount > 0 && (
-                    <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-bold">
-                      -{Math.round(product.discount)}%
-                    </div>
-                  )}
-
-                  {/* شارة نفاذ المخزون */}
-                  {!product.inStock && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="bg-white text-gray-900 px-4 py-2 rounded-lg font-bold">
-                        نفذت الكمية
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* معلومات المنتج */}
-                <div className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
-                  <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                    {product.name}
-                  </h3>
-
-                  {product.description && (
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
-
-                  {/* التقييم */}
-                  {product.rating > 0 && (
-                    <div className="flex items-center gap-1 mb-2">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{product.rating}</span>
-                      <span className="text-xs text-gray-500">
-                        ({product.reviewCount})
-                      </span>
-                    </div>
-                  )}
-
-                  {/* السعر */}
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-primary">
-                      {product.price.toLocaleString('ar-EG')} جنيه
-                    </span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-400 line-through">
-                        {product.originalPrice.toLocaleString('ar-EG')} جنيه
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  description: product.description,
+                  price: product.price,
+                  image: product.image,
+                  slug: product.slug,
+                  discount_percentage: product.discount,
+                  rating: product.rating,
+                  reviews_count: product.reviewCount,
+                  stock_quantity: product.inStock ? 10 : 0
+                }}
+              />
             ))}
           </div>
         ) : query ? (
