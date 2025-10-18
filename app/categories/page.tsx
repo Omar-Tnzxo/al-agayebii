@@ -144,11 +144,6 @@ export default async function CategoriesPage() {
                     
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
-                    {/* Icon Badge */}
-                    <div className={`absolute top-4 right-4 w-12 h-12 rounded-xl bg-gradient-to-br ${getGradientColors()} shadow-lg flex items-center justify-center text-white transform group-hover:scale-110 transition-transform duration-300`}>
-                      {getCategoryIcon()}
-                    </div>
 
                     {/* Product Count Badge */}
                     <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
