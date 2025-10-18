@@ -822,6 +822,7 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
                     {[
                       { id: 'description', label: 'الوصف', icon: Info },
                       { id: 'shipping', label: 'الشحن', icon: Truck },
+                      { id: 'reviews', label: 'التقييمات', icon: Star },
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -862,6 +863,11 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
                           <p className="text-sm text-gray-600">من 1-2 أيام عمل</p>
                         </div>
                       </div>
+                    </div>
+                  )}
+                  {activeTab === 'reviews' && (
+                    <div className="w-full">
+                      <ProductReviews productId={product.id} />
                     </div>
                   )}
                 </div>
@@ -1333,11 +1339,6 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
             </form>
             )}
           </div>
-        </div>
-        
-        {/* قسم التقييمات */}
-        <div className="mb-16">
-          <ProductReviews productId={product.id} />
         </div>
 
         {/* المنتجات المقترحة */}

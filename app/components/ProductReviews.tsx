@@ -160,7 +160,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="p-4">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-gray-200 rounded"></div>
           <div className="h-4 w-full bg-gray-100 rounded"></div>
@@ -171,7 +171,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 space-y-8">
+    <div className="space-y-6">
       {/* رسالة النجاح/الخطأ */}
       {submitMessage.text && (
         <div className={`p-4 rounded-lg ${submitMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
@@ -183,19 +183,13 @@ export default function ProductReviews({ productId }: { productId: string }) {
       )}
 
       {/* العنوان والإحصائيات */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-gray-200">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-            <Star className="h-6 w-6 text-yellow-400 fill-yellow-400" />
-            تقييمات العملاء
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-4xl font-bold text-gray-900">{stats.averageRating.toFixed(1)}</span>
-              <div>
-                <StarRating rating={Math.round(stats.averageRating)} />
-                <p className="text-sm text-gray-600 mt-1">{stats.totalReviews} تقييم</p>
-              </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-3xl font-bold text-gray-900">{stats.averageRating.toFixed(1)}</span>
+            <div>
+              <StarRating rating={Math.round(stats.averageRating)} />
+              <p className="text-xs text-gray-600 mt-1">{stats.totalReviews} تقييم</p>
             </div>
           </div>
         </div>
@@ -203,9 +197,9 @@ export default function ProductReviews({ productId }: { productId: string }) {
         {/* زر إضافة تقييم */}
         <button
           onClick={() => setShowAddReview(!showAddReview)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
         >
-          <MessageSquare className="h-5 w-5" />
+          <MessageSquare className="h-4 w-4" />
           {showAddReview ? 'إخفاء النموذج' : 'أضف تقييمك'}
         </button>
       </div>
@@ -236,8 +230,8 @@ export default function ProductReviews({ productId }: { productId: string }) {
 
       {/* نموذج إضافة تقييم */}
       {showAddReview && (
-        <form onSubmit={handleSubmitReview} className="bg-gray-50 rounded-xl p-6 space-y-4 border-2 border-blue-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">أضف تقييمك</h3>
+        <form onSubmit={handleSubmitReview} className="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200">
+          <h3 className="text-base font-bold text-gray-900">أضف تقييمك</h3>
 
           {/* الاسم */}
           <div>
@@ -302,37 +296,37 @@ export default function ProductReviews({ productId }: { productId: string }) {
       )}
 
       {/* قائمة التقييمات */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {reviews.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">لا توجد تقييمات بعد</h3>
-            <p className="text-gray-600">كن أول من يقيم هذا المنتج!</p>
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <MessageSquare className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+            <h3 className="text-sm font-medium text-gray-900 mb-1">لا توجد تقييمات بعد</h3>
+            <p className="text-xs text-gray-600">كن أول من يقيم هذا المنتج!</p>
           </div>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+            <div key={review.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
               {/* رأس التقييم */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6 text-blue-600" />
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900">{review.reviewer_name}</h4>
-                    <div className="flex items-center gap-2 mt-1">
+                    <h4 className="font-semibold text-sm text-gray-900">{review.reviewer_name}</h4>
+                    <div className="flex items-center gap-2 mt-0.5">
                       <StarRating rating={review.rating} />
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Calendar className="h-4 w-4" />
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Calendar className="h-3 w-3" />
                   {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: ar })}
                 </div>
               </div>
 
               {/* التعليق */}
-              <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{review.comment}</p>
             </div>
           ))
         )}
