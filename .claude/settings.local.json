@@ -40,7 +40,8 @@
       "Bash(taskkill //F //PID 14288)",
       "Bash(test -f \"app/components/ProductReviews.tsx\")",
       "Bash(test -f \"app/api/products/[id]/reviews/route.ts\")",
-      "Bash(test -f \"app/dashboard/reviews/page.tsx\")"
+      "Bash(test -f \"app/dashboard/reviews/page.tsx\")",
+      "Bash(node -c \"app/api/contact/route.ts\")"
     ],
     "deny": [],
     "ask": []

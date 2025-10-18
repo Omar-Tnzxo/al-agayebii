@@ -31,8 +31,14 @@ export interface ContactInfo {
   // وسائل التواصل الاجتماعي
   facebookUrl?: string;
   instagramUrl?: string;
-  tiktokUrl?: string;
+  twitterUrl?: string;
+  linkedinUrl?: string;
   youtubeUrl?: string;
+  tiktokUrl?: string;
+  snapchatUrl?: string;
+  telegramUrl?: string;
+  pinterestUrl?: string;
+  whatsappBusinessUrl?: string;
   
   // معلومات إضافية
   shippingInfo: string;

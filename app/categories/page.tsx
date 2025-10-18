@@ -1,23 +1,76 @@
-import { Metadata } from 'next';
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
-import { fetchCategories, fetchProducts } from '@/lib/data/mockData';
 import { Zap, TrendingUp, Award, ShoppingBag, ArrowRight, Package, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
 
-export const metadata: Metadata = {
-  title: 'التصنيفات | متجر العجايبي',
-  description: 'تصفح تصنيفات منتجات متجر العجايبي للأدوات الكهربائية والصحية',
-};
+interface Category {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  image?: string;
+}
 
-// إضافة خيار revalidate
-export const revalidate = 3600; // إعادة تحقق كل ساعة
+interface Product {
+  id: string;
+  category_type: string;
+}
 
-export default async function CategoriesPage() {
-  // جلب البيانات من الخادم
-  const [categories, products] = await Promise.all([
-    fetchCategories(),
-    fetchProducts()
-  ]);
+export default function CategoriesPage() {
+  const { settings } = useLiveSiteSettings();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [categoriesRes, productsRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/products')
+        ]);
+
+        const categoriesData = await categoriesRes.json();
+        const productsData = await productsRes.json();
+
+        setCategories(categoriesData.data || categoriesData || []);
+        setProducts(productsData.data || productsData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  // الحصول على الإعدادات الديناميكية
+  const heroTitle = settings.categories_hero_title || 'تصنيفات المنتجات';
+  const heroSubtitle = settings.categories_hero_subtitle || 'اكتشف مجموعة واسعة من المنتجات المصنفة خصيصاً لتلبية احتياجاتك';
+  const heroBadge = settings.categories_hero_badge || 'استكشف تشكيلتنا المميزة';
+  
+  const feature1Title = settings.categories_feature1_title || 'تشكيلة واسعة';
+  const feature1Desc = settings.categories_feature1_description || 'مئات المنتجات المتنوعة في جميع الفئات';
+  
+  const feature2Title = settings.categories_feature2_title || 'جودة عالية';
+  const feature2Desc = settings.categories_feature2_description || 'منتجات أصلية ومضمونة 100%';
+  
+  const feature3Title = settings.categories_feature3_title || 'أسعار تنافسية';
+  const feature3Desc = settings.categories_feature3_description || 'أفضل الأسعار مع عروض مستمرة';
+  
+  const showFeatures = settings.categories_show_features !== 'false';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -35,15 +88,15 @@ export default async function CategoriesPage() {
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
               <Sparkles className="h-4 w-4" />
-              <span className="text-sm font-medium">استكشف تشكيلتنا المميزة</span>
+              <span className="text-sm font-medium">{heroBadge}</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              تصنيفات المنتجات
+              {heroTitle}
             </h1>
             
             <p className="text-lg md:text-xl text-blue-100 mb-8 leading-relaxed">
-              اكتشف مجموعة واسعة من المنتجات المصنفة خصيصاً لتلبية احتياجاتك
+              {heroSubtitle}
             </p>
             
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
@@ -197,35 +250,37 @@ export default async function CategoriesPage() {
       </section>
 
       {/* Features Section */}
-      <section className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Package className="h-8 w-8 text-white" />
+      {showFeatures && (
+        <section className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Package className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature1Title}</h3>
+                <p className="text-gray-600">{feature1Desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">تشكيلة واسعة</h3>
-              <p className="text-gray-600">مئات المنتجات المتنوعة في جميع الفئات</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Award className="h-8 w-8 text-white" />
+              
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Award className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature2Title}</h3>
+                <p className="text-gray-600">{feature2Desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">جودة عالية</h3>
-              <p className="text-gray-600">منتجات أصلية ومضمونة 100%</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Sparkles className="h-8 w-8 text-white" />
+              
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature3Title}</h3>
+                <p className="text-gray-600">{feature3Desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">أسعار تنافسية</h3>
-              <p className="text-gray-600">أفضل الأسعار مع عروض مستمرة</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

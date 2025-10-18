@@ -33,8 +33,14 @@ export function parseContactSettings(settings: ContactSettings): ContactInfo {
     // وسائل التواصل الاجتماعي
     facebookUrl: settings.contact_facebook_url || undefined,
     instagramUrl: settings.contact_instagram_url || undefined,
-    tiktokUrl: settings.contact_tiktok_url || undefined,
+    twitterUrl: settings.contact_twitter_url || undefined,
+    linkedinUrl: settings.contact_linkedin_url || undefined,
     youtubeUrl: settings.contact_youtube_url || undefined,
+    tiktokUrl: settings.contact_tiktok_url || undefined,
+    snapchatUrl: settings.contact_snapchat_url || undefined,
+    telegramUrl: settings.contact_telegram_url || undefined,
+    pinterestUrl: settings.contact_pinterest_url || undefined,
+    whatsappBusinessUrl: settings.contact_whatsapp_business_url || undefined,
     
     // معلومات إضافية
     shippingInfo: settings.contact_shipping_info || 'التوصيل لجميع أنحاء الجمهورية',
@@ -92,8 +98,14 @@ export function getDefaultContactSettings(): ContactSettings {
     // وسائل التواصل الاجتماعي
     contact_facebook_url: '',
     contact_instagram_url: '',
-    contact_tiktok_url: '',
+    contact_twitter_url: '',
+    contact_linkedin_url: '',
     contact_youtube_url: '',
+    contact_tiktok_url: '',
+    contact_snapchat_url: '',
+    contact_telegram_url: '',
+    contact_pinterest_url: '',
+    contact_whatsapp_business_url: '',
     
     // معلومات إضافية
     contact_shipping_info: 'التوصيل لجميع أنحاء الجمهورية',
