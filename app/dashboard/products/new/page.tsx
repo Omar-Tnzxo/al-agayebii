@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Save, ImagePlus, CheckCircle, AlertCircle, X, Plus, Info } from 'lucide-react';
-import ImageUpload from '@/components/ImageUpload';
-import MultiImageUpload from '@/components/MultiImageUpload';
+import MultiImageUpload, { MultiImageUploadRef } from '@/components/MultiImageUpload';
 import ColorSelector, { ProductColor } from '@/components/ColorSelector';
 import { useSupabaseRealtime } from '@/lib/hooks/useSupabaseRealtime';
 
@@ -45,7 +44,6 @@ interface ProductFormData {
   is_popular: boolean;
   is_new: boolean;
   is_featured: boolean;
-  is_exclusive: boolean;
   discount_percentage: number;
   rating: number;
   reviews_count: number;
@@ -97,7 +95,6 @@ export default function NewProductPage() {
     is_popular: false,
     is_new: false,
     is_featured: false,
-    is_exclusive: false,
     discount_percentage: 0,
     rating: 0,
     reviews_count: 0,
@@ -109,7 +106,7 @@ export default function NewProductPage() {
   // حالة الصور المتعددة والألوان
   const [productImages, setProductImages] = useState<string[]>([]);
   const [productColors, setProductColors] = useState<any[]>([]);
-  const [useMultipleImages, setUseMultipleImages] = useState(true);
+  const multiImageUploadRef = useRef<MultiImageUploadRef>(null);
   
   // حالة التصنيفات
   const [categories, setCategories] = useState<Category[]>([]);
@@ -344,25 +341,48 @@ export default function NewProductPage() {
     setErrors({});
     
     try {
+      // رفع الصور الجديدة تلقائياً إذا كانت موجودة
+      let finalImages = productImages;
+      if (multiImageUploadRef.current?.hasUnuploadedImages()) {
+        showNotification('info', 'جاري رفع الصور...', 'يرجى الانتظار حتى يتم رفع جميع الصور');
+        
+        try {
+          const allImagesAfterUpload = await multiImageUploadRef.current.uploadImages();
+          console.log('✅ تم رفع الصور الجديدة. إجمالي الصور:', allImagesAfterUpload);
+          finalImages = allImagesAfterUpload;
+          
+          // تحديث حالة الصور
+          setProductImages(allImagesAfterUpload);
+          
+          // انتظار صغير للتأكد من تحديث الحالة
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (uploadError) {
+          console.error('❌ فشل رفع الصور:', uploadError);
+          showNotification('error', 'فشل رفع الصور', 'حدث خطأ أثناء رفع الصور. يرجى المحاولة مرة أخرى.');
+          setLoading(false);
+          return;
+        }
+      }
+      
       // التحقق من رفع الصور إذا كانت مطلوبة
       let finalImageUrl = product.image;
       
-      if (useMultipleImages && productImages.length > 0) {
+      if (finalImages.length > 0) {
         // التحقق من أن الصور تم رفعها بنجاح (ليست blob URLs)
-        const hasLocalImages = productImages.some(url => url.startsWith('blob:'));
+        const hasLocalImages = finalImages.some(url => url.startsWith('blob:'));
         
         if (hasLocalImages) {
-          throw new Error('يجب رفع جميع الصور قبل حفظ المنتج. اضغط على زر "رفع الصور" أولاً.');
+          throw new Error('حدث خطأ في رفع الصور. يرجى المحاولة مرة أخرى.');
         }
         
-        finalImageUrl = productImages[0]; // استخدام أول صورة كصورة رئيسية
-      } else if (useMultipleImages && productImages.length === 0) {
-        throw new Error('يجب إضافة صور للمنتج أولاً. اختر الصور واضغط "رفع الصور".');
+        finalImageUrl = finalImages[0]; // استخدام أول صورة كصورة رئيسية
+      } else {
+        throw new Error('يجب إضافة صورة واحدة على الأقل للمنتج.');
       }
       
       // التحقق من وجود صورة رئيسية
       if (!finalImageUrl) {
-        throw new Error('يجب إضافة صورة واحدة على الأقل للمنتج. اختر صورة وارفعها أولاً.');
+        throw new Error('يجب إضافة صورة واحدة على الأقل للمنتج.');
       }
       
       // استخراج category_id من التصنيف المختار
@@ -380,7 +400,7 @@ export default function NewProductPage() {
         category_type: product.category_type,
         stock_quantity: parseInt(product.stock_quantity.toString()),
         image: finalImageUrl,
-        images: useMultipleImages ? productImages : [finalImageUrl],
+        images: finalImages,
         colors: productColors,
         is_active: product.is_active,
         is_popular: product.is_popular,
@@ -395,6 +415,8 @@ export default function NewProductPage() {
       };
       
       console.log('🚀 إرسال بيانات المنتج:', productData);
+      console.log('📸 الصور النهائية المرسلة:', finalImages);
+      console.log('🎨 الألوان المرسلة:', productColors);
       
       // إرسال بيانات المنتج إلى الخادم
       const response = await fetch('/api/products', {
@@ -406,6 +428,9 @@ export default function NewProductPage() {
       });
       
       const result = await response.json();
+      
+      console.log('📦 استجابة الخادم:', result);
+      console.log('🆔 معرف المنتج:', result.data?.id);
       
       if (!response.ok || !result.success) {
         console.error('❌ خطأ من الخادم:', result);
@@ -439,7 +464,7 @@ export default function NewProductPage() {
       if (result.success) {
         console.log('🎉 تم إضافة المنتج بنجاح في قاعدة البيانات');
         
-        const productId = result.product?.id;
+        const productId = result.data?.id;
         
         // إضافة المنتج للأقسام المحددة
         if (productId && selectedSections.length > 0) {
@@ -469,14 +494,18 @@ export default function NewProductPage() {
         showNotification(
           'success', 
           'تم إضافة المنتج بنجاح!', 
-          `تم حفظ "${product.name}" في قاعدة البيانات بنجاح. سيتم إعادة توجيهك خلال ثوان...`
+          `تم حفظ "${product.name}" في قاعدة البيانات بنجاح. سيتم إعادة توجيهك لصفحة تعديل المنتج...`
         );
         
-        // انتظار 3 ثوان ثم إعادة التوجيه
+        // انتظار 2 ثانية ثم إعادة التوجيه لصفحة تعديل المنتج
         setTimeout(() => {
-          router.push('/dashboard/products');
+          if (productId) {
+            router.push(`/dashboard/products/edit/${productId}`);
+          } else {
+            router.push('/dashboard/products');
+          }
           router.refresh();
-        }, 3000);
+        }, 2000);
       } else {
         // في حالة عدم نجاح الحفظ في قاعدة البيانات
         throw new Error('فشل في حفظ المنتج في قاعدة البيانات');
@@ -661,64 +690,63 @@ export default function NewProductPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 required">
-                  السعر للعملاء (جنيه مصري) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={product.price}
-                  onChange={(e) => setProduct(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
-                    errors.price ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                  placeholder="0.00 ج.م"
-                  required
-                />
-                {errors.price && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.price}
-                  </p>
-                )}
-              </div>
+            {/* حقول السعر والتكلفة */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 required">
+                السعر للعملاء (جنيه مصري) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={product.price}
+                onChange={(e) => setProduct(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
+                  errors.price ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="0.00 ج.م"
+                required
+              />
+              {errors.price && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.price}
+                </p>
+              )}
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-                  سعر التكلفة (جنيه مصري)
-                  <Tooltip text="سعر شراء أو تكلفة المنتج. يساعد في حساب هامش الربح. هذا الحقل اختياري ولن يظهر للعملاء">
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </Tooltip>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={product.cost_price || 0}
-                  onChange={(e) => setProduct(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  placeholder="0.00 ج.م"
-                />
-                {product.cost_price && product.price > 0 && (
-                  <div className="mt-2 text-sm">
-                    <div className="flex justify-between text-gray-600">
-                      <span>هامش الربح:</span>
-                      <span className="font-medium text-green-600">
-                        {(product.price - (product.cost_price || 0)).toFixed(2)} ج.م
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-gray-600">
-                      <span>نسبة الربح:</span>
-                      <span className="font-medium text-blue-600">
-                        {product.cost_price > 0 ? (((product.price - product.cost_price) / product.cost_price) * 100).toFixed(1) : '0'}%
-                      </span>
-                    </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                سعر التكلفة (جنيه مصري)
+                <Tooltip text="سعر شراء أو تكلفة المنتج. يساعد في حساب هامش الربح. هذا الحقل اختياري ولن يظهر للعملاء">
+                  <Info className="h-4 w-4 text-gray-400" />
+                </Tooltip>
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={product.cost_price || 0}
+                onChange={(e) => setProduct(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                placeholder="0.00 ج.م"
+              />
+              {product.cost_price && product.price > 0 && (
+                <div className="mt-2 text-sm space-y-1">
+                  <div className="flex justify-between text-gray-600">
+                    <span>هامش الربح:</span>
+                    <span className="font-medium text-green-600">
+                      {(product.price - (product.cost_price || 0)).toFixed(2)} ج.م
+                    </span>
                   </div>
-                )}
-              </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>نسبة الربح:</span>
+                    <span className="font-medium text-blue-600">
+                      {product.cost_price > 0 ? (((product.price - product.cost_price) / product.cost_price) * 100).toFixed(1) : '0'}%
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -830,99 +858,44 @@ export default function NewProductPage() {
         {/* قسم الصور */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center mb-6">
-            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium mr-3 ${
-              isImagesUploaded ? 'bg-green-500 text-white' : 'bg-primary text-white'
-            }`}>
-              {isImagesUploaded ? '✓' : '2'}
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
+              2
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">صور المنتج</h2>
+              <h2 className="text-xl font-semibold text-gray-900">صور المنتج (حتى 30 صورة)</h2>
               <p className="text-sm text-gray-600 mt-1">
-                {isImagesUploaded 
-                  ? '✅ تم رفع الصور بنجاح - يمكنك المتابعة' 
-                  : 'اختر الصور ثم اضغط على "رفع الصور" لتحميلها للخادم'
-                }
+                اختر صور المنتج - سيتم رفعها تلقائياً عند الحفظ
               </p>
             </div>
           </div>
 
-          {!isImagesUploaded && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-blue-400" />
-                </div>
-                <div className="mr-3">
-                  <h3 className="text-sm font-medium text-blue-800">
-                    خطوات رفع الصور
-                  </h3>
-                  <div className="mt-2 text-sm text-blue-700">
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>اختر الصور من جهازك (حتى 30 صورة)</li>
-                      <li>اضغط على زر "رفع الصور" لتحميلها للخادم</li>
-                      <li>انتظر حتى ظهور رسالة النجاح</li>
-                      <li>ثم يمكنك حفظ المنتج</li>
-                    </ol>
-                  </div>
-                </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-semibold text-blue-900 mb-1">
+                  💡 نصيحة: رفع تلقائي عند الحفظ
+                </h3>
+                <p className="text-sm text-blue-700">
+                  اختر الصور المطلوبة (1-30 صورة)، ثم اضغط "إضافة المنتج" مباشرة. سيتم رفع الصور تلقائياً وحفظ المنتج في خطوة واحدة!
+                </p>
               </div>
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium flex items-center">
-              <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-              صور المنتج
-            </h2>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={useMultipleImages}
-                  onChange={(e) => setUseMultipleImages(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <span className="text-gray-700">صور متعددة</span>
-              </label>
             </div>
           </div>
           
-          {useMultipleImages ? (
-            <MultiImageUpload
-              images={productImages}
-              onImagesChange={(imageUrls: string[]) => {
-                console.log('🔗 ربط الصور المتعددة بالمنتج:', imageUrls);
-                
-                // التحقق من أن الصور تم رفعها بنجاح (ليست blob URLs)
-                const hasLocalImages = imageUrls.some(url => url.startsWith('blob:'));
-                
-                if (hasLocalImages) {
-                  console.warn('⚠️ بعض الصور لم يتم رفعها بعد');
-                  setIsImagesUploaded(false);
-                  showNotification('warning', 'انتباه', 'يرجى الضغط على زر "رفع الصور" لتحميل الصور إلى الخادم');
-                  return;
-                }
-                
-                setIsImagesUploaded(true);
-                setProductImages(imageUrls);
-                // تحديث الصورة الرئيسية
-                if (imageUrls.length > 0) {
-                  setProduct(prev => ({ ...prev, image: imageUrls[0] }));
-                  showNotification('success', '✅ تم رفع الصور بنجاح!', `تم رفع ${imageUrls.length} صورة بنجاح وربطها بالمنتج. يمكنك الآن المتابعة للخطوة التالية.`);
-                }
-              }}
-              maxImages={30}
-            />
-          ) : (
-            <ImageUpload
-              onImageUploaded={(imageUrl) => {
-                console.log('🔗 ربط الصورة بالمنتج:', imageUrl);
-                setProduct(prev => ({ ...prev, image: imageUrl }));
-                setProductImages([imageUrl]);
-                showNotification('success', 'تم رفع الصورة', 'تم رفع صورة المنتج بنجاح وربطها بالمنتج');
-              }}
-              currentImage={product.image}
-            />
-          )}
+          <MultiImageUpload
+            ref={multiImageUploadRef}
+            images={productImages}
+            onImagesChange={(imageUrls: string[]) => {
+              console.log('🔗 [صفحة الإضافة] ربط الصور:', imageUrls.length, 'صورة');
+              setProductImages(imageUrls);
+              // تحديث الصورة الرئيسية
+              if (imageUrls.length > 0) {
+                setProduct(prev => ({ ...prev, image: imageUrls[0] }));
+              }
+            }}
+            maxImages={30}
+          />
         </div>
         
         {/* قسم الألوان */}
@@ -1003,20 +976,6 @@ export default function NewProductPage() {
               />
               <label htmlFor="is_featured" className="mr-3 block text-sm text-amber-700 font-medium">
                 منتج مميز
-              </label>
-            </div>
-            
-            <div className="flex items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-              <input
-                id="is_exclusive"
-                name="is_exclusive"
-                type="checkbox"
-                checked={product.is_exclusive}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-purple-300 text-purple-500 focus:ring-purple-500"
-              />
-              <label htmlFor="is_exclusive" className="mr-3 block text-sm text-purple-700 font-medium">
-                منتج حصري (يظهر في العروض الحصرية)
               </label>
             </div>
             
@@ -1129,13 +1088,13 @@ export default function NewProductPage() {
         {/* أزرار الحفظ */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">جاهز للحفظ؟</h3>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900">جاهز لإضافة المنتج؟</h3>
               <p className="text-sm text-gray-600 mt-1">
-                تأكد من ملء جميع البيانات المطلوبة ورفع الصور قبل الحفظ
+                تأكد من ملء جميع البيانات المطلوبة واختيار الصور
               </p>
             </div>
-            <div className="flex space-x-4 space-x-reverse">
+            <div className="flex gap-3">
               <Link
                 href="/dashboard/products"
                 className="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
@@ -1144,35 +1103,26 @@ export default function NewProductPage() {
               </Link>
               <button
                 type="submit"
-                disabled={loading || (!isImagesUploaded && productImages.length === 0 && !product.image)}
-                className="px-8 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                disabled={loading}
+                className="px-8 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    جاري الحفظ...
+                    <span>جاري الحفظ...</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="h-5 w-5 mr-2" />
-                    إضافة المنتج
+                    <Save className="h-5 w-5" />
+                    <span>إضافة المنتج</span>
                   </>
                 )}
               </button>
             </div>
           </div>
-          
-          {(!isImagesUploaded && productImages.length === 0 && !product.image) && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                يرجى رفع الصور أولاً قبل حفظ المنتج
-              </p>
-            </div>
-          )}
         </div>
       </form>
     </div>

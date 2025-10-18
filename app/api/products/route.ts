@@ -294,6 +294,7 @@ export async function POST(request: NextRequest) {
 
     // إضافة الصور إذا كانت موجودة
     if (images && images.length > 0) {
+      console.log('📸 إضافة', images.length, 'صورة للمنتج');
       const imageInserts = images.map((imageUrl: string, index: number) => ({
         product_id: product.id,
         image_url: imageUrl,
@@ -306,8 +307,12 @@ export async function POST(request: NextRequest) {
         .insert(imageInserts);
 
       if (imagesError) {
-        console.warn('تحذير: فشل في إضافة بعض صور المنتج:', imagesError);
+        console.warn('⚠️ تحذير: فشل في إضافة بعض صور المنتج:', imagesError);
+      } else {
+        console.log('✅ تم إضافة الصور بنجاح');
       }
+    } else {
+      console.log('⚠️ لا توجد صور لإضافتها');
     }
 
     // إضافة الألوان إذا كانت موجودة

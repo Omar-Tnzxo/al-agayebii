@@ -98,6 +98,26 @@ const paymentStatusLabels: Record<string, string> = {
   refunded: 'تم الإرجاع',
 };
 
+// ترجمة طريقة الدفع
+const paymentMethodLabels: Record<string, string> = {
+  cash: 'الدفع نقداً',
+  cash_on_delivery: 'الدفع عند الاستلام',
+  credit_card: 'بطاقة ائتمان',
+  debit_card: 'بطاقة الخصم المباشر',
+  bank_transfer: 'تحويل بنكي',
+  mobile_payment: 'دفع عبر الهاتف',
+  wallet: 'محفظة إلكترونية',
+};
+
+// ترجمة طريقة الشحن
+const shippingMethodLabels: Record<string, string> = {
+  standard: 'شحن عادي',
+  express: 'شحن سريع',
+  same_day: 'التوصيل في نفس اليوم',
+  pickup: 'استلام من الفرع',
+  free: 'شحن مجاني',
+};
+
 export default function OrderDetailsModal({ orderId, isOpen, onClose, onOrderUpdate }: OrderDetailsModalProps) {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [statusHistory, setStatusHistory] = useState<StatusHistoryItem[]>([]);
@@ -393,7 +413,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, onOrderUpd
 
                           <div>
                             <span className="text-sm text-gray-500">طريقة الدفع</span>
-                            <p className="font-medium">{orderDetails.payment_method}</p>
+                            <p className="font-medium">
+                              {paymentMethodLabels[orderDetails.payment_method] || orderDetails.payment_method}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -464,7 +486,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, onOrderUpd
                           {orderDetails.shipping_method && (
                             <div>
                               <span className="text-sm text-gray-500">طريقة الشحن</span>
-                              <p className="font-medium">{orderDetails.shipping_method}</p>
+                              <p className="font-medium">
+                                {shippingMethodLabels[orderDetails.shipping_method] || orderDetails.shipping_method}
+                              </p>
                             </div>
                           )}
 
@@ -643,8 +667,21 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, onOrderUpd
                                   </span>
                                 </div>
 
+                                {/* رسالة الانتقال المترجمة */}
+                                {item.old_status && (
+                                  <p className="text-sm text-gray-700 mb-2 bg-blue-50 px-3 py-2 rounded border border-blue-100">
+                                    تم تحديث الحالة من <span className="font-semibold text-blue-700">{statusLabels[item.old_status] || item.old_status}</span> إلى <span className="font-semibold text-blue-700">{statusLabels[item.new_status] || item.new_status}</span>
+                                  </p>
+                                )}
+
                                 <p className="text-sm text-gray-600 mb-2">
-                                  {new Date(item.created_at).toLocaleString('en-US')}
+                                  {new Date(item.created_at).toLocaleString('ar-EG', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
                                 </p>
 
                                 {item.changed_by && (
@@ -653,7 +690,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, onOrderUpd
                                   </p>
                                 )}
 
-                                {item.notes && (
+                                {item.notes && !item.notes.includes('تم تحديث الحالة من') && (
                                   <p className="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">
                                     {item.notes}
                                   </p>

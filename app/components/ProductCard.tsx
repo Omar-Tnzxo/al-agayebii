@@ -24,7 +24,6 @@ interface Product {
     name: string;
   };
   slug: string;
-  is_exclusive?: boolean;
 }
 
 interface ProductCardProps {
@@ -126,12 +125,6 @@ const ProductCard = ({ product, className = '' }: ProductCardProps) => {
             {product.is_new && (
               <span className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">
                 جديد
-              </span>
-            )}
-            {product.is_exclusive && (
-              <span className="px-2 py-1 bg-purple-600 text-white text-xs font-medium rounded-full flex items-center gap-1 animate-pulse">
-                <Star className="w-4 h-4 text-yellow-300" />
-                حصري
               </span>
             )}
             {product.is_popular && (

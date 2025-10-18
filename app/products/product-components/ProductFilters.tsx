@@ -165,12 +165,10 @@ export function ProductFilters({
     icon: any;
     count?: number;
   }> = [
-    { key: 'inStock', label: 'متوفر في المخزون', icon: Package, count: productCounts?.inStock },
     { key: 'onSale', label: 'عروض وخصومات', icon: Tag, count: productCounts?.onSale },
     { key: 'isNew', label: 'منتجات جديدة', icon: Zap, count: productCounts?.isNew },
     { key: 'isFeatured', label: 'منتجات مميزة', icon: Crown, count: productCounts?.isFeatured },
     { key: 'isPopular', label: 'منتجات رائجة', icon: Flame, count: productCounts?.isPopular },
-    { key: 'isExclusive', label: 'منتجات حصرية', icon: Star, count: productCounts?.isExclusive },
   ];
 
   return (

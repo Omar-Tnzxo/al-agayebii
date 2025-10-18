@@ -1123,6 +1123,12 @@ export default function OrdersManagement() {
                   </tr>
                 </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            {/* صف فارغ في البداية لتوفير مساحة للقوائم المنسدلة في الصفوف الأولى */}
+            {filteredOrders.length > 0 && (
+              <tr className="h-2">
+                <td colSpan={15} className="p-0"></td>
+              </tr>
+            )}
             {loading ? (
               skeletonRows
             ) : filteredOrders.length === 0 ? (
@@ -1132,16 +1138,20 @@ export default function OrdersManagement() {
                       </td>
               </tr>
             ) : (
-              filteredOrders.map((order, idx) => (
-                <tr
-                  key={order.id}
-                  className={cn(
-                    idx % 2 === 0
-                      ? 'bg-white dark:bg-gray-900'
-                      : 'bg-gray-50 dark:bg-gray-800',
-                    'hover:bg-primary/5 dark:hover:bg-primary/10 transition'
-                  )}
-                >
+              filteredOrders.map((order, idx) => {
+                const isLastRows = idx >= filteredOrders.length - 6; // آخر 6 صفوف
+                
+                return (
+                  <tr
+                    key={order.id}
+                    className={cn(
+                      idx % 2 === 0
+                        ? 'bg-white dark:bg-gray-900'
+                        : 'bg-gray-50 dark:bg-gray-800',
+                      'hover:bg-primary/5 dark:hover:bg-primary/10 transition',
+                      isLastRows && 'relative' // للصفوف الأخيرة
+                    )}
+                  >
                   <td className="px-3 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleSelectOrder(order.id)}
@@ -1199,8 +1209,15 @@ export default function OrdersManagement() {
                       <Eye className="w-4 h-4" />
                     </button>
                   </td>
-                    </tr>
-              ))
+                </tr>
+              );
+              })
+            )}
+            {/* صف فارغ في النهاية لتوفير مساحة للقوائم المنسدلة */}
+            {filteredOrders.length > 0 && (
+              <tr className="h-80">
+                <td colSpan={15} className="p-0"></td>
+              </tr>
             )}
                 </tbody>
               </table>

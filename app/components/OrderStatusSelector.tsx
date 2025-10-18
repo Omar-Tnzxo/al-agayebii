@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Clock, CheckCircle, X, Package, Truck, CheckCircle2, RefreshCw, RotateCcw, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils/helpers';
 
@@ -32,9 +32,35 @@ export default function OrderStatusSelector({
 }: OrderStatusSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const currentStatusOption = statusOptions.find(option => option.value === currentStatus);
   const CurrentIcon = currentStatusOption?.icon || Clock;
+
+  // تحديد موضع القائمة (أعلى أو أسفل) بناءً على المساحة المتاحة
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      // ارتفاع القائمة المتوقع (8 عناصر × 40px تقريباً)
+      const dropdownHeight = 320;
+      
+      // المسافة المطلوبة للأمان
+      const safetyBuffer = 50;
+
+      // قرار ذكي: افتح للأعلى فقط إذا كانت المساحة أسفلاً غير كافية 
+      // AND المساحة أعلى أكبر من المساحة أسفلاً
+      if (spaceBelow < (dropdownHeight + safetyBuffer) && spaceAbove > (dropdownHeight + safetyBuffer)) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+    }
+  }, [isOpen]);
 
   const handleStatusSelect = async (newStatus: string) => {
     if (newStatus === currentStatus || isUpdating || disabled) return;
@@ -60,6 +86,7 @@ export default function OrderStatusSelector({
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={handleToggle}
         disabled={disabled || isUpdating}
         className={cn(
@@ -88,12 +115,15 @@ export default function OrderStatusSelector({
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-[90]"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Dropdown */}
-          <div className="absolute top-full left-0 mt-1 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-[140px]">
+          <div className={cn(
+            'absolute left-0 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-[140px] max-h-[320px] overflow-y-auto',
+            dropdownPosition === 'bottom' ? 'top-full mt-1' : 'bottom-full mb-1'
+          )}>
             {statusOptions.map((option) => {
               const Icon = option.icon;
               const isSelected = option.value === currentStatus;

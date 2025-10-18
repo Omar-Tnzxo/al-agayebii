@@ -58,7 +58,6 @@ export function ProductCard({
   const isNew = product.is_new;
   const isOnSale = product.discount_percentage > 0;
   const isFeatured = product.is_featured;
-  const isExclusive = product.is_exclusive;
   const isPopular = product.is_popular;
   const isInStock = product.stock_quantity > 0;
   const isLowStock = product.stock_quantity <= 5 && product.stock_quantity > 0;
@@ -85,13 +84,6 @@ export function ProductCard({
       badges.push(
         <span key="new" className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold flex items-center">
           <Zap className="w-3 h-3 mr-1" /> جديد
-        </span>
-      );
-    }
-    if (isExclusive) {
-      badges.push(
-        <span key="exclusive" className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-semibold flex items-center">
-          <Crown className="w-3 h-3 mr-1 text-yellow-300" /> حصري
         </span>
       );
     }
@@ -283,10 +275,6 @@ export function ProductCard({
               {product.description}
             </p>
 
-
-            {/* الألوان */}
-            {renderColors()}
-
             {/* السعر والإجراءات */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -323,12 +311,7 @@ export function ProductCard({
 
             {/* حالة المخزون */}
             <div className="mt-2">
-              {isInStock ? (
-                <span className="text-green-600 text-sm font-medium">
-                  <CheckCircle className="w-4 h-4 inline mr-1" />
-                  متوفر ({product.stock_quantity} قطعة)
-                </span>
-              ) : (
+              {!isInStock && (
                 <span className="text-red-600 text-sm font-medium">
                   <XCircle className="w-4 h-4 inline mr-1" />
                   نفذ المخزون
@@ -405,10 +388,6 @@ export function ProductCard({
           </h3>
         </Link>
 
-
-        {/* الألوان */}
-        {renderColors()}
-
         {/* السعر */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -430,12 +409,7 @@ export function ProductCard({
 
         {/* حالة المخزون */}
         <div className="text-sm">
-          {isInStock ? (
-            <span className="text-green-600 font-medium">
-              <CheckCircle className="w-4 h-4 inline mr-1" />
-              متوفر
-            </span>
-          ) : (
+          {!isInStock && (
             <span className="text-red-600 font-medium">
               <XCircle className="w-4 h-4 inline mr-1" />
               نفذ المخزون

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Save, Loader2, AlertCircle, CheckCircle, X, Info } from 'lucide-react';
-import ImageUpload from '@/components/ImageUpload';
-import MultiImageUpload from '@/components/MultiImageUpload';
+import MultiImageUpload, { MultiImageUploadRef } from '@/components/MultiImageUpload';
 import ColorSelector, { ProductColor } from '@/components/ColorSelector';
 import { useSupabaseRealtime } from '@/lib/hooks/useSupabaseRealtime';
 import { toast } from 'sonner';
@@ -38,7 +37,6 @@ interface Product {
   is_active: boolean;
   is_popular: boolean;
   is_featured: boolean;
-  is_exclusive: boolean;
   is_new: boolean;
   discount_percentage: string;
   rating: string;
@@ -98,7 +96,6 @@ export default function EditProductPage() {
     is_active: true,
     is_popular: false,
     is_featured: false,
-    is_exclusive: false,
     is_new: false,
     discount_percentage: '',
     rating: '',
@@ -111,7 +108,7 @@ export default function EditProductPage() {
   // حالة الصور المتعددة والألوان
   const [productImages, setProductImages] = useState<string[]>([]);
   const [productColors, setProductColors] = useState<ProductColor[]>([]);
-  const [useMultipleImages, setUseMultipleImages] = useState(false);
+  const multiImageUploadRef = useRef<MultiImageUploadRef>(null);
   
   // حالة التصنيفات
   const [categories, setCategories] = useState<Category[]>([]);
@@ -185,7 +182,6 @@ export default function EditProductPage() {
             is_active: productData.is_active ?? true,
             is_popular: productData.is_popular ?? false,
             is_featured: productData.is_featured ?? false,
-            is_exclusive: productData.is_exclusive ?? false,
             is_new: isNew,
             discount_percentage: productData.discount_percentage?.toString() || '',
             rating: productData.rating?.toString() || '',
@@ -196,13 +192,30 @@ export default function EditProductPage() {
           });
           setIsNew(isNew);
           setNewUntil(newUntil);
+          
           // جلب صور المنتج
-          if (productData.images && productData.images.length > 0) {
-            setProductImages(productData.images.map((img: any) => img.image_url));
-            setUseMultipleImages(true);
-          } else if (productData.image) {
-            setProductImages([productData.image]);
+          console.log('📸 صور المنتج من API:', productData.images);
+          const imageUrls: string[] = [];
+          
+          if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
+            // جلب الصور من product_images table
+            productData.images.forEach((img: any) => {
+              if (img.image_url) {
+                imageUrls.push(img.image_url);
+              }
+            });
+            console.log('✅ تم جلب الصور من product_images:', imageUrls);
           }
+          
+          // إذا لم توجد صور في product_images، استخدم الصورة الرئيسية
+          if (imageUrls.length === 0 && productData.image) {
+            imageUrls.push(productData.image);
+            console.log('✅ تم استخدام الصورة الرئيسية:', productData.image);
+          }
+          
+          setProductImages(imageUrls);
+          console.log('🖼️ الصور النهائية:', imageUrls);
+          
           // جلب ألوان المنتج
           if (productData.colors && productData.colors.length > 0) {
             setProductColors(productData.colors.map((color: any) => ({
@@ -450,6 +463,35 @@ export default function EditProductPage() {
     setLoading(true);
     
     try {
+      // رفع الصور الجديدة تلقائياً إذا كانت موجودة
+      let finalImages = productImages;
+      if (multiImageUploadRef.current?.hasUnuploadedImages()) {
+        toast.info('جاري رفع الصور...', {
+          description: 'يرجى الانتظار حتى يتم رفع جميع الصور',
+          className: 'bg-white text-blue-700 border-blue-300 shadow-lg font-tajawal'
+        });
+        
+        try {
+          const allImagesAfterUpload = await multiImageUploadRef.current.uploadImages();
+          console.log('✅ تم رفع الصور الجديدة. إجمالي الصور:', allImagesAfterUpload);
+          finalImages = allImagesAfterUpload;
+          
+          // تحديث حالة الصور
+          setProductImages(allImagesAfterUpload);
+          
+          // انتظار صغير للتأكد من تحديث الحالة
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (uploadError) {
+          console.error('❌ فشل رفع الصور:', uploadError);
+          toast.error('فشل رفع الصور', {
+            description: 'حدث خطأ أثناء رفع الصور. يرجى المحاولة مرة أخرى.',
+            className: 'bg-white text-red-700 border-red-300 shadow-lg font-tajawal'
+          });
+          setLoading(false);
+          return;
+        }
+      }
+      
       const productData = {
         name: product.name.trim(),
         description: product.description.trim(),
@@ -460,13 +502,12 @@ export default function EditProductPage() {
         is_active: product.is_active,
         is_popular: product.is_popular,
         is_featured: product.is_featured,
-        is_exclusive: product.is_exclusive,
         is_new: isNew,
         discount_percentage: parseInt(product.discount_percentage || '0'),
         rating: parseFloat(product.rating || '0'),
         reviews_count: parseInt(product.reviews_count || '0'),
-        image: product.image || productImages[0] || null,
-        images: productImages,
+        image: product.image || finalImages[0] || null,
+        images: finalImages,
         colors: productColors,
         sku: product.sku.trim() || null,
         slug: product.slug.trim(),
@@ -474,6 +515,7 @@ export default function EditProductPage() {
       };
 
       console.log('📝 بيانات المنتج المُحدثة:', productData);
+      console.log('📸 الصور النهائية المُرسلة:', finalImages);
 
       const response = await fetch(`/api/products/${productId}`, {
           method: 'PUT',
@@ -655,70 +697,69 @@ export default function EditProductPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                  السعر للعملاء (ج.م) *
-                </label>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={product.price}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  step="0.01"
-                  className={`w-full rounded-md border ${
-                    errors.price ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-primary focus:ring-primary'
-                  } py-2 px-3 shadow-sm focus:outline-none focus:ring-1 transition-colors`}
-                  placeholder="0.00"
-                />
-                {errors.price && (
-                  <p className="mt-1 text-xs text-red-600 flex items-center">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    {errors.price}
-                  </p>
-                )}
-              </div>
+            {/* حقول السعر والتكلفة */}
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                السعر للعملاء (ج.م) *
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={product.price}
+                onChange={handleChange}
+                required
+                min="0"
+                step="0.01"
+                className={`w-full rounded-md border ${
+                  errors.price ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-primary focus:ring-primary'
+                } py-2 px-3 shadow-sm focus:outline-none focus:ring-1 transition-colors`}
+                placeholder="0.00"
+              />
+              {errors.price && (
+                <p className="mt-1 text-xs text-red-600 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {errors.price}
+                </p>
+              )}
+            </div>
 
-              <div>
-                <label htmlFor="cost_price" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  سعر التكلفة (ج.م)
-                  <Tooltip text="سعر شراء أو تكلفة المنتج. يساعد في حساب هامش الربح. هذا الحقل اختياري ولن يظهر للعملاء">
-                    <Info className="h-4 w-4 text-gray-400" />
-                  </Tooltip>
-                </label>
-                <input
-                  type="number"
-                  id="cost_price"
-                  name="cost_price"
-                  value={product.cost_price || ''}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className="w-full rounded-md border border-gray-300 focus:border-primary focus:ring-primary py-2 px-3 shadow-sm focus:outline-none focus:ring-1 transition-colors"
-                  placeholder="0.00"
-                />
-                {product.cost_price && product.price && parseFloat(product.price) > 0 && parseFloat(product.cost_price) >= 0 && (
-                  <div className="mt-2 text-sm">
-                    <div className="flex justify-between text-gray-600">
-                      <span>هامش الربح:</span>
-                      <span className="font-medium text-green-600">
-                        {(parseFloat(product.price) - parseFloat(product.cost_price || '0')).toFixed(2)} ج.م
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-gray-600">
-                      <span>نسبة الربح:</span>
-                      <span className="font-medium text-blue-600">
-                        {parseFloat(product.cost_price) > 0 ?
-                          (((parseFloat(product.price) - parseFloat(product.cost_price)) / parseFloat(product.cost_price)) * 100).toFixed(1)
-                          : '0'}%
-                      </span>
-                    </div>
+            <div>
+              <label htmlFor="cost_price" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                سعر التكلفة (ج.م)
+                <Tooltip text="سعر شراء أو تكلفة المنتج. يساعد في حساب هامش الربح. هذا الحقل اختياري ولن يظهر للعملاء">
+                  <Info className="h-4 w-4 text-gray-400" />
+                </Tooltip>
+              </label>
+              <input
+                type="number"
+                id="cost_price"
+                name="cost_price"
+                value={product.cost_price || ''}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                className="w-full rounded-md border border-gray-300 focus:border-primary focus:ring-primary py-2 px-3 shadow-sm focus:outline-none focus:ring-1 transition-colors"
+                placeholder="0.00"
+              />
+              {product.cost_price && product.price && parseFloat(product.price) > 0 && parseFloat(product.cost_price) >= 0 && (
+                <div className="mt-2 text-sm space-y-1">
+                  <div className="flex justify-between text-gray-600">
+                    <span>هامش الربح:</span>
+                    <span className="font-medium text-green-600">
+                      {(parseFloat(product.price) - parseFloat(product.cost_price || '0')).toFixed(2)} ج.م
+                    </span>
                   </div>
-                )}
-              </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>نسبة الربح:</span>
+                    <span className="font-medium text-blue-600">
+                      {parseFloat(product.cost_price) > 0 ?
+                        (((parseFloat(product.price) - parseFloat(product.cost_price)) / parseFloat(product.cost_price)) * 100).toFixed(1)
+                        : '0'}%
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div>
@@ -856,54 +897,29 @@ export default function EditProductPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium flex items-center">
               <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-              صور المنتج
+              صور المنتج (حتى 30 صورة)
             </h2>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={useMultipleImages}
-                  onChange={(e) => setUseMultipleImages(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <span className="text-gray-700">صور متعددة</span>
-              </label>
-            </div>
           </div>
           
-          {useMultipleImages ? (
-            <MultiImageUpload
-              images={productImages}
-              onImagesChange={(imageUrls: string[]) => {
-                console.log('🔗 تحديث الصور المتعددة:', imageUrls);
-                setProductImages(imageUrls);
-                // تحديث الصورة الرئيسية
-                if (imageUrls.length > 0) {
-                  setProduct(prev => ({ ...prev, image: imageUrls[0] }));
-                }
-                toast.success('تم تحديث الصور', {
-                  description: `تم تحديث ${imageUrls.length} صورة بنجاح.`,
-                  className: 'bg-white text-green-700 border-green-300 shadow-lg font-tajawal',
-                  icon: <CheckCircle className="text-green-500 w-6 h-6 animate-bounce" />
-                });
-              }}
-              maxImages={30}
-            />
-          ) : (
-            <ImageUpload
-              onImageUploaded={(imageUrl) => {
-                console.log('🔗 تحديث صورة المنتج:', imageUrl);
-                setProduct(prev => ({ ...prev, image: imageUrl }));
-                setProductImages([imageUrl]);
-                toast.success('تم تحديث الصورة', {
-                  description: 'تم تحديث صورة المنتج بنجاح.',
-                  className: 'bg-white text-green-700 border-green-300 shadow-lg font-tajawal',
-                  icon: <CheckCircle className="text-green-500 w-6 h-6 animate-bounce" />
-                });
-              }}
-              currentImage={product.image}
-            />
-          )}
+          <MultiImageUpload
+            ref={multiImageUploadRef}
+            images={productImages}
+            onImagesChange={(imageUrls: string[]) => {
+              console.log('🔗 [صفحة التعديل] تحديث الصور - العدد الجديد:', imageUrls.length);
+              console.log('🔗 [صفحة التعديل] الصور:', imageUrls);
+              setProductImages(imageUrls);
+              // تحديث الصورة الرئيسية
+              if (imageUrls.length > 0) {
+                setProduct(prev => ({ ...prev, image: imageUrls[0] }));
+              }
+              toast.success('تم تحديث الصور', {
+                description: `تم تحديث ${imageUrls.length} صورة بنجاح.`,
+                className: 'bg-white text-green-700 border-green-300 shadow-lg font-tajawal',
+                icon: <CheckCircle className="text-green-500 w-6 h-6 animate-bounce" />
+              });
+            }}
+            maxImages={30}
+          />
         </div>
         
         {/* الألوان المتاحة */}
@@ -980,22 +996,6 @@ export default function EditProductPage() {
                 منتج مميز
                 <Tooltip text="يظهر في أقسام المنتجات المميزة ويُعطى أولوية في الترتيب والعروض الخاصة.">
                   <Info className="w-4 h-4 text-amber-400" />
-                </Tooltip>
-              </label>
-            </div>
-            <div className="flex items-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-              <input
-                id="is_exclusive"
-                name="is_exclusive"
-                type="checkbox"
-                checked={product.is_exclusive}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-purple-300 text-purple-500 focus:ring-purple-500"
-              />
-              <label htmlFor="is_exclusive" className="mr-3 block text-sm text-purple-700 font-medium flex items-center gap-1">
-                منتج حصري (يظهر في العروض الحصرية)
-                <Tooltip text="يظهر في أقسام العروض الحصرية فقط ويُستخدم في فلاتر خاصة.">
-                  <Info className="w-4 h-4 text-purple-400" />
                 </Tooltip>
               </label>
             </div>

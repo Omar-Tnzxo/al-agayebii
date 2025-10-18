@@ -32,7 +32,6 @@ interface Product {
   is_new?: boolean;
   is_featured?: boolean;
   is_popular?: boolean;
-  is_exclusive?: boolean;
   is_active?: boolean;
   product_images?: {
     id: string;
@@ -75,7 +74,6 @@ interface FilterState {
   isPopular: boolean;
   rating: number;
   colors: string[];
-  isExclusive: boolean;
   ratingMode: 'exact' | 'atLeast'; // جديد
 }
 
@@ -97,7 +95,6 @@ const defaultFilters: FilterState = {
   isPopular: false,
   rating: 0,
   colors: [],
-  isExclusive: false,
   ratingMode: 'atLeast', // القيمة الافتراضية
 };
 
@@ -149,7 +146,6 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
     isNew: 0,
     isFeatured: 0,
     isPopular: 0,
-    isExclusive: 0,
   });
 
   const router = useRouter();
@@ -247,10 +243,6 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
         query = query.eq('is_popular', true);
       }
 
-      if (filters.isExclusive) {
-        query = query.eq('is_exclusive', true);
-      }
-
       if (filters.rating > 0) {
         if (filters.ratingMode === 'exact') {
           query = query.eq('rating', filters.rating);
@@ -323,9 +315,6 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
         if (filters.isPopular) {
           filtered = filtered.filter(p => (p as any).is_popular || (p as any).isPopular);
         }
-        if (filters.isExclusive) {
-          filtered = filtered.filter(p => (p as any).is_exclusive);
-        }
         if (filters.rating > 0) {
           filtered = filtered.filter(p => (p as any).rating >= filters.rating);
         }
@@ -388,7 +377,7 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
       if (supabase) {
         const { data, error } = await supabase
           .from('products')
-          .select('stock_quantity, discount_percentage, is_new, is_featured, is_popular, is_exclusive')
+          .select('stock_quantity, discount_percentage, is_new, is_featured, is_popular')
           .eq('is_active', true);
 
         if (error) throw error;
@@ -400,7 +389,6 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
           isNew: data.filter(p => (p as any).is_new).length,
           isFeatured: data.filter(p => (p as any).is_featured).length,
           isPopular: data.filter(p => (p as any).is_popular).length,
-          isExclusive: data.filter(p => (p as any).is_exclusive).length
         };
 
         setProductCounts(counts);
@@ -414,7 +402,6 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
           isNew: data.filter(p => (p as any).isNew || (p as any).is_new).length,
           isFeatured: data.filter(p => (p as any).is_featured).length,
           isPopular: data.filter(p => (p as any).isPopular || (p as any).is_popular).length,
-          isExclusive: data.filter(p => (p as any).is_exclusive).length
         };
         setProductCounts(counts);
       }
@@ -455,9 +442,6 @@ export default function ProductsClient({ initialCategories }: ProductsClientProp
       params.set('page', pagination.page.toString());
     }
 
-    if (filters.isExclusive) {
-      params.set('exclusive', 'true');
-    }
 
     const newURL = `/products${params.toString() ? `?${params.toString()}` : ''}`;
     router.replace(newURL, { scroll: false });

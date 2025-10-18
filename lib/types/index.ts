@@ -25,7 +25,6 @@ export interface Product {
   slug: string;
   sku: string;
   is_featured?: boolean;
-  is_exclusive?: boolean;
   category_id?: string;
   created_at: string;
   updated_at: string;

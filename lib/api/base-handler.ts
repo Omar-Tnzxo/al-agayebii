@@ -48,7 +48,6 @@ export abstract class BaseApiHandler {
       status: searchParams.get('status') || '',
       featured: searchParams.get('featured') === 'true',
       popular: searchParams.get('popular') === 'true',
-      exclusive: searchParams.get('exclusive') === 'true',
       minRating: parseFloat(searchParams.get('min_rating') || '0'),
       maxRating: parseFloat(searchParams.get('max_rating') || '5'),
       minPrice: parseFloat(searchParams.get('min_price') || '0'),

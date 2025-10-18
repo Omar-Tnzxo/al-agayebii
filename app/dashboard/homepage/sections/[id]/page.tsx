@@ -101,15 +101,19 @@ export default function ManageSectionProductsPage() {
       }
 
       // جلب جميع المنتجات
-      const allProductsRes = await fetch('/api/products?per_page=100');
+      const allProductsRes = await fetch('/api/products?limit=100&is_active=true');
       const allProductsData = await allProductsRes.json();
       
       console.log('📦 All Products Response:', allProductsData);
       
-      if (allProductsData.success) {
-        setAllProducts(allProductsData.products || []);
+      if (allProductsData.success && allProductsData.data && allProductsData.data.data) {
+        // البيانات موجودة في data.data
+        const products = allProductsData.data.data || [];
+        console.log('✅ عدد المنتجات المتاحة:', products.length);
+        setAllProducts(Array.isArray(products) ? products : []);
       } else {
         console.log('⚠️ Failed to fetch all products');
+        setAllProducts([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
