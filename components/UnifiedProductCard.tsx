@@ -169,12 +169,6 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
             {product.name}
           </h3>
 
-          {product.description && (
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-              {product.description}
-            </p>
-          )}
-
           {/* التقييم */}
           {reviewsEnabled && product.rating && product.rating > 0 && (
             <div className="flex items-center gap-1 mb-2">
