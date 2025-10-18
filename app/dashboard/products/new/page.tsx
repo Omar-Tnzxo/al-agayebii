@@ -630,9 +630,9 @@ export default function NewProductPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">إضافة منتج جديد</h1>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">إضافة منتج جديد</h1>
           <p className="text-gray-600 mt-1">املأ جميع البيانات المطلوبة لإضافة منتج جديد للمتجر</p>
         </div>
         <Link 
@@ -660,7 +660,7 @@ export default function NewProductPage() {
         
         {/* القسم الأول: البيانات الأساسية */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-4 md:mb-6">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
               1
             </div>
@@ -857,13 +857,13 @@ export default function NewProductPage() {
         
         {/* قسم الصور */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-4 md:mb-6">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
               2
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">صور المنتج (حتى 30 صورة)</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs md:text-sm text-gray-600 mt-1">
                 اختر صور المنتج - سيتم رفعها تلقائياً عند الحفظ
               </p>
             </div>
@@ -900,13 +900,13 @@ export default function NewProductPage() {
         
         {/* قسم الألوان */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-4 md:mb-6">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
               3
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">الألوان المتاحة</h2>
-              <p className="text-sm text-gray-600 mt-1">أضف الألوان المتاحة للمنتج (اختياري)</p>
+              <p className="text-xs md:text-sm text-gray-600 mt-1">أضف الألوان المتاحة للمنتج (اختياري)</p>
             </div>
           </div>
           <ColorSelector
@@ -926,13 +926,13 @@ export default function NewProductPage() {
         
         {/* قسم الخيارات الإضافية */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-4 md:mb-6">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
               4
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">خيارات إضافية</h2>
-              <p className="text-sm text-gray-600 mt-1">إعدادات المنتج والعروض الخاصة</p>
+              <p className="text-xs md:text-sm text-gray-600 mt-1">إعدادات المنتج والعروض الخاصة</p>
             </div>
           </div>
           
@@ -1047,7 +1047,7 @@ export default function NewProductPage() {
                 اختر الأقسام التي تريد ظهور هذا المنتج فيها في الصفحة الرئيسية
               </p>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {homepageSections.map((section) => (
                   <div
                     key={section.id}
@@ -1087,24 +1087,24 @@ export default function NewProductPage() {
         
         {/* أزرار الحفظ */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900">جاهز لإضافة المنتج؟</h3>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs md:text-sm text-gray-600 mt-1">
                 تأكد من ملء جميع البيانات المطلوبة واختيار الصور
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 href="/dashboard/products"
-                className="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
               >
                 إلغاء
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
                 {loading ? (
                   <>
@@ -1128,3 +1128,4 @@ export default function NewProductPage() {
     </div>
   );
 } 
+

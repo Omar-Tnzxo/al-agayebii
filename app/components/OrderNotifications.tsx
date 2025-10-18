@@ -222,95 +222,111 @@ export default function OrderNotifications({ orders, onOrderSelect }: OrderNotif
   };
 
   return (
-    <div className="relative">
+    <>
       {/* زر الإشعارات */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-      >
-        <Bell className="w-6 h-6" />
-        {stats.total > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {stats.total > 9 ? '9+' : stats.total}
-          </span>
-        )}
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <Bell className="w-5 h-5 md:w-6 md:h-6" />
+          {stats.total > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+              {stats.total > 9 ? '9+' : stats.total}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Overlay للخلفية على الهاتف */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
 
       {/* قائمة الإشعارات */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
+        <div className="fixed md:absolute left-0 md:left-auto right-0 md:right-0 top-16 md:top-full mt-0 md:mt-2 w-full md:w-96 bg-white md:rounded-xl shadow-xl border-t md:border border-gray-200 z-50 max-h-[calc(100vh-4rem)] md:max-h-96 overflow-hidden">
           {/* عنوان */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-3 md:p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">الإشعارات الذكية</h3>
+              <h3 className="text-base md:text-lg font-semibold font-['Cairo']">الإشعارات الذكية</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             {stats.total > 0 && (
-              <div className="flex items-center gap-4 mt-2 text-sm">
-                <span className="text-red-600">عاجل: {stats.urgent}</span>
-                <span className="text-yellow-600">تحذير: {stats.warnings}</span>
-                <span className="text-gray-600">المجموع: {stats.total}</span>
+              <div className="flex items-center gap-2 md:gap-4 mt-2 text-xs md:text-sm flex-wrap">
+                <span className="text-red-600 font-medium">عاجل: {stats.urgent}</span>
+                <span className="text-yellow-600 font-medium">تحذير: {stats.warnings}</span>
+                <span className="text-gray-600 font-medium">المجموع: {stats.total}</span>
               </div>
             )}
           </div>
 
           {/* قائمة الإشعارات */}
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-[calc(100vh-12rem)] md:max-h-64 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>لا توجد إشعارات جديدة</p>
-                <p className="text-sm mt-1">جميع الطلبات تسير بشكل طبيعي</p>
+              <div className="p-6 md:p-8 text-center text-gray-500">
+                <Bell className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 opacity-30" />
+                <p className="font-['Cairo'] text-sm md:text-base">لا توجد إشعارات جديدة</p>
+                <p className="text-xs md:text-sm mt-1">جميع الطلبات تسير بشكل طبيعي</p>
               </div>
             ) : (
               notifications.map(notification => (
                 <div
                   key={notification.id}
-                  className={`p-4 border-b border-gray-100 last:border-b-0 ${getNotificationStyle(notification.type)}`}
+                  className={`p-3 md:p-4 border-b border-gray-100 last:border-b-0 ${getNotificationStyle(notification.type)}`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 md:gap-3">
                     <div className="flex-shrink-0 mt-1">
                       {getNotificationIcon(notification.type)}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 mb-1">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs md:text-sm font-medium text-gray-900 mb-1 font-['Cairo']">
                             {notification.title}
                           </p>
-                          <p className="text-sm text-gray-600 leading-relaxed">
+                          <p className="text-xs md:text-sm text-gray-600 leading-relaxed break-words">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-gray-400 mt-2">
-                            {notification.timestamp.toLocaleString('en-US')}
+                          <p className="text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2">
+                            {notification.timestamp.toLocaleString('ar-EG', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
                           {notification.orderId && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleOrderClick(notification.orderId);
                               }}
-                              className="p-1 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                              className="p-1 md:p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors"
                               title="عرض الطلب"
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </button>
                           )}
                           <button
                             onClick={() => dismissNotification(notification.id)}
-                            className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                            className="p-1 md:p-1.5 text-gray-400 hover:bg-gray-100 rounded transition-colors"
                             title="إخفاء الإشعار"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
                         </div>
                       </div>
@@ -323,10 +339,10 @@ export default function OrderNotifications({ orders, onOrderSelect }: OrderNotif
 
           {/* تذييل */}
           {notifications.length > 0 && (
-            <div className="p-3 border-t border-gray-200 bg-gray-50">
+            <div className="p-2 md:p-3 border-t border-gray-200 bg-gray-50 sticky bottom-0">
               <button
                 onClick={() => setDismissedNotifications(notifications.map(n => n.id))}
-                className="w-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                className="w-full text-xs md:text-sm text-gray-600 hover:text-gray-800 transition-colors py-1.5 md:py-1 font-['Cairo']"
               >
                 إخفاء جميع الإشعارات
               </button>
@@ -334,6 +350,6 @@ export default function OrderNotifications({ orders, onOrderSelect }: OrderNotif
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }

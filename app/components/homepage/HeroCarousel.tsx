@@ -30,11 +30,6 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
-  // الانتقال لصورة محددة
-  const goToSlide = useCallback((index: number) => {
-    setCurrentSlide(index);
-  }, []);
-
   // Auto-play
   useEffect(() => {
     if (slides.length <= 1 || isPaused) return;
@@ -53,7 +48,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
   if (slides.length === 1) {
     const slide = slides[0];
     const content = (
-      <div className="relative w-full h-[300px] sm:h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:aspect-[24/9] lg:aspect-[3/1] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <Image
           src={slide.image_url}
           alt="Hero Image"
@@ -78,7 +73,7 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
 
   return (
     <section
-      className="relative w-full h-[300px] sm:h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl group"
+      className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:aspect-[24/9] lg:aspect-[3/1] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -113,55 +108,22 @@ export default function HeroCarousel({ slides }: HeroCarouselProps) {
         return slideContent;
       })}
 
-        {/* أزرار التنقل */}
-        <button
-          onClick={prevSlide}
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all md:opacity-0 md:group-hover:opacity-100 hover:scale-110 shadow-lg"
-          aria-label="السابق"
-        >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-800" />
-        </button>
+      {/* أزرار التنقل - دائماً مرئية على جميع الأجهزة */}
+      <button
+        onClick={prevSlide}
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all hover:scale-110 shadow-lg backdrop-blur-sm"
+        aria-label="السابق"
+      >
+        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-gray-800" />
+      </button>
 
-        <button
-          onClick={nextSlide}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all md:opacity-0 md:group-hover:opacity-100 hover:scale-110 shadow-lg"
-          aria-label="التالي"
-        >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-800" />
-        </button>
-
-        {/* المؤشرات (Dots) */}
-        <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`transition-all ${
-                index === currentSlide
-                  ? 'w-8 md:w-10 h-2 md:h-3 bg-white rounded-full'
-                  : 'w-2 md:w-3 h-2 md:h-3 bg-white/50 hover:bg-white/75 rounded-full'
-              }`}
-              aria-label={`الانتقال إلى الصورة ${index + 1}`}
-            />
-          ))}
-        </div>
-
-      {/* CSS Animation */}
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-      `}</style>
+      <button
+        onClick={nextSlide}
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white/95 hover:bg-white flex items-center justify-center transition-all hover:scale-110 shadow-lg backdrop-blur-sm"
+        aria-label="التالي"
+      >
+        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-gray-800" />
+      </button>
     </section>
   );
 }
