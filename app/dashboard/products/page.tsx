@@ -51,6 +51,17 @@ export default function ProductsManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
+  // دالة لتحويل category_type إلى اسم عربي
+  const getCategoryName = (categoryType: string) => {
+    const categories: { [key: string]: string } = {
+      'electrical': 'أدوات كهربائية',
+      'plumbing': 'أدوات صحية',
+      'tools': 'أدوات يدوية',
+      'other': 'أخرى'
+    };
+    return categories[categoryType] || categoryType || 'غير محدد';
+  };
+
   // جلب المنتجات
   useEffect(() => {
     fetchProducts();
@@ -325,7 +336,7 @@ export default function ProductsManagement() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 truncate">{product.name}</h3>
-                        <p className="text-sm text-gray-500 truncate">{product.category?.name || 'غير محدد'}</p>
+                        <p className="text-sm text-gray-500 truncate">{getCategoryName(product.category_type)}</p>
                         <p className="text-sm font-medium text-primary">{formatPrice(product.price)}</p>
 
                         <div className="flex items-center gap-2 mt-2">
