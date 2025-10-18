@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Zap, TrendingUp, Award, ShoppingBag, ArrowRight, Package, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
+import { fetchCategories, fetchProducts } from '@/lib/data/mockData';
 
 interface Category {
   id: string;
@@ -28,31 +29,17 @@ export default function CategoriesPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [categoriesRes, productsRes] = await Promise.all([
-          fetch('/api/categories'),
-          fetch('/api/products')
+        // استخدام نفس الدوال التي تعمل في باقي الصفحات
+        const [categoriesData, productsData] = await Promise.all([
+          fetchCategories(),
+          fetchProducts()
         ]);
 
-        const categoriesData = await categoriesRes.json();
-        const productsData = await productsRes.json();
+        console.log('Categories fetched:', categoriesData);
+        console.log('Products fetched:', productsData);
 
-        console.log('Categories Data:', categoriesData);
-        console.log('Products Data:', productsData);
-
-        // التأكد من أن البيانات arrays
-        const categoriesArray = Array.isArray(categoriesData) 
-          ? categoriesData 
-          : (categoriesData.data && Array.isArray(categoriesData.data) ? categoriesData.data : []);
-        
-        const productsArray = Array.isArray(productsData) 
-          ? productsData 
-          : (productsData.data && Array.isArray(productsData.data) ? productsData.data : []);
-
-        console.log('Categories Array:', categoriesArray);
-        console.log('Products Array:', productsArray);
-
-        setCategories(categoriesArray);
-        setProducts(productsArray);
+        setCategories(categoriesData);
+        setProducts(productsData);
       } catch (error) {
         console.error('Error fetching data:', error);
         setCategories([]);
@@ -146,12 +133,7 @@ export default function CategoriesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {categories.map((category) => {
             // حساب عدد المنتجات في كل فئة
-            const productCount = products.filter(p => {
-              console.log(`Product category_type: ${p.category_type}, Category type: ${category.type}`);
-              return p.category_type === category.type;
-            }).length;
-
-            console.log(`Category ${category.name} has ${productCount} products`);
+            const productCount = products.filter(p => p.category_type === category.type).length;
 
             const getCategoryIcon = () => {
               switch (category.type) {
