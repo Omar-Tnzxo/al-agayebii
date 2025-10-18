@@ -92,7 +92,7 @@ export default function ContactSettingsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-primary">إعدادات صفحة الاتصال</h1>
-          <p className="text-accent/60 mt-2">إدارة محتوى ومعلومات صفحة اتصل بنا</p>
+          <p className="text-gray-500 mt-2">إدارة محتوى ومعلومات صفحة اتصل بنا</p>
         </div>
         <Button 
           onClick={handleSave} 

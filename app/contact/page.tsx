@@ -138,7 +138,7 @@ export default function ContactPage() {
       <div className="container mx-auto py-12 px-4 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-red-600 mb-2">خطأ في تحميل البيانات</h1>
-        <p className="text-accent/60">تعذر تحميل معلومات الاتصال. يرجى المحاولة مرة أخرى.</p>
+        <p className="text-gray-500">تعذر تحميل معلومات الاتصال. يرجى المحاولة مرة أخرى.</p>
       </div>
     );
   }
@@ -207,7 +207,7 @@ export default function ContactPage() {
                   <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors">
                     <Phone className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-accent/60">الهاتف الأساسي</p>
+                      <p className="text-sm text-gray-500">الهاتف الأساسي</p>
                       <a 
                         href={`tel:${contactInfo.primaryPhone}`}
                         className="font-semibold text-primary hover:text-primary/80 transition-colors"
@@ -223,7 +223,7 @@ export default function ContactPage() {
                   <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
                     <MessageSquare className="h-5 w-5 text-green-600" />
                     <div className="flex-1">
-                      <p className="text-sm text-accent/60">واتساب</p>
+                      <p className="text-sm text-gray-500">واتساب</p>
                       <a 
                         href={createWhatsAppLink(contactInfo.whatsappNumber)}
                         target="_blank"
@@ -242,7 +242,7 @@ export default function ContactPage() {
                   <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors">
                     <Mail className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-accent/60">البريد الإلكتروني</p>
+                      <p className="text-sm text-gray-500">البريد الإلكتروني</p>
                       <a 
                         href={`mailto:${contactInfo.primaryEmail}`}
                         className="font-semibold text-primary hover:text-primary/80 transition-colors"
@@ -267,11 +267,11 @@ export default function ContactPage() {
               
               <div className="space-y-4">
                 <div className="p-3 bg-primary/5 rounded-lg">
-                  <p className="text-sm text-accent/60 mb-1">العنوان</p>
+                  <p className="text-sm text-gray-500 mb-1">العنوان</p>
                   <p className="font-semibold text-primary mb-2">{contactInfo.fullAddress}</p>
-                  <p className="text-accent/80">{contactInfo.city}, {contactInfo.governorate}</p>
+                  <p className="text-gray-600">{contactInfo.city}, {contactInfo.governorate}</p>
                   {contactInfo.landmark && (
-                    <p className="text-sm text-accent/60 mt-1">📍 {contactInfo.landmark}</p>
+                    <p className="text-sm text-gray-500 mt-1">📍 {contactInfo.landmark}</p>
                   )}
                   <a 
                     href={createMapsLink(contactInfo.fullAddress)}
@@ -287,11 +287,11 @@ export default function ContactPage() {
                 <div className="p-3 bg-accent/5 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Clock className="h-4 w-4 text-accent" />
-                    <p className="text-sm text-accent/60">ساعات العمل</p>
+                    <p className="text-sm text-gray-500">ساعات العمل</p>
                   </div>
                   <p className="font-semibold text-accent">{contactInfo.workingDays}</p>
-                  <p className="text-accent/80">{contactInfo.workingHours}</p>
-                  <p className="text-sm text-accent/60 mt-1">{contactInfo.weekendStatus}</p>
+                  <p className="text-gray-600">{contactInfo.workingHours}</p>
+                  <p className="text-sm text-gray-500 mt-1">{contactInfo.weekendStatus}</p>
                 </div>
               </div>
             </Card>
@@ -521,7 +521,7 @@ export default function ContactPage() {
                   <Truck className="h-8 w-8 text-blue-600" />
                 </div>
                 <h3 className="font-bold text-primary mb-2">الشحن والتوصيل</h3>
-                <p className="text-sm text-accent/70 leading-relaxed">{contactInfo.shippingInfo}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{contactInfo.shippingInfo}</p>
               </Card>
 
               <Card className="p-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm text-center">
@@ -529,7 +529,7 @@ export default function ContactPage() {
                   <ShoppingBag className="h-8 w-8 text-green-600" />
                 </div>
                 <h3 className="font-bold text-primary mb-2">طرق الدفع</h3>
-                <p className="text-sm text-accent/70 leading-relaxed">{contactInfo.paymentMethods}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{contactInfo.paymentMethods}</p>
               </Card>
 
               <Card className="p-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm text-center">
@@ -537,7 +537,7 @@ export default function ContactPage() {
                   <Award className="h-8 w-8 text-amber-600" />
                 </div>
                 <h3 className="font-bold text-primary mb-2">الضمان</h3>
-                <p className="text-sm text-accent/70 leading-relaxed">{contactInfo.warrantyInfo}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{contactInfo.warrantyInfo}</p>
               </Card>
             </motion.div>
 

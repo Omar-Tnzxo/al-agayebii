@@ -43,7 +43,7 @@ export function StoreLocations({ className = '' }: StoreLocationsProps) {
             </div>
             <div className="flex-1">
               <h4 className="font-bold text-primary">{store.name}</h4>
-              <p className="text-sm text-accent/80 mb-2">{store.address}</p>
+              <p className="text-sm text-gray-600 mb-2">{store.address}</p>
               <Link 
                 href={store.mapUrl} 
                 target="_blank" 

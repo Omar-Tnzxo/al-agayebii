@@ -11,7 +11,7 @@ export default function AboutPage() {
         </h1>
 
         <div className="prose prose-lg mx-auto">
-          <p className="text-lg text-accent/80 leading-relaxed mb-8">
+          <p className="text-lg text-gray-600 leading-relaxed mb-8">
             نحن في متجر العجايبي نسعى دائماً لتقديم أفضل المنتجات بأعلى جودة وأفضل
             الأسعار. نؤمن بأن رضا العملاء هو أولويتنا الأولى، ونسعى جاهدين لتقديم
             تجربة تسوق مميزة ومريحة.
@@ -23,7 +23,7 @@ export default function AboutPage() {
                 <Store className="h-8 w-8 text-primary" />
                 <h2 className="text-xl font-semibold text-primary">رؤيتنا</h2>
               </div>
-              <p className="text-accent/80">
+              <p className="text-gray-600">
                 نسعى لأن نكون الوجهة الأولى للتسوق الإلكتروني في المنطقة، من خلال
                 تقديم منتجات عالية الجودة وخدمة عملاء متميزة.
               </p>
@@ -34,7 +34,7 @@ export default function AboutPage() {
                 <Package className="h-8 w-8 text-primary" />
                 <h2 className="text-xl font-semibold text-primary">منتجاتنا</h2>
               </div>
-              <p className="text-accent/80">
+              <p className="text-gray-600">
                 نقدم مجموعة واسعة من المنتجات المختارة بعناية، مع ضمان الجودة
                 والموثوقية في كل منتج.
               </p>
@@ -45,7 +45,7 @@ export default function AboutPage() {
                 <Users className="h-8 w-8 text-primary" />
                 <h2 className="text-xl font-semibold text-primary">فريقنا</h2>
               </div>
-              <p className="text-accent/80">
+              <p className="text-gray-600">
                 فريقنا المتميز يعمل بجد لتقديم أفضل الخدمات وضمان رضا عملائنا
                 الكرام.
               </p>
@@ -56,7 +56,7 @@ export default function AboutPage() {
                 <Award className="h-8 w-8 text-primary" />
                 <h2 className="text-xl font-semibold text-primary">جودتنا</h2>
               </div>
-              <p className="text-accent/80">
+              <p className="text-gray-600">
                 نلتزم بأعلى معايير الجودة في كل ما نقدمه، من المنتجات إلى خدمة
                 العملاء.
               </p>

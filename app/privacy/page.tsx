@@ -18,7 +18,7 @@ export default function PrivacyPage() {
                 حماية بياناتك
               </h2>
             </div>
-            <p className="text-accent/80 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               نحن نلتزم بحماية خصوصية بياناتك الشخصية. نستخدم أحدث التقنيات
               والبروتوكولات الأمنية لضمان أمان معلوماتك.
             </p>
@@ -31,10 +31,10 @@ export default function PrivacyPage() {
                 جمع واستخدام البيانات
               </h2>
             </div>
-            <p className="text-accent/80 leading-relaxed mb-4">
+            <p className="text-gray-600 leading-relaxed mb-4">
               نقوم بجمع البيانات التالية:
             </p>
-            <ul className="list-disc list-inside space-y-2 text-accent/80">
+            <ul className="list-disc list-inside space-y-2 text-gray-600">
               <li>الاسم والبريد الإلكتروني</li>
               <li>عنوان الشحن</li>
               <li>معلومات الدفع</li>
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
                 مشاركة البيانات
               </h2>
             </div>
-            <p className="text-accent/80 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               لا نقوم بمشاركة بياناتك الشخصية مع أي طرف ثالث إلا في الحالات
               الضرورية لتقديم الخدمة، مثل شركات الشحن وشركات معالجة الدفع.
             </p>
@@ -62,10 +62,10 @@ export default function PrivacyPage() {
                 حقوق المستخدم
               </h2>
             </div>
-            <p className="text-accent/80 leading-relaxed mb-4">
+            <p className="text-gray-600 leading-relaxed mb-4">
               لديك الحق في:
             </p>
-            <ul className="list-disc list-inside space-y-2 text-accent/80">
+            <ul className="list-disc list-inside space-y-2 text-gray-600">
               <li>الوصول إلى بياناتك الشخصية</li>
               <li>تصحيح أي معلومات غير دقيقة</li>
               <li>طلب حذف بياناتك</li>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             </ul>
           </div>
 
-          <div className="mt-12 text-center text-accent/60">
+          <div className="mt-12 text-center text-gray-500">
             <p>آخر تحديث: {new Date().toLocaleDateString('ar-SA')}</p>
           </div>
         </div>

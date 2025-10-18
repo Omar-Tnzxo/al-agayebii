@@ -84,7 +84,7 @@ export function ContactFAQ({ items = defaultFAQItems, className = '' }: ContactF
                 animate={{ rotate: openItem === item.id ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <ChevronDown className="h-5 w-5 text-accent/60" />
+                <ChevronDown className="h-5 w-5 text-gray-500" />
               </motion.div>
             </button>
             
@@ -98,7 +98,7 @@ export function ContactFAQ({ items = defaultFAQItems, className = '' }: ContactF
                   className="overflow-hidden"
                 >
                   <div className="p-4 bg-accent/5 border-t border-accent/10">
-                    <p className="text-accent/80 leading-relaxed text-base">
+                    <p className="text-gray-600 leading-relaxed text-base">
                       {item.answer}
                     </p>
                   </div>
@@ -110,7 +110,7 @@ export function ContactFAQ({ items = defaultFAQItems, className = '' }: ContactF
       </div>
 
       <div className="mt-8 p-4 bg-primary/5 rounded-lg text-center">
-        <p className="text-accent/70 mb-2">لم تجد إجابة لسؤالك؟</p>
+        <p className="text-gray-600 mb-2">لم تجد إجابة لسؤالك؟</p>
         <p className="text-primary font-semibold">
           تواصل معنا مباشرة وسنكون سعداء لمساعدتك!
         </p>

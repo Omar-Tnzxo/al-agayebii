@@ -22,7 +22,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
     <main className="container mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center px-4 gap-6" dir="rtl">
       <AlertTriangle className="h-20 w-20 text-destructive" />
       <h1 className="text-3xl font-bold text-primary">حدث خطأ في لوحة التحكم</h1>
-      <p className="text-accent/70 max-w-md">جرّب إعادة تحميل الصفحة أو تواصل مع المطوّر إن استمر الخطأ.</p>
+      <p className="text-gray-600 max-w-md">جرّب إعادة تحميل الصفحة أو تواصل مع المطوّر إن استمر الخطأ.</p>
       <div className="flex gap-4">
         <button
           onClick={() => reset()}

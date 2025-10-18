@@ -89,7 +89,7 @@ export function SimpleShippingSelector({
               {settings.company_name}
             </div>
             {calculation.delivery_time && (
-              <div className="text-xs text-accent/60">
+              <div className="text-xs text-gray-500">
                 ⏱️ {calculation.delivery_time}
               </div>
             )}

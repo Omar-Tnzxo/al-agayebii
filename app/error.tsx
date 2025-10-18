@@ -23,7 +23,7 @@ export default function GlobalError({ error, reset }: ErrorPageProps) {
     <main className="container mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center px-4 gap-6" dir="rtl">
       <AlertTriangle className="h-20 w-20 text-destructive" />
       <h1 className="text-4xl font-bold text-primary">عذراً، حدث خطأ غير متوقع</h1>
-      <p className="text-accent/70 max-w-md">
+      <p className="text-gray-600 max-w-md">
         حدث خطأ أثناء معالجة طلبك. يمكنك إعادة المحاولة أو العودة إلى الصفحة الرئيسية.
       </p>
       <div className="flex gap-4">

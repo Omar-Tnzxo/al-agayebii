@@ -23,7 +23,7 @@ export default async function CategoriesPage() {
     <main className="container mx-auto py-12 px-4">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold ar-title mb-4">تصنيفات المنتجات</h1>
-        <p className="max-w-2xl mx-auto text-accent/80">
+        <p className="max-w-2xl mx-auto text-gray-600">
           تصفح تصنيفات منتجاتنا المختلفة واختر ما يناسب احتياجاتك
         </p>
       </div>
@@ -72,7 +72,7 @@ export default async function CategoriesPage() {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-primary mb-2">{category.name}</h2>
-                    <p className="text-accent/80 mb-4">{productCount} منتج</p>
+                    <p className="text-gray-600 mb-4">{productCount} منتج</p>
                     <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all">
                       <span>استعرض الفئة</span>
                       <ArrowRight className="h-4 w-4" />

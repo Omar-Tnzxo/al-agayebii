@@ -50,8 +50,8 @@ export const OrderSummaryCard: FC<OrderSummaryCardProps> = ({
       </h2>
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="flex items-center gap-1 text-accent/80">
-            <ShoppingCart className="w-4 h-4 text-accent/60" />
+          <span className="flex items-center gap-1 text-gray-600">
+            <ShoppingCart className="w-4 h-4 text-gray-500" />
             إجمالي المنتجات
           </span>
           <span className="font-bold">{subTotal.toLocaleString()} {currency}</span>
@@ -110,7 +110,7 @@ export const OrderSummaryCard: FC<OrderSummaryCardProps> = ({
         )}
         {tax > 0 && (
           <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-1 text-accent/70">
+            <span className="flex items-center gap-1 text-gray-600">
               <Info className="w-4 h-4 text-accent/40" />
               الضرائب
             </span>
