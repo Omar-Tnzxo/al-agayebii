@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star } from 'lucide-react';
+import { Star, ShoppingCart } from 'lucide-react';
 import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
+import { toast } from 'sonner';
 
 interface Product {
   id: string;
@@ -35,80 +36,116 @@ export default function UnifiedProductCard({ product, className = '' }: UnifiedP
   const isDiscounted = product.discount_percentage && product.discount_percentage > 0;
   const isOutOfStock = product.stock_quantity === 0;
 
+  // إضافة للسلة
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isOutOfStock) return;
+    
+    // إضافة المنتج للسلة
+    const cartEvent = new CustomEvent('addToCart', {
+      detail: {
+        product_id: product.id,
+        name: product.name,
+        price: discountedPrice,
+        image: product.image,
+        quantity: 1
+      }
+    });
+    window.dispatchEvent(cartEvent);
+    toast.success(`تمت إضافة ${product.name} للسلة`);
+  };
+
   return (
-    <Link
-      href={`/product/${product.slug}`}
-      className={`group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all block ${className}`}
-    >
-      {/* صورة المنتج */}
-      <div className="relative bg-gray-100 aspect-square">
-        {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-            <span className="text-4xl">📦</span>
-          </div>
-        )}
+    <div className={`group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${className}`}>
+      <Link href={`/product/${product.slug}`}>
+        {/* صورة المنتج */}
+        <div className="relative bg-gray-100 aspect-square">
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+              <span className="text-4xl">📦</span>
+            </div>
+          )}
 
-        {/* شارة الخصم */}
-        {isDiscounted && (
-          <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-bold">
-            -{Math.round(product.discount_percentage || 0)}%
-          </div>
-        )}
+          {/* شارة الخصم */}
+          {isDiscounted && (
+            <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
+              -{Math.round(product.discount_percentage || 0)}%
+            </div>
+          )}
 
-        {/* شارة نفاذ المخزون */}
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="bg-white text-gray-900 px-4 py-2 rounded-lg font-bold">
-              نفذت الكمية
-            </span>
-          </div>
-        )}
-      </div>
+          {/* شارة نفاذ المخزون */}
+          {isOutOfStock && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <span className="bg-white text-gray-900 px-4 py-2 rounded-lg font-bold">
+                نفذت الكمية
+              </span>
+            </div>
+          )}
+        </div>
+      </Link>
 
       {/* معلومات المنتج */}
       <div className="p-4">
-        <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-          {product.name}
-        </h3>
+        <Link href={`/product/${product.slug}`}>
+          <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+            {product.name}
+          </h3>
 
-        {product.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {product.description}
-          </p>
-        )}
+          {product.description && (
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              {product.description}
+            </p>
+          )}
 
-        {/* التقييم */}
-        {reviewsEnabled && product.rating && product.rating > 0 && (
-          <div className="flex items-center gap-1 mb-2">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm font-medium">{product.rating}</span>
-            {product.reviews_count && (
-              <span className="text-xs text-gray-500">
-                ({product.reviews_count})
+          {/* التقييم */}
+          {reviewsEnabled && product.rating && product.rating > 0 && (
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-medium">{product.rating}</span>
+              {product.reviews_count && (
+                <span className="text-xs text-gray-500">
+                  ({product.reviews_count})
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* السعر */}
+          <div className="flex items-baseline gap-2 mb-3">
+            <span className="text-xl font-bold text-primary">
+              {discountedPrice.toLocaleString('ar-EG')} جنيه
+            </span>
+            {isDiscounted && (
+              <span className="text-sm text-gray-400 line-through">
+                {product.price.toLocaleString('ar-EG')} جنيه
               </span>
             )}
           </div>
-        )}
+        </Link>
 
-        {/* السعر */}
-        <div className="flex items-baseline gap-2">
-          <span className="text-xl font-bold text-primary">
-            {discountedPrice.toLocaleString('ar-EG')} جنيه
-          </span>
-          {isDiscounted && (
-            <span className="text-sm text-gray-400 line-through">
-              {product.price.toLocaleString('ar-EG')} جنيه
-            </span>
-          )}
-        </div>
+        {/* زر إضافة للسلة */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className={`w-full py-2.5 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+            isOutOfStock
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-primary/90 active:scale-95'
+          }`}
+        >
+          <ShoppingCart className="h-4 w-4" />
+          <span>{isOutOfStock ? 'نفذ المخزون' : 'أضف للسلة'}</span>
+        </button>
       </div>
-    </Link>
+    </div>
   );
 }
