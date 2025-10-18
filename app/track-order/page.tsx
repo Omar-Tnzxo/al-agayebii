@@ -618,7 +618,7 @@ export default function TrackOrderPage() {
         {hasSearched && !isLoading && !error && orders.length === 0 && (
           <div className="max-w-2xl mx-auto text-center py-16">
             <div className="bg-gray-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-              <Package className="h-12 w-12 text-gray-300" />
+              <Package className="h-12 w-12 text-gray-500" />
             </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">لا توجد طلبات</h3>
             <p className="text-gray-600 text-lg mb-6">

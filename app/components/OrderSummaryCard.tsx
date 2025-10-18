@@ -111,7 +111,7 @@ export const OrderSummaryCard: FC<OrderSummaryCardProps> = ({
         {tax > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1 text-gray-600">
-              <Info className="w-4 h-4 text-accent/40" />
+              <Info className="w-4 h-4 text-gray-400" />
               الضرائب
             </span>
             <span className="font-bold">{tax.toLocaleString()} {currency}</span>

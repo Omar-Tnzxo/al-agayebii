@@ -255,7 +255,7 @@ export default function SearchBar({
                         className="object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                      <div className="w-full h-full flex items-center justify-center text-gray-500">
                         <Search className="h-5 w-5" />
                       </div>
                     )}

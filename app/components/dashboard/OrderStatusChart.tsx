@@ -40,7 +40,7 @@ export default function OrderStatusChart({ data, isLoading }: OrderStatusChartPr
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-center h-64 text-gray-500">
           <div className="text-center">
-            <PieChart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <PieChart className="h-12 w-12 mx-auto mb-4 text-gray-500" />
             <p>لا توجد طلبات متاحة</p>
           </div>
         </div>

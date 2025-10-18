@@ -289,7 +289,7 @@ export default function ContactPage() {
                     <Clock className="h-4 w-4 text-accent" />
                     <p className="text-sm text-gray-500">ساعات العمل</p>
                   </div>
-                  <p className="font-semibold text-accent">{contactInfo.workingDays}</p>
+                  <p className="font-semibold text-gray-700">{contactInfo.workingDays}</p>
                   <p className="text-gray-600">{contactInfo.workingHours}</p>
                   <p className="text-sm text-gray-500 mt-1">{contactInfo.weekendStatus}</p>
                 </div>
@@ -384,7 +384,7 @@ export default function ContactPage() {
                       <div>
                         <Label htmlFor="name">الاسم الكامل *</Label>
                         <div className="relative">
-                          <User className="absolute right-3 top-3 h-4 w-4 text-accent/40" />
+                          <User className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
                             id="name"
                             value={formData.name}
@@ -399,7 +399,7 @@ export default function ContactPage() {
                       <div>
                         <Label htmlFor="email">البريد الإلكتروني *</Label>
                         <div className="relative">
-                          <Mail className="absolute right-3 top-3 h-4 w-4 text-accent/40" />
+                          <Mail className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
                             id="email"
                             type="email"
@@ -416,7 +416,7 @@ export default function ContactPage() {
                       <div>
                         <Label htmlFor="phone">رقم الهاتف</Label>
                         <div className="relative">
-                          <Phone className="absolute right-3 top-3 h-4 w-4 text-accent/40" />
+                          <Phone className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
                             id="phone"
                             value={formData.phone}
@@ -431,7 +431,7 @@ export default function ContactPage() {
                       <div>
                         <Label htmlFor="company">الشركة (اختياري)</Label>
                         <div className="relative">
-                          <Building className="absolute right-3 top-3 h-4 w-4 text-accent/40" />
+                          <Building className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
                             id="company"
                             value={formData.company}
@@ -463,7 +463,7 @@ export default function ContactPage() {
                       <div>
                         <Label htmlFor="subject">الموضوع</Label>
                         <div className="relative">
-                          <FileText className="absolute right-3 top-3 h-4 w-4 text-accent/40" />
+                          <FileText className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
                             id="subject"
                             value={formData.subject}

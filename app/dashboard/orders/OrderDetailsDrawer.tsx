@@ -770,7 +770,7 @@ export function OrderDetailsDrawer({ order, open, onClose }: OrderDetailsDrawerP
 
                   {order.customer_notes && (
                     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ملاحظات العميل:</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-500 mb-2">ملاحظات العميل:</p>
                       <p className="text-gray-900 dark:text-white whitespace-pre-line">{order.customer_notes}</p>
                     </div>
                   )}
@@ -845,7 +845,7 @@ export function OrderDetailsDrawer({ order, open, onClose }: OrderDetailsDrawerP
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Package className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <Package className="w-16 h-16 mx-auto text-gray-500 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400 text-lg">لا توجد عناصر في هذا الطلب</p>
                   </div>
                 )}

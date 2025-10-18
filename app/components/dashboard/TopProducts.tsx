@@ -63,7 +63,7 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
         </div>
         <div className="flex items-center justify-center h-40 text-gray-500">
           <div className="text-center">
-            <Package className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+            <Package className="h-8 w-8 mx-auto mb-2 text-gray-500" />
             <p className="text-sm">لا توجد مبيعات متاحة</p>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function TopProducts({ products, isLoading }: TopProductsProps) {
 
       {products.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+          <Package className="h-12 w-12 mx-auto mb-4 text-gray-500" />
           <p>لا توجد مبيعات متاحة</p>
         </div>
       )}

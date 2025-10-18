@@ -397,7 +397,7 @@ export default function CategoriesPage() {
           </div>
         ) : categories.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="text-5xl mb-4 text-gray-300">📂</div>
+            <div className="text-5xl mb-4 text-gray-500">📂</div>
             <h3 className="text-lg font-medium text-gray-900 mb-1">لا توجد تصنيفات</h3>
             <p className="text-gray-500 mb-4">قم بإضافة تصنيفات لتنظيم منتجاتك</p>
             <Link
