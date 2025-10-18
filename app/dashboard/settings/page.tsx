@@ -852,19 +852,6 @@ export default function SettingsPage() {
                 />
               )}
 
-              {/* Free Shipping Threshold */}
-              {settings.shipping_cost_type === 'fixed' && (
-                <FormField
-                  label="الحد الأدنى للشحن المجاني (ج.م)"
-                  name="free_shipping_threshold"
-                  type="number"
-                  value={settings.free_shipping_threshold || ''}
-                  onChange={handleChange}
-                  placeholder="500"
-                  description="عند تجاوز هذا المبلغ يكون الشحن مجاني"
-                />
-              )}
-
               {/* Enable/Disable Pickup from Branch */}
               <div className="flex items-center justify-between p-5 bg-green-50/50 rounded-xl border border-green-100">
                 <div className="flex-1">

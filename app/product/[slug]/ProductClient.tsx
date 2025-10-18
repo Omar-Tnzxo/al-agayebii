@@ -376,8 +376,8 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
   // استخدم useLiveSiteSettings فقط
   const { settings } = useLiveSiteSettings();
   const currency = settings.currencySymbol || 'ج.م';
-  const freeShippingMin = Number(settings.freeShippingThreshold) || 500;
-  const shippingCost = Number(settings.shippingCost) || 25;
+  const freeShippingMin = Number(settings.free_shipping_threshold) || 500;
+  const shippingCost = Number(settings.shipping_cost) || 25;
   const freeShippingEnabled = settings.freeShippingEnabled === 'true';
   const shippingEnabled = settings.shipping_enabled === 'true';
   const pickupEnabled = settings.pickup_enabled === 'true';
