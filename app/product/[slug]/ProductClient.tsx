@@ -1376,6 +1376,12 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
             </div>
           </div>
         )}
+
+        {/* قسم التقييمات */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">تقييمات المنتج</h2>
+          <ProductReviews productId={product.id} />
+        </div>
       </div>
       {/* زر إضافة للسلة ثابت للموبايل */}
       {product && product.stock_quantity > 0 && (
