@@ -34,7 +34,6 @@ import {
   CreditCard,
   User,
   Mail,
-  Eye,
   ThumbsUp,
   Filter,
   Grid3X3,
@@ -908,12 +907,6 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-bold text-gray-900 mb-0">{product.name}</h1>
-                {product.view_count !== undefined && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">
-                    <Eye className="h-4 w-4" />
-                    {product.view_count}
-                  </span>
-                )}
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500 flex items-center gap-1">
