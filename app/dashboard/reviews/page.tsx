@@ -469,15 +469,25 @@ export default function ReviewsManagementPage() {
                         />
 
                         {/* صورة المنتج */}
-                        {review.product && review.product.image && (
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            <Image
-                              src={review.product.image}
-                              alt={review.product.name}
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                            />
+                        {review.product && (
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                            {review.product.image ? (
+                              <Image
+                                src={review.product.image}
+                                alt={review.product.name}
+                                width={64}
+                                height={64}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // في حالة فشل تحميل الصورة، إخفاء العنصر
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Package className="h-8 w-8 text-gray-400" />
+                              </div>
+                            )}
                           </div>
                         )}
 

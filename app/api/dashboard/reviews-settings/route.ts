@@ -18,7 +18,7 @@ export async function GET() {
       .from('reviews')
       .select(`
         *,
-        products (name, slug)
+        products (id, name, slug, image)
       `)
       .order('created_at', { ascending: false });
 
@@ -41,8 +41,10 @@ export async function GET() {
       comment: review.comment,
       created_at: review.created_at,
       product: review.products ? {
+        id: review.products.id,
         name: review.products.name,
-        slug: review.products.slug
+        slug: review.products.slug,
+        image: review.products.image
       } : null
     })) || [];
 
