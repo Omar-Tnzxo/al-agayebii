@@ -338,20 +338,20 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* العنوان */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">إدارة التصنيفات</h1>
-          <p className="text-gray-600">إضافة وتعديل وحذف تصنيفات المنتجات</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">إدارة التصنيفات</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">إضافة وتعديل وحذف تصنيفات المنتجات</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Link
             href="/dashboard/categories/new"
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base flex-1 sm:flex-initial"
         >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 flex-shrink-0" />
             <span>إضافة تصنيف</span>
           </Link>
           
@@ -359,10 +359,10 @@ export default function CategoriesPage() {
           {selectedTypes.length > 0 && (
             <button
               onClick={handleBulkDelete}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base flex-1 sm:flex-initial"
             >
-              <Trash2 className="h-4 w-4" />
-              <span>حذف المحدد ({selectedTypes.length})</span>
+              <Trash2 className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">حذف المحدد ({selectedTypes.length})</span>
             </button>
           )}
         </div>
@@ -370,20 +370,20 @@ export default function CategoriesPage() {
 
       {/* رسائل النجاح والخطأ */}
       {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 flex items-center gap-2">
-          <CheckCircle className="h-5 w-5 flex-shrink-0" />
-          <p>{success}</p>
-          <button onClick={() => setSuccess(null)} className="mr-auto">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 text-green-800 flex items-start sm:items-center gap-2 sm:gap-3">
+          <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5 sm:mt-0" />
+          <p className="flex-1 text-sm sm:text-base break-words">{success}</p>
+          <button onClick={() => setSuccess(null)} className="flex-shrink-0">
             <X className="h-4 w-4" />
           </button>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <p>{error}</p>
-          <button onClick={() => setError(null)} className="mr-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 text-red-800 flex items-start sm:items-center gap-2 sm:gap-3">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5 sm:mt-0" />
+          <p className="flex-1 text-sm sm:text-base break-words">{error}</p>
+          <button onClick={() => setError(null)} className="flex-shrink-0">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -396,142 +396,252 @@ export default function CategoriesPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         ) : categories.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="text-5xl mb-4 text-gray-500">📂</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">لا توجد تصنيفات</h3>
-            <p className="text-gray-500 mb-4">قم بإضافة تصنيفات لتنظيم منتجاتك</p>
+          <div className="p-6 sm:p-8 text-center">
+            <div className="text-4xl sm:text-5xl mb-4 text-gray-500">📂</div>
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-1">لا توجد تصنيفات</h3>
+            <p className="text-sm sm:text-base text-gray-500 mb-4">قم بإضافة تصنيفات لتنظيم منتجاتك</p>
             <Link
               href="/dashboard/categories/new"
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
             >
               إضافة تصنيف جديد
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.length === categories.length && categories.length > 0}
-                      onChange={handleSelectAll}
-                      aria-label="تحديد الكل"
-                    />
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    اسم التصنيف
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    النوع
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الوصف
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ترتيب العرض
-                    <span className="block text-[10px] text-gray-400 font-normal">(0 = افتراضي)</span>
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {categories.map((category) => (
-                  <tr key={category.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4">
+          <>
+            {/* عرض الجدول على الشاشات الكبيرة */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 w-12">
                       <input
                         type="checkbox"
-                        checked={selectedTypes.includes(category.type)}
-                        onChange={() => handleSelect(category.type)}
-                        aria-label={`تحديد ${category.name}`}
+                        checked={selectedTypes.length === categories.length && categories.length > 0}
+                        onChange={handleSelectAll}
+                        aria-label="تحديد الكل"
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                       />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {category.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {category.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {category.description || 'لا يوجد وصف'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {editingSortOrderId === category.id ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min={0}
-                            value={sortOrderDraft}
-                            onChange={handleSortOrderChange}
-                            className="w-16 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
-                            autoFocus
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      اسم التصنيف
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      النوع
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الوصف
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ترتيب العرض
+                      <span className="block text-[10px] text-gray-400 font-normal">(0 = افتراضي)</span>
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الإجراءات
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {categories.map((category) => (
+                    <tr key={category.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedTypes.includes(category.type)}
+                          onChange={() => handleSelect(category.type)}
+                          aria-label={`تحديد ${category.name}`}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {category.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {category.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                        {category.description || 'لا يوجد وصف'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {editingSortOrderId === category.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min={0}
+                              value={sortOrderDraft}
+                              onChange={handleSortOrderChange}
+                              className="w-16 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                              autoFocus
+                              aria-label="تعديل ترتيب العرض"
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSortOrderSave(category);
+                                if (e.key === 'Escape') handleSortOrderCancel();
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleSortOrderSave(category)}
+                              disabled={sortOrderLoading === category.id}
+                              className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                              aria-label="حفظ ترتيب العرض"
+                            >
+                              {sortOrderLoading === category.id ? (
+                                <span className="animate-spin h-4 w-4 border-b-2 border-green-600 rounded-full inline-block"></span>
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSortOrderCancel}
+                              className="text-gray-400 hover:text-gray-600"
+                              aria-label="إلغاء التعديل"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="hover:underline text-primary font-semibold"
+                            onClick={() => handleSortOrderEdit(category)}
                             aria-label="تعديل ترتيب العرض"
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') handleSortOrderSave(category);
-                              if (e.key === 'Escape') handleSortOrderCancel();
-                            }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleSortOrderSave(category)}
-                            disabled={sortOrderLoading === category.id}
-                            className="text-green-600 hover:text-green-800 disabled:opacity-50"
-                            aria-label="حفظ ترتيب العرض"
+                            tabIndex={0}
+                            onKeyDown={e => { if (e.key === 'Enter') handleSortOrderEdit(category); }}
                           >
-                            {sortOrderLoading === category.id ? (
-                              <span className="animate-spin h-4 w-4 border-b-2 border-green-600 rounded-full inline-block"></span>
-                            ) : (
-                              <CheckCircle className="h-4 w-4" />
-                            )}
+                            {typeof category.sort_order === 'number' ? category.sort_order : 0}
                           </button>
-                          <button
-                            type="button"
-                            onClick={handleSortOrderCancel}
-                            className="text-gray-400 hover:text-gray-600"
-                            aria-label="إلغاء التعديل"
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                          <Link
+                            href={`/dashboard/categories/edit/${category.type}`}
+                            className="text-primary hover:text-primary-dark"
                           >
-                            <X className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(category.type, category.name)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className="hover:underline text-primary font-semibold"
-                          onClick={() => handleSortOrderEdit(category)}
-                          aria-label="تعديل ترتيب العرض"
-                          tabIndex={0}
-                          onKeyDown={e => { if (e.key === 'Enter') handleSortOrderEdit(category); }}
-                        >
-                          {typeof category.sort_order === 'number' ? category.sort_order : 0}
-                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* عرض البطاقات على الشاشات الصغيرة والمتوسطة */}
+            <div className="lg:hidden divide-y divide-gray-200">
+              {categories.map((category) => (
+                <div key={category.id} className="p-4 sm:p-5 hover:bg-gray-50">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedTypes.includes(category.type)}
+                      onChange={() => handleSelect(category.type)}
+                      aria-label={`تحديد ${category.name}`}
+                      className="h-4 w-4 mt-1 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0 space-y-3">
+                      {/* الاسم والنوع */}
+                      <div>
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
+                          {category.name}
+                        </h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {category.type}
+                        </span>
+                      </div>
+
+                      {/* الوصف */}
+                      {category.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {category.description}
+                        </p>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+
+                      {/* ترتيب العرض */}
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-500 font-medium">ترتيب العرض:</span>
+                        {editingSortOrderId === category.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min={0}
+                              value={sortOrderDraft}
+                              onChange={handleSortOrderChange}
+                              className="w-16 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                              autoFocus
+                              aria-label="تعديل ترتيب العرض"
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSortOrderSave(category);
+                                if (e.key === 'Escape') handleSortOrderCancel();
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleSortOrderSave(category)}
+                              disabled={sortOrderLoading === category.id}
+                              className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                              aria-label="حفظ ترتيب العرض"
+                            >
+                              {sortOrderLoading === category.id ? (
+                                <span className="animate-spin h-4 w-4 border-b-2 border-green-600 rounded-full inline-block"></span>
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSortOrderCancel}
+                              className="text-gray-400 hover:text-gray-600"
+                              aria-label="إلغاء التعديل"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-primary font-semibold hover:underline"
+                            onClick={() => handleSortOrderEdit(category)}
+                            aria-label="تعديل ترتيب العرض"
+                          >
+                            {typeof category.sort_order === 'number' ? category.sort_order : 0}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* الإجراءات */}
+                      <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
                         <Link
                           href={`/dashboard/categories/edit/${category.type}`}
-                          className="text-primary hover:text-primary-dark"
+                          className="flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium"
                         >
                           <Edit className="h-4 w-4" />
+                          <span>تعديل</span>
                         </Link>
                         <button
                           onClick={() => handleDelete(category.type, category.name)}
-                          className="text-red-600 hover:text-red-900"
+                          className="flex items-center gap-2 text-red-600 hover:text-red-900 text-sm font-medium"
                         >
                           <Trash2 className="h-4 w-4" />
+                          <span>حذف</span>
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

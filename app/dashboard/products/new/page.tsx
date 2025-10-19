@@ -543,33 +543,60 @@ export default function NewProductPage() {
   return (
     <div className="space-y-6">
       {/* شريط التقدم */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-gray-900">خطوات إضافة المنتج</h2>
-          <span className="text-sm text-gray-500">الخطوة {currentStep} من 4</span>
+      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 className="text-base sm:text-lg font-medium text-gray-900">خطوات إضافة المنتج</h2>
+          <span className="text-xs sm:text-sm text-gray-500">الخطوة {currentStep} من 4</span>
         </div>
-        <div className="flex items-center space-x-4 space-x-reverse">
+        {/* نسخة الموبايل - عرض عمودي */}
+        <div className="flex md:hidden flex-col gap-3">
           {[
             { step: 1, title: 'البيانات الأساسية', icon: '📝' },
             { step: 2, title: 'الصور', icon: '📸' },
             { step: 3, title: 'الألوان', icon: '🎨' },
             { step: 4, title: 'الحفظ', icon: '💾' }
-          ].map((item, index) => (
-            <div key={item.step} className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+          ].map((item) => (
+            <div key={item.step} className="flex items-center gap-3">
+              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium flex-shrink-0 ${
                 currentStep >= item.step 
                   ? 'bg-primary text-white' 
                   : 'bg-gray-200 text-gray-600'
               }`}>
                 {currentStep > item.step ? '✓' : item.step}
               </div>
-              <span className={`mr-2 text-sm ${
+              <span className={`text-sm ${
                 currentStep >= item.step ? 'text-primary font-medium' : 'text-gray-500'
               }`}>
                 {item.icon} {item.title}
               </span>
+            </div>
+          ))}
+        </div>
+        {/* نسخة الديسكتوب - عرض أفقي */}
+        <div className="hidden md:flex items-center justify-between gap-2 lg:gap-4">
+          {[
+            { step: 1, title: 'البيانات الأساسية', icon: '📝' },
+            { step: 2, title: 'الصور', icon: '📸' },
+            { step: 3, title: 'الألوان', icon: '🎨' },
+            { step: 4, title: 'الحفظ', icon: '💾' }
+          ].map((item, index) => (
+            <div key={item.step} className="flex items-center flex-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium flex-shrink-0 ${
+                  currentStep >= item.step 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-200 text-gray-600'
+                }`}>
+                  {currentStep > item.step ? '✓' : item.step}
+                </div>
+                <span className={`text-xs lg:text-sm truncate ${
+                  currentStep >= item.step ? 'text-primary font-medium' : 'text-gray-500'
+                }`}>
+                  <span className="hidden lg:inline">{item.icon} </span>{item.title}
+                </span>
+              </div>
               {index < 3 && (
-                <div className={`w-12 h-0.5 mx-4 ${
+                <div className={`h-0.5 flex-1 mx-2 lg:mx-4 ${
                   currentStep > item.step ? 'bg-primary' : 'bg-gray-200'
                 }`} />
               )}
@@ -580,21 +607,21 @@ export default function NewProductPage() {
 
       {/* إشعارات النجاح والأخطاء */}
       {notification.show && (
-        <div className={`fixed top-4 right-4 z-50 max-w-lg w-full shadow-xl rounded-lg border ${
+        <div className={`fixed top-4 right-4 left-4 sm:left-auto z-50 max-w-lg w-full sm:w-auto shadow-xl rounded-lg border ${
           notification.type === 'success' ? 'bg-green-50 border-green-200' :
           notification.type === 'error' ? 'bg-red-50 border-red-200' :
           notification.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
           'bg-blue-50 border-blue-200'
         } transition-all duration-300 ease-in-out`}>
-          <div className="p-4">
-            <div className="flex items-start">
+          <div className="p-3 sm:p-4">
+            <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                {notification.type === 'success' && <CheckCircle className="h-6 w-6 text-green-400" />}
-                {notification.type === 'error' && <AlertCircle className="h-6 w-6 text-red-400" />}
-                {notification.type === 'warning' && <AlertCircle className="h-6 w-6 text-yellow-400" />}
-                {notification.type === 'info' && <AlertCircle className="h-6 w-6 text-blue-400" />}
+                {notification.type === 'success' && <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />}
+                {notification.type === 'error' && <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-400" />}
+                {notification.type === 'warning' && <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400" />}
+                {notification.type === 'info' && <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />}
               </div>
-              <div className="mr-3 flex-1">
+              <div className="flex-1 min-w-0">
                 <h3 className={`text-sm font-medium ${
                   notification.type === 'success' ? 'text-green-800' :
                   notification.type === 'error' ? 'text-red-800' :
@@ -603,7 +630,7 @@ export default function NewProductPage() {
                 }`}>
                   {notification.title}
                 </h3>
-                <p className={`mt-1 text-sm ${
+                <p className={`mt-1 text-xs sm:text-sm break-words ${
                   notification.type === 'success' ? 'text-green-700' :
                   notification.type === 'error' ? 'text-red-700' :
                   notification.type === 'warning' ? 'text-yellow-700' :
@@ -612,7 +639,7 @@ export default function NewProductPage() {
                   {notification.message}
                 </p>
               </div>
-              <div className="mr-4 flex-shrink-0 flex">
+              <div className="flex-shrink-0">
                 <button
                   onClick={hideNotification}
                   className={`rounded-md inline-flex ${
@@ -659,16 +686,16 @@ export default function NewProductPage() {
         )}
         
         {/* القسم الأول: البيانات الأساسية */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-4 md:mb-6">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white text-sm font-medium mr-2 sm:mr-3 flex-shrink-0">
               1
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">البيانات الأساسية للمنتج</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">البيانات الأساسية للمنتج</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2 required">
                 اسم المنتج *
               </label>
@@ -676,22 +703,22 @@ export default function NewProductPage() {
                 type="text"
                 value={product.name}
                 onChange={(e) => setProduct(prev => ({ ...prev, name: e.target.value }))}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="أدخل اسم المنتج..."
                 required
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.name}
+                <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>{errors.name}</span>
                 </p>
               )}
             </div>
 
             {/* حقول السعر والتكلفة */}
-            <div>
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2 required">
                 السعر للعملاء (جنيه مصري) *
               </label>
@@ -701,25 +728,25 @@ export default function NewProductPage() {
                 min="0"
                 value={product.price}
                 onChange={(e) => setProduct(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.price ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="0.00 ج.م"
                 required
               />
               {errors.price && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.price}
+                <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>{errors.price}</span>
                 </p>
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                 سعر التكلفة (جنيه مصري)
                 <Tooltip text="سعر شراء أو تكلفة المنتج. يساعد في حساب هامش الربح. هذا الحقل اختياري ولن يظهر للعملاء">
-                  <Info className="h-4 w-4 text-gray-400" />
+                  <Info className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 </Tooltip>
               </label>
               <input
@@ -728,11 +755,11 @@ export default function NewProductPage() {
                 min="0"
                 value={product.cost_price || 0}
                 onChange={(e) => setProduct(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base"
                 placeholder="0.00 ج.م"
               />
               {product.cost_price && product.price > 0 && (
-                <div className="mt-2 text-sm space-y-1">
+                <div className="mt-2 text-xs sm:text-sm space-y-1">
                   <div className="flex justify-between text-gray-600">
                     <span>هامش الربح:</span>
                     <span className="font-medium text-green-600">
@@ -749,21 +776,28 @@ export default function NewProductPage() {
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2 required">
                 التصنيف *
               </label>
               {loadingCategories ? (
-                <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm">
                   جاري تحميل التصنيفات...
                 </div>
               ) : (
                 <select
                   value={product.category_type}
                   onChange={(e) => setProduct(prev => ({ ...prev, category_type: e.target.value }))}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors appearance-none bg-white text-sm sm:text-base ${
                     errors.category_type ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'left 0.5rem center',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingLeft: '2.5rem'
+                  }}
                   required
                 >
                   <option value="">اختر التصنيف...</option>
@@ -775,14 +809,14 @@ export default function NewProductPage() {
                 </select>
               )}
               {errors.category_type && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.category_type}
+                <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>{errors.category_type}</span>
                 </p>
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 الكمية المتوفرة
               </label>
@@ -791,12 +825,12 @@ export default function NewProductPage() {
                 min="0"
                 value={product.stock_quantity}
                 onChange={(e) => setProduct(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base"
                 placeholder="0"
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2 required">
                 كود المنتج (SKU)
               </label>
@@ -804,20 +838,20 @@ export default function NewProductPage() {
                 type="text"
                 value={product.sku}
                 onChange={(e) => setProduct(prev => ({ ...prev, sku: e.target.value }))}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.sku ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="مثال: PROD-00123"
               />
               {errors.sku && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.sku}
+                <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>{errors.sku}</span>
                 </p>
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2 required">
                 الرابط المخصص (slug) *
               </label>
@@ -825,29 +859,29 @@ export default function NewProductPage() {
                 type="text"
                 value={product.slug}
                 onChange={(e) => setProduct(prev => ({ ...prev, slug: e.target.value }))}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.slug ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="مثال: product-name-123"
                 required
               />
               {errors.slug && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.slug}
+                <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>{errors.slug}</span>
                 </p>
               )}
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               وصف المنتج
             </label>
             <textarea
               value={product.description}
               onChange={(e) => setProduct(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base"
               rows={4}
               placeholder="أدخل وصف مفصل للمنتج..."
               required
@@ -856,27 +890,27 @@ export default function NewProductPage() {
         </div>
         
         {/* قسم الصور */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-4 md:mb-6">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white text-sm font-medium mr-2 sm:mr-3 flex-shrink-0">
               2
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">صور المنتج (حتى 30 صورة)</h2>
-              <p className="text-xs md:text-sm text-gray-600 mt-1">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">صور المنتج (حتى 30 صورة)</h2>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 اختر صور المنتج - سيتم رفعها تلقائياً عند الحفظ
               </p>
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <div className="flex items-start gap-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4">
+            <div className="flex items-start gap-2 sm:gap-3">
               <AlertCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="text-sm font-semibold text-blue-900 mb-1">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-1">
                   💡 نصيحة: رفع تلقائي عند الحفظ
                 </h3>
-                <p className="text-sm text-blue-700">
+                <p className="text-xs sm:text-sm text-blue-700">
                   اختر الصور المطلوبة (1-30 صورة)، ثم اضغط "إضافة المنتج" مباشرة. سيتم رفع الصور تلقائياً وحفظ المنتج في خطوة واحدة!
                 </p>
               </div>
@@ -899,14 +933,14 @@ export default function NewProductPage() {
         </div>
         
         {/* قسم الألوان */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-4 md:mb-6">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white text-sm font-medium mr-2 sm:mr-3 flex-shrink-0">
               3
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">الألوان المتاحة</h2>
-              <p className="text-xs md:text-sm text-gray-600 mt-1">أضف الألوان المتاحة للمنتج (اختياري)</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">الألوان المتاحة</h2>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">أضف الألوان المتاحة للمنتج (اختياري)</p>
             </div>
           </div>
           <ColorSelector
@@ -925,18 +959,18 @@ export default function NewProductPage() {
         </div>
         
         {/* قسم الخيارات الإضافية */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-4 md:mb-6">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-medium mr-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white text-sm font-medium mr-2 sm:mr-3 flex-shrink-0">
               4
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">خيارات إضافية</h2>
-              <p className="text-xs md:text-sm text-gray-600 mt-1">إعدادات المنتج والعروض الخاصة</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">خيارات إضافية</h2>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">إعدادات المنتج والعروض الخاصة</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex items-center p-3 bg-gray-50 rounded-lg">
               <input
                 id="is_active"
@@ -944,9 +978,9 @@ export default function NewProductPage() {
                 type="checkbox"
                 checked={product.is_active}
                 onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
               />
-              <label htmlFor="is_active" className="mr-3 block text-sm text-gray-700 font-medium">
+              <label htmlFor="is_active" className="mr-3 block text-sm text-gray-700 font-medium cursor-pointer">
                 منتج نشط
               </label>
             </div>
@@ -958,9 +992,9 @@ export default function NewProductPage() {
                 type="checkbox"
                 checked={product.is_popular}
                 onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
               />
-              <label htmlFor="is_popular" className="mr-3 block text-sm text-gray-700 font-medium">
+              <label htmlFor="is_popular" className="mr-3 block text-sm text-gray-700 font-medium cursor-pointer">
                 منتج مميز
               </label>
             </div>
@@ -972,9 +1006,9 @@ export default function NewProductPage() {
                 type="checkbox"
                 checked={product.is_featured}
                 onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-amber-300 text-amber-500 focus:ring-amber-500"
+                className="h-4 w-4 rounded border-amber-300 text-amber-500 focus:ring-amber-500 flex-shrink-0"
               />
-              <label htmlFor="is_featured" className="mr-3 block text-sm text-amber-700 font-medium">
+              <label htmlFor="is_featured" className="mr-3 block text-sm text-amber-700 font-medium cursor-pointer">
                 منتج مميز
               </label>
             </div>
@@ -986,31 +1020,31 @@ export default function NewProductPage() {
                 type="checkbox"
                 checked={isNew}
                 onChange={handleIsNewChange}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
               />
-              <label htmlFor="is_new" className="mr-3 block text-sm text-gray-700 font-medium flex items-center gap-1">
+              <label htmlFor="is_new" className="mr-3 block text-sm text-gray-700 font-medium flex items-center gap-1 cursor-pointer">
                 منتج جديد
                 <Tooltip text="يظهر في أقسام الجديد وتظهر عليه شارة 'جديد' في كرت المنتج.">
-                  <Info className="w-4 h-4 text-green-400" />
+                  <Info className="w-4 h-4 text-green-400 flex-shrink-0" />
                 </Tooltip>
               </label>
             </div>
             {isNew && (
-              <div className="mt-2 flex items-center gap-2">
-                <label htmlFor="new_until" className="text-xs text-gray-500">يظل جديد حتى تاريخ:</label>
+              <div className="sm:col-span-2 lg:col-span-1 flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                <label htmlFor="new_until" className="text-xs sm:text-sm text-gray-700 whitespace-nowrap">يظل جديد حتى:</label>
                 <input
                   id="new_until"
                   name="new_until"
                   type="date"
                   value={newUntil}
                   onChange={e => setNewUntil(e.target.value)}
-                  className="border rounded px-2 py-1 text-xs"
+                  className="border rounded px-2 py-1 text-xs sm:text-sm flex-1 min-w-0"
                 />
               </div>
             )}
             
-            <div className="sm:col-span-3">
-              <label htmlFor="discount_percentage" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label htmlFor="discount_percentage" className="block text-sm font-medium text-gray-700 mb-2">
                 نسبة الخصم (%)
               </label>
               <input
@@ -1023,14 +1057,14 @@ export default function NewProductPage() {
                 max="100"
                 step="1"
                 placeholder="0"
-                className={`w-full rounded-md border ${
+                className={`w-full sm:max-w-xs rounded-md border py-2 px-3 shadow-sm focus:outline-none focus:ring-1 transition-colors text-sm sm:text-base ${
                   errors.discount_percentage ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-primary focus:ring-primary'
-                } py-2 px-3 shadow-sm focus:outline-none focus:ring-1 transition-colors`}
+                }`}
               />
               {errors.discount_percentage && (
-                <p className="mt-1 text-xs text-red-600 flex items-center">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  {errors.discount_percentage}
+                <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                  <span>{errors.discount_percentage}</span>
                 </p>
               )}
             </div>
@@ -1038,12 +1072,12 @@ export default function NewProductPage() {
 
           {/* قسم فرعي: الأقسام */}
           {homepageSections.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
-                إضافة المنتج إلى أقسام الصفحة الرئيسية
+            <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                <span>إضافة المنتج إلى أقسام الصفحة الرئيسية</span>
               </h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-xs sm:text-sm text-gray-600 mb-4">
                 اختر الأقسام التي تريد ظهور هذا المنتج فيها في الصفحة الرئيسية
               </p>
 
@@ -1064,11 +1098,11 @@ export default function NewProductPage() {
                           setSelectedSections(prev => prev.filter(id => id !== section.id));
                         }
                       }}
-                      className="h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                      className="h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500 flex-shrink-0"
                     />
                     <label
                       htmlFor={`section-${section.id}`}
-                      className="mr-3 block text-sm text-indigo-900 font-medium cursor-pointer"
+                      className="mr-3 block text-xs sm:text-sm text-indigo-900 font-medium cursor-pointer min-w-0 truncate"
                     >
                       {section.title}
                     </label>
@@ -1077,7 +1111,7 @@ export default function NewProductPage() {
               </div>
 
               {selectedSections.length > 0 && (
-                <p className="mt-3 text-xs text-indigo-600 bg-indigo-50 p-2 rounded">
+                <p className="mt-3 text-xs sm:text-sm text-indigo-600 bg-indigo-50 p-2 rounded">
                   ✓ سيظهر المنتج في {selectedSections.length} {selectedSections.length === 1 ? 'قسم' : 'أقسام'}
                 </p>
               )}
@@ -1086,25 +1120,25 @@ export default function NewProductPage() {
         </div>
         
         {/* أزرار الحفظ */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">جاهز لإضافة المنتج؟</h3>
-              <p className="text-xs md:text-sm text-gray-600 mt-1">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">جاهز لإضافة المنتج؟</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 تأكد من ملء جميع البيانات المطلوبة واختيار الصور
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 href="/dashboard/products"
-                className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors text-center"
               >
                 إلغاء
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
               >
                 {loading ? (
                   <>

@@ -30,23 +30,23 @@ const SettingsSection = ({
   children: React.ReactNode;
   className?: string;
 }) => (
-  <div className={`bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}>
-    <div className="p-6 border-b border-gray-100">
-      <div className="flex items-start gap-4">
+  <div className={`bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}>
+    <div className="p-4 sm:p-6 border-b border-gray-100">
+      <div className="flex items-start gap-3 sm:gap-4">
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl flex items-center justify-center">
-            <Icon className="w-6 h-6 text-primary" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">{title}</h3>
           {description && (
-            <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{description}</p>
           )}
         </div>
       </div>
     </div>
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {children}
     </div>
   </div>
@@ -217,7 +217,7 @@ const Popup = ({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => 
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* خلفية معتمة */}
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -225,7 +225,7 @@ const Popup = ({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => 
       />
       
       {/* المنبثقة */}
-      <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 scale-100">
+      <div className="relative bg-white rounded-2xl shadow-2xl p-4 sm:p-6 max-w-md w-full transform transition-all duration-300 scale-100">
         {children}
       </div>
     </div>
@@ -560,17 +560,21 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+            <div className="space-y-1 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 إعدادات الموقع
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 قم بتخصيص وإدارة إعدادات موقعك الإلكتروني بشكل شامل
               </p>
+            </div>
+            <div className="flex sm:hidden items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
+              <Settings className="w-3 h-3" />
+              لوحة التحكم
             </div>
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
               <Settings className="w-4 h-4" />
@@ -582,33 +586,33 @@ export default function SettingsPage() {
         {/* Success Popup */}
         <Popup isOpen={success} onClose={() => setSuccess(false)}>
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-green-600" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
               تم حفظ جميع الإعدادات بنجاح!
             </h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
               سيتم تطبيق جميع التغييرات تلقائياً على الموقع
             </p>
             <button
               onClick={() => setSuccess(false)}
-              className="w-full bg-primary text-white py-3 px-6 rounded-xl font-medium hover:bg-primary/90 transition-colors"
+              className="w-full bg-primary text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl text-sm sm:text-base font-medium hover:bg-primary/90 transition-colors"
             >
               حسناً
             </button>
           </div>
         </Popup>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Brand & Identity Section */}
           <SettingsSection
             icon={Palette}
             title="الهوية البصرية والعلامة التجارية"
             description="قم بتخصيص شعار موقعك وأيقونة المتصفح لتعكس هويتك التجارية"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              <div className="space-y-4 sm:space-y-6">
                 <FormField
                   label="اسم الموقع"
                   name="siteName"
@@ -631,7 +635,7 @@ export default function SettingsPage() {
                 />
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <FileUpload
                   label="شعار الموقع"
                   description="الحد الأقصى 5MB. الصيغ المدعومة: PNG, JPG, SVG"
@@ -659,9 +663,9 @@ export default function SettingsPage() {
             title="إعدادات الشحن"
             description="إدارة خيارات الشحن والاستلام من الفروع"
           >
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Enable/Disable Shipping */}
-              <div className="flex items-center justify-between p-5 bg-blue-50/50 rounded-xl border border-blue-100">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 sm:p-5 bg-blue-50/50 rounded-xl border border-blue-100">
                 <div className="flex-1">
                   <h4 className="text-sm font-semibold text-gray-900 mb-1">تفعيل نظام الشحن</h4>
                   <p className="text-xs text-gray-600">عند التعطيل، سيكون خيار "الاستلام من الفرع" فقط متاحاً</p>
@@ -689,7 +693,7 @@ export default function SettingsPage() {
               />
 
               {/* Delivery Time Range */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   label="مدة التوصيل من (أيام)"
                   name="shipping_min_days"
@@ -713,34 +717,34 @@ export default function SettingsPage() {
               {/* Shipping Cost Type */}
               <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-800">نوع تكلفة الشحن</label>
-                <div className="space-y-3">
-                  <label className="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50" style={{ borderColor: settings.shipping_cost_type === 'fixed' ? 'var(--primary)' : '#e5e7eb' }}>
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="flex items-start sm:items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50" style={{ borderColor: settings.shipping_cost_type === 'fixed' ? 'var(--primary)' : '#e5e7eb' }}>
                     <input
                       type="radio"
                       name="shipping_cost_type"
                       value="fixed"
                       checked={settings.shipping_cost_type === 'fixed'}
                       onChange={handleChange}
-                      className="w-4 h-4 text-primary focus:ring-primary"
+                      className="w-4 h-4 text-primary focus:ring-primary mt-0.5 sm:mt-0 flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-gray-900">سعر ثابت</span>
-                      <p className="text-xs text-gray-500">تحديد سعر شحن موحد لجميع الطلبات</p>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-gray-900 block">سعر ثابت</span>
+                      <p className="text-xs text-gray-500 mt-0.5">تحديد سعر شحن موحد لجميع الطلبات</p>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50" style={{ borderColor: settings.shipping_cost_type === 'phone' ? 'var(--primary)' : '#e5e7eb' }}>
+                  <label className="flex items-start sm:items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50" style={{ borderColor: settings.shipping_cost_type === 'phone' ? 'var(--primary)' : '#e5e7eb' }}>
                     <input
                       type="radio"
                       name="shipping_cost_type"
                       value="phone"
                       checked={settings.shipping_cost_type === 'phone'}
                       onChange={handleChange}
-                      className="w-4 h-4 text-primary focus:ring-primary"
+                      className="w-4 h-4 text-primary focus:ring-primary mt-0.5 sm:mt-0 flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-gray-900">يتم تحديده هاتفياً</span>
-                      <p className="text-xs text-gray-500">سيتم التواصل مع العميل لتحديد تكلفة الشحن</p>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-gray-900 block">يتم تحديده هاتفياً</span>
+                      <p className="text-xs text-gray-500 mt-0.5">سيتم التواصل مع العميل لتحديد تكلفة الشحن</p>
                     </div>
                   </label>
                 </div>
@@ -774,15 +778,15 @@ export default function SettingsPage() {
               )}
 
               {/* Enable/Disable Pickup from Branch */}
-              <div className="flex items-center justify-between p-5 bg-green-50/50 rounded-xl border border-green-100">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 sm:p-5 bg-green-50/50 rounded-xl border border-green-100">
                 <div className="flex-1">
                   <h4 className="text-sm font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-green-600" />
+                    <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
                     تفعيل الاستلام من الفرع
                   </h4>
                   <p className="text-xs text-gray-600">السماح للعملاء باختيار الاستلام من أحد الفروع</p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
+                <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={settings.pickup_enabled === 'true'}
@@ -795,17 +799,17 @@ export default function SettingsPage() {
               </div>
 
               {/* Link to Branches Management */}
-              <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-5 border border-primary/20">
-                <div className="flex items-center justify-between">
+              <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-4 sm:p-5 border border-primary/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex-1">
                     <h4 className="text-sm font-semibold text-gray-900 mb-1">إدارة الفروع</h4>
                     <p className="text-xs text-gray-600">إضافة وتعديل وحذف فروع الاستلام المتاحة للعملاء</p>
                   </div>
                   <Link
                     href="/dashboard/branches"
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
                   >
-                    <MapPin className="w-4 h-4" />
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                     إدارة الفروع
                   </Link>
                 </div>
@@ -831,7 +835,7 @@ export default function SettingsPage() {
             title="إعدادات المتجر الإلكتروني"
             description="إعدادات خاصة بالتجارة الإلكترونية والمدفوعات"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <FormField
                 label="رمز العملة"
                 name="currencySymbol"
@@ -906,41 +910,41 @@ export default function SettingsPage() {
             </div>
 
             {/* Return Policy Section */}
-            <div className="mt-8">
-              <h4 className="text-base font-semibold mb-2 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
+            <div className="mt-6 sm:mt-8">
+              <h4 className="text-sm sm:text-base font-semibold mb-2 flex items-center gap-2">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 سياسة الإرجاع
               </h4>
-              <div className="flex flex-col md:flex-row gap-4 items-center">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
                 <input
                   type="number"
                   min={1}
                   name="returnPolicyValue"
                   value={settings.returnPolicyValue || ''}
                   onChange={handleReturnPolicyChange}
-                  className="w-32 rounded-xl border border-gray-300 bg-gray-50/50 px-4 py-3 text-sm focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-                  placeholder="عدد الأيام/الشهور/السنوات"
+                  className="w-full sm:w-32 rounded-xl border border-gray-300 bg-gray-50/50 px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                  placeholder="عدد"
                   aria-label="عدد الأيام/الشهور/السنوات"
                 />
                 <select
                   name="returnPolicyUnit"
                   value={settings.returnPolicyUnit || 'يوم'}
                   onChange={handleReturnPolicyChange}
-                  className="w-32 rounded-xl border border-gray-300 bg-gray-50/50 px-4 py-3 text-sm focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                  className="w-full sm:w-32 rounded-xl border border-gray-300 bg-gray-50/50 px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   aria-label="وحدة المدة"
                 >
                   {RETURN_POLICY_UNITS.map(unit => (
                     <option key={unit.value} value={unit.value}>{unit.label}</option>
                   ))}
                 </select>
-                <span className="text-xs text-gray-500">مثال: 14 يوم، 30 يوم، 1 شهر ...</span>
+                <span className="text-xs text-gray-500 self-center">مثال: 14 يوم، 30 يوم، 1 شهر ...</span>
               </div>
             </div>
           </SettingsSection>
 
           {/* Save Button */}
-          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-            <div className="text-sm text-gray-500">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-gray-200">
+            <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-right">
               جميع التغييرات سيتم حفظها وتطبيقها فوراً على الموقع
             </div>
             
@@ -948,7 +952,7 @@ export default function SettingsPage() {
               type="submit"
               disabled={loading}
               className={`
-                flex items-center gap-3 px-8 py-4 rounded-xl font-medium text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
+                flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-medium text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary whitespace-nowrap
                 ${loading 
                   ? 'bg-gray-400 cursor-not-allowed' 
                   : 'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
@@ -957,12 +961,12 @@ export default function SettingsPage() {
             >
               {loading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   جاري الحفظ...
                 </>
               ) : (
                 <>
-                  <Save className="w-5 h-5" />
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                   حفظ جميع الإعدادات
                 </>
               )}

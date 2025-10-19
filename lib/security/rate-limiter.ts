@@ -1,173 +1,211 @@
-import { logger } from '@/lib/utils/logger';
+/**
+ * Rate Limiter - حماية من هجمات Brute Force و DDoS
+ * 
+ * يحد من عدد الطلبات لكل IP address في فترة زمنية محددة
+ */
 
-interface RateLimitConfig {
-  windowMs: number; // نافذة زمنية بالميلي ثانية
-  maxRequests: number; // عدد الطلبات المسموح
-  keyGenerator?: (req: any) => string; // مولد المفاتيح
-  skipSuccessfulRequests?: boolean; // تجاهل الطلبات الناجحة
-  skipFailedRequests?: boolean; // تجاهل الطلبات الفاشلة
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 interface RateLimitEntry {
   count: number;
   resetTime: number;
-  firstRequest: number;
+  blockedUntil?: number;
 }
 
-class RateLimiter {
-  private store = new Map<string, RateLimitEntry>();
-  private config: RateLimitConfig;
+// تخزين مؤقت للطلبات في الذاكرة
+const rateLimitStore = new Map<string, RateLimitEntry>();
 
-  constructor(config: RateLimitConfig) {
-    this.config = config;
-    
-    // تنظيف البيانات المنتهية الصلاحية كل دقيقة
-    setInterval(() => this.cleanup(), 60000);
-  }
-
-  async isAllowed(key: string): Promise<{ allowed: boolean; resetTime: number; remaining: number }> {
-    const now = Date.now();
-    const entry = this.store.get(key);
-
-    if (!entry || now > entry.resetTime) {
-      // إنشاء مدخل جديد أو إعادة تعيين المدخل المنتهي الصلاحية
-      const newEntry: RateLimitEntry = {
-        count: 1,
-        resetTime: now + this.config.windowMs,
-        firstRequest: now
-      };
-      this.store.set(key, newEntry);
-
-      return {
-        allowed: true,
-        resetTime: newEntry.resetTime,
-        remaining: this.config.maxRequests - 1
-      };
-    }
-
-    // تحديث العداد
-    entry.count += 1;
-
-    const allowed = entry.count <= this.config.maxRequests;
-    const remaining = Math.max(0, this.config.maxRequests - entry.count);
-
-    if (!allowed) {
-      logger.warn('🚫 Rate limit exceeded', {
-        key,
-        count: entry.count,
-        maxRequests: this.config.maxRequests,
-        resetTime: new Date(entry.resetTime).toISOString()
-      });
-    }
-
-    return {
-      allowed,
-      resetTime: entry.resetTime,
-      remaining
-    };
-  }
-
-  private cleanup(): void {
-    const now = Date.now();
-    let cleanedCount = 0;
-
-    for (const [key, entry] of this.store.entries()) {
-      if (now > entry.resetTime) {
-        this.store.delete(key);
-        cleanedCount++;
-      }
-    }
-
-    if (cleanedCount > 0) {
-      logger.debug(`🧹 Cleaned ${cleanedCount} expired rate limit entries`);
+// تنظيف تلقائي كل 10 دقائق
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (value.resetTime < now && (!value.blockedUntil || value.blockedUntil < now)) {
+      rateLimitStore.delete(key);
     }
   }
+}, 10 * 60 * 1000);
 
-  // إحصائيات الاستخدام
-  getStats(): { totalKeys: number; activeKeys: number } {
-    const now = Date.now();
-    let activeKeys = 0;
-
-    for (const entry of this.store.values()) {
-      if (now <= entry.resetTime) {
-        activeKeys++;
-      }
-    }
-
-    return {
-      totalKeys: this.store.size,
-      activeKeys
-    };
-  }
+export interface RateLimitConfig {
+  /**
+   * عدد الطلبات المسموح بها
+   */
+  maxRequests: number;
+  
+  /**
+   * الفترة الزمنية بالمللي ثانية
+   */
+  windowMs: number;
+  
+  /**
+   * مدة الحظر عند تجاوز الحد (اختياري)
+   */
+  blockDurationMs?: number;
+  
+  /**
+   * رسالة خطأ مخصصة
+   */
+  message?: string;
 }
 
-// مثيلات Rate Limiter مختلفة للاستخدامات المختلفة
-export const apiRateLimiter = new RateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  maxRequests: 100, // 100 طلب لكل 15 دقيقة
-});
-
-export const authRateLimiter = new RateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  maxRequests: 5, // 5 محاولات تسجيل دخول لكل 15 دقيقة
-});
-
-export const orderRateLimiter = new RateLimiter({
-  windowMs: 60 * 60 * 1000, // ساعة واحدة
-  maxRequests: 10, // 10 طلبات لكل ساعة
-});
-
-// دالة مساعدة لاستخراج IP
-export function getClientIP(request: Request): string {
-  // محاولة الحصول على IP من headers مختلفة
-  const forwarded = request.headers.get('x-forwarded-for');
+/**
+ * الحصول على IP address من الطلب
+ */
+function getClientIP(request: NextRequest): string {
+  // محاولة الحصول على IP الحقيقي من headers (للحالات خلف proxy/CDN)
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  
   const realIP = request.headers.get('x-real-ip');
-  const cfConnectingIP = request.headers.get('cf-connecting-ip');
-  
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  
   if (realIP) {
     return realIP;
   }
   
-  if (cfConnectingIP) {
-    return cfConnectingIP;
-  }
-  
-  // fallback
-  return 'unknown';
+  // fallback للـ IP المباشر
+  return request.ip || 'unknown';
 }
 
-// Middleware لـ Rate Limiting
-export async function rateLimitMiddleware(
-  request: Request,
-  limiter: RateLimiter,
-  identifier?: string
-): Promise<Response | null> {
-  const key = identifier || getClientIP(request);
-  const result = await limiter.isAllowed(key);
-
-  if (!result.allowed) {
-    return new Response(
-      JSON.stringify({
+/**
+ * Rate Limiter Middleware
+ * 
+ * @example
+ * ```typescript
+ * // في API route
+ * export async function POST(request: NextRequest) {
+ *   const rateLimitResult = await rateLimit(request, {
+ *     maxRequests: 5,
+ *     windowMs: 15 * 60 * 1000, // 15 دقيقة
+ *     blockDurationMs: 60 * 60 * 1000 // ساعة
+ *   });
+ *   
+ *   if (rateLimitResult) {
+ *     return rateLimitResult; // أعد response الخطأ
+ *   }
+ *   
+ *   // تابع معالجة الطلب العادي
+ * }
+ * ```
+ */
+export async function rateLimit(
+  request: NextRequest,
+  config: RateLimitConfig
+): Promise<NextResponse | null> {
+  const clientIP = getClientIP(request);
+  const key = `${request.nextUrl.pathname}:${clientIP}`;
+  const now = Date.now();
+  
+  let entry = rateLimitStore.get(key);
+  
+  // فحص إذا كان محظوراً
+  if (entry?.blockedUntil && entry.blockedUntil > now) {
+    const remainingTime = Math.ceil((entry.blockedUntil - now) / 1000 / 60);
+    return NextResponse.json(
+      {
         success: false,
-        error: 'كثرة الطلبات - يرجى المحاولة لاحقاً',
-        resetTime: new Date(result.resetTime).toISOString()
-      }),
+        error: config.message || `تم حظر الوصول مؤقتاً. حاول مرة أخرى بعد ${remainingTime} دقيقة`,
+        retryAfter: remainingTime
+      },
       {
         status: 429,
         headers: {
-          'Content-Type': 'application/json',
-          'X-RateLimit-Limit': limiter['config'].maxRequests.toString(),
-          'X-RateLimit-Remaining': result.remaining.toString(),
-          'X-RateLimit-Reset': result.resetTime.toString(),
-          'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString()
+          'Retry-After': String(Math.ceil((entry.blockedUntil - now) / 1000)),
+          'X-RateLimit-Limit': String(config.maxRequests),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(Math.ceil(entry.blockedUntil / 1000))
         }
       }
     );
   }
+  
+  // إنشاء أو تحديث entry
+  if (!entry || entry.resetTime < now) {
+    entry = {
+      count: 1,
+      resetTime: now + config.windowMs
+    };
+    rateLimitStore.set(key, entry);
+    return null; // السماح بالطلب
+  }
+  
+  entry.count++;
+  
+  // فحص إذا تجاوز الحد
+  if (entry.count > config.maxRequests) {
+    // حظر مؤقت إذا تم تحديده
+    if (config.blockDurationMs) {
+      entry.blockedUntil = now + config.blockDurationMs;
+    }
+    
+    const remainingTime = Math.ceil((entry.resetTime - now) / 1000 / 60);
+    
+    return NextResponse.json(
+      {
+        success: false,
+        error: config.message || `تجاوزت الحد المسموح من الطلبات. حاول مرة أخرى بعد ${remainingTime} دقيقة`,
+        retryAfter: remainingTime
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((entry.resetTime - now) / 1000)),
+          'X-RateLimit-Limit': String(config.maxRequests),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(Math.ceil(entry.resetTime / 1000))
+        }
+      }
+    );
+  }
+  
+  // السماح بالطلب
+  return null;
+}
 
-  return null; // مسموح
-} 
+/**
+ * Rate Limiter خاص بصفحة تسجيل الدخول
+ * - 5 محاولات كل 15 دقيقة
+ * - حظر لمدة ساعة بعد 5 محاولات فاشلة
+ */
+export async function loginRateLimit(request: NextRequest): Promise<NextResponse | null> {
+  return rateLimit(request, {
+    maxRequests: 5,
+    windowMs: 15 * 60 * 1000, // 15 دقيقة
+    blockDurationMs: 60 * 60 * 1000, // ساعة واحدة
+    message: 'تم تجاوز عدد محاولات تسجيل الدخول. حاول مرة أخرى لاحقاً'
+  });
+}
+
+/**
+ * Rate Limiter عام للـ API
+ * - 100 طلب كل دقيقة
+ */
+export async function apiRateLimit(request: NextRequest): Promise<NextResponse | null> {
+  return rateLimit(request, {
+    maxRequests: 100,
+    windowMs: 60 * 1000, // دقيقة واحدة
+    message: 'تجاوزت عدد الطلبات المسموح. حاول مرة أخرى لاحقاً'
+  });
+}
+
+/**
+ * Rate Limiter للعمليات الحرجة (مثل إنشاء طلبات)
+ * - 10 طلبات كل 5 دقائق
+ */
+export async function criticalOperationRateLimit(request: NextRequest): Promise<NextResponse | null> {
+  return rateLimit(request, {
+    maxRequests: 10,
+    windowMs: 5 * 60 * 1000, // 5 دقائق
+    blockDurationMs: 30 * 60 * 1000, // 30 دقيقة
+    message: 'تجاوزت عدد العمليات المسموح. حاول مرة أخرى لاحقاً'
+  });
+}
+
+/**
+ * تصدير للاستخدام المباشر
+ */
+export default {
+  rateLimit,
+  loginRateLimit,
+  apiRateLimit,
+  criticalOperationRateLimit
+};

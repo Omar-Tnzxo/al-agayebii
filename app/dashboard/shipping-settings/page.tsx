@@ -117,38 +117,39 @@ export default function ShippingSettingsPage() {
   const costType = settings.shipping_cost_type;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-3 sm:p-4 lg:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-primary mb-2">إعدادات الشحن والتوصيل</h1>
-            <p className="text-gray-600">إدارة نظام الشحن والاستلام من الفرع</p>
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary mb-2">إعدادات الشحن والتوصيل</h1>
+            <p className="text-sm sm:text-base text-gray-600">إدارة نظام الشحن والاستلام من الفرع</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-shrink-0">
             <button
               onClick={fetchSettings}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex-1 sm:flex-initial"
             >
-              <RefreshCw className="w-4 h-4" />
-              تحديث
+              <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">تحديث</span>
             </button>
 
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex-1 sm:flex-initial"
             >
               {saving ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  جاري الحفظ...
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                  <span className="hidden sm:inline">جاري الحفظ...</span>
+                  <span className="sm:hidden">حفظ...</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
-                  حفظ التغييرات
+                  <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>حفظ التغييرات</span>
                 </>
               )}
             </button>
@@ -157,34 +158,34 @@ export default function ShippingSettingsPage() {
 
         {/* رسالة النجاح/الخطأ */}
         {message && (
-          <div className={`p-4 rounded-lg flex items-center gap-3 ${
+          <div className={`p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 text-sm sm:text-base ${
             message.type === 'success'
               ? 'bg-green-50 text-green-700 border border-green-200'
               : 'bg-red-50 text-red-700 border border-red-200'
           }`}>
             {message.type === 'success' ? (
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" />
             ) : (
-              <AlertCircle className="w-5 h-5" />
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" />
             )}
-            <span>{message.text}</span>
+            <span className="break-words">{message.text}</span>
           </div>
         )}
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* قسم تفعيل الشحن */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Truck className="w-6 h-6 text-primary" />
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">نظام الشحن</h2>
-              <p className="text-gray-600 mb-4">تفعيل أو تعطيل خدمة التوصيل للمنزل</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">نظام الشحن</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-4">تفعيل أو تعطيل خدمة التوصيل للمنزل</p>
 
               <label className="flex items-center gap-3 cursor-pointer">
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={isShippingEnabled}
@@ -205,41 +206,41 @@ export default function ShippingSettingsPage() {
         {isShippingEnabled && (
           <>
             {/* معلومات شركة الشحن */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">معلومات شركة الشحن</h2>
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">معلومات شركة الشحن</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   اسم شركة الشحن
                 </label>
                 <input
                   type="text"
                   value={settings.shipping_company_name}
                   onChange={(e) => setSettings({ ...settings, shipping_company_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   placeholder="مثال: شركة الشحن السريع"
                 />
               </div>
             </div>
 
             {/* تكلفة الشحن */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                  <DollarSign className="w-6 h-6 text-green-600" />
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">تكلفة الشحن</h2>
-                  <p className="text-gray-600">حدد طريقة احتساب تكلفة الشحن</p>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">تكلفة الشحن</h2>
+                  <p className="text-sm sm:text-base text-gray-600">حدد طريقة احتساب تكلفة الشحن</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 {/* اختيار نوع التكلفة */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">نوع التكلفة</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <label className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-3">نوع التكلفة</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                       costType === 'fixed' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
                     }`}>
                       <input
@@ -248,15 +249,15 @@ export default function ShippingSettingsPage() {
                         value="fixed"
                         checked={costType === 'fixed'}
                         onChange={() => setSettings({ ...settings, shipping_cost_type: 'fixed' })}
-                        className="w-4 h-4 text-primary"
+                        className="w-4 h-4 text-primary flex-shrink-0"
                       />
-                      <div>
-                        <div className="font-medium">سعر ثابت</div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm sm:text-base">سعر ثابت</div>
                         <div className="text-xs text-gray-500">تحديد سعر محدد للشحن</div>
                       </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    <label className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                       costType === 'phone' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
                     }`}>
                       <input
@@ -265,10 +266,10 @@ export default function ShippingSettingsPage() {
                         value="phone"
                         checked={costType === 'phone'}
                         onChange={() => setSettings({ ...settings, shipping_cost_type: 'phone' })}
-                        className="w-4 h-4 text-primary"
+                        className="w-4 h-4 text-primary flex-shrink-0"
                       />
-                      <div>
-                        <div className="font-medium">يحدد هاتفياً</div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm sm:text-base">يحدد هاتفياً</div>
                         <div className="text-xs text-gray-500">يتم الاتفاق على السعر</div>
                       </div>
                     </label>
@@ -278,14 +279,14 @@ export default function ShippingSettingsPage() {
                 {/* حقل السعر الثابت */}
                 {costType === 'fixed' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       تكلفة الشحن (جنيه مصري)
                     </label>
                     <input
                       type="number"
                       value={settings.shipping_cost}
                       onChange={(e) => setSettings({ ...settings, shipping_cost: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       placeholder="30"
                       min="0"
                       step="0.01"
@@ -296,13 +297,13 @@ export default function ShippingSettingsPage() {
                 {/* رسالة "يحدد هاتفياً" */}
                 {costType === 'phone' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       رسالة للعميل
                     </label>
                     <textarea
                       value={settings.shipping_phone_message}
                       onChange={(e) => setSettings({ ...settings, shipping_phone_message: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       rows={3}
                       placeholder="سيتم تحديد تكلفة الشحن عند التواصل معك"
                     />
@@ -311,14 +312,14 @@ export default function ShippingSettingsPage() {
 
                 {/* حد الشحن المجاني */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     حد الشحن المجاني (جنيه مصري)
                   </label>
                   <input
                     type="number"
                     value={settings.free_shipping_threshold}
                     onChange={(e) => setSettings({ ...settings, free_shipping_threshold: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     placeholder="500"
                     min="0"
                     step="0.01"
@@ -331,47 +332,47 @@ export default function ShippingSettingsPage() {
             </div>
 
             {/* مدة التوصيل */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-blue-600" />
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">مدة التوصيل</h2>
-                  <p className="text-gray-600">حدد المدة المتوقعة للتوصيل</p>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">مدة التوصيل</h2>
+                  <p className="text-sm sm:text-base text-gray-600">حدد المدة المتوقعة للتوصيل</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     الحد الأدنى (أيام)
                   </label>
                   <input
                     type="number"
                     value={settings.shipping_min_days}
                     onChange={(e) => setSettings({ ...settings, shipping_min_days: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     min="1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     الحد الأقصى (أيام)
                   </label>
                   <input
                     type="number"
                     value={settings.shipping_max_days}
                     onChange={(e) => setSettings({ ...settings, shipping_max_days: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     min="1"
                   />
                 </div>
               </div>
 
               <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   <strong>سيتم عرض:</strong> التوصيل خلال {settings.shipping_min_days}-{settings.shipping_max_days} أيام
                 </p>
               </div>
@@ -380,17 +381,17 @@ export default function ShippingSettingsPage() {
         )}
 
         {/* قسم الاستلام من الفرع */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-              <MapPin className="w-6 h-6 text-orange-600" />
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">الاستلام من الفرع</h2>
-              <p className="text-gray-600 mb-4">السماح للعملاء باستلام الطلبات من الفروع مباشرة</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">الاستلام من الفرع</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-4">السماح للعملاء باستلام الطلبات من الفروع مباشرة</p>
 
               <label className="flex items-center gap-3 cursor-pointer mb-3">
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={isPickupEnabled}
@@ -406,7 +407,7 @@ export default function ShippingSettingsPage() {
 
               {isPickupEnabled && (
                 <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                  <p className="text-sm text-orange-800">
+                  <p className="text-xs sm:text-sm text-orange-800 break-words">
                     💡 تأكد من إضافة فروعك من صفحة <a href="/dashboard/branches" className="underline font-medium">إدارة الفروع</a>
                   </p>
                 </div>
@@ -416,46 +417,46 @@ export default function ShippingSettingsPage() {
         </div>
 
         {/* ملخص الإعدادات */}
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20 p-6">
-          <h3 className="font-bold text-lg text-gray-900 mb-4">📋 ملخص الإعدادات الحالية</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20 p-4 sm:p-6">
+          <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-4">📋 ملخص الإعدادات الحالية</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
               {isShippingEnabled ? (
-                <CheckCircle className="w-4 h-4 text-green-600" />
+                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
               ) : (
-                <XCircle className="w-4 h-4 text-red-600" />
+                <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
               )}
-              <span>الشحن: <strong>{isShippingEnabled ? 'مفعّل' : 'معطّل'}</strong></span>
+              <span className="break-words">الشحن: <strong>{isShippingEnabled ? 'مفعّل' : 'معطّل'}</strong></span>
             </div>
 
             {isShippingEnabled && (
               <>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-primary" />
-                  <span>التكلفة: <strong>
+                  <DollarSign className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="break-words">التكلفة: <strong>
                     {costType === 'fixed' ? `${settings.shipping_cost} ج.م` : 'يحدد هاتفياً'}
                   </strong></span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-primary" />
-                  <span>الشحن المجاني: <strong>عند {settings.free_shipping_threshold} ج.م</strong></span>
+                  <Package className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="break-words">الشحن المجاني: <strong>عند {settings.free_shipping_threshold} ج.م</strong></span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" />
-                  <span>المدة: <strong>{settings.shipping_min_days}-{settings.shipping_max_days} أيام</strong></span>
+                  <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="whitespace-nowrap">المدة: <strong>{settings.shipping_min_days}-{settings.shipping_max_days} أيام</strong></span>
                 </div>
               </>
             )}
 
             <div className="flex items-center gap-2">
               {isPickupEnabled ? (
-                <CheckCircle className="w-4 h-4 text-green-600" />
+                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
               ) : (
-                <XCircle className="w-4 h-4 text-red-600" />
+                <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
               )}
-              <span>الاستلام من الفرع: <strong>{isPickupEnabled ? 'متاح' : 'غير متاح'}</strong></span>
+              <span className="break-words">الاستلام من الفرع: <strong>{isPickupEnabled ? 'متاح' : 'غير متاح'}</strong></span>
             </div>
           </div>
         </div>

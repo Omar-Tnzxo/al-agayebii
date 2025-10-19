@@ -115,22 +115,22 @@ export default function HeroManagementPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8" dir="rtl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="rtl">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-primary mb-2">إدارة البنر الرئيسي</h1>
-          <p className="text-gray-600">إضافة وتعديل صور Hero Carousel</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-2">إدارة البنر الرئيسي</h1>
+          <p className="text-sm sm:text-base text-gray-600">إضافة وتعديل صور Hero Carousel</p>
         </div>
         <button
           onClick={() => {
             setEditingSlide(null);
             setShowForm(true);
           }}
-          className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
         >
-          <Plus className="w-5 h-5" />
-          إضافة صورة جديدة
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+          <span>إضافة صورة جديدة</span>
         </button>
       </div>
 
@@ -147,78 +147,80 @@ export default function HeroManagementPage() {
       )}
 
       {/* Slides Grid */}
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {slides.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">لا توجد صور في البنر الرئيسي</p>
-            <p className="text-gray-400 text-sm mt-2">ابدأ بإضافة صورة جديدة</p>
+          <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
+            <p className="text-sm sm:text-base text-gray-500">لا توجد صور في البنر الرئيسي</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-2">ابدأ بإضافة صورة جديدة</p>
           </div>
         ) : (
           slides.map((slide) => (
             <div
               key={slide.id}
-              className="bg-white rounded-lg shadow-md p-4 flex items-center gap-4"
+              className="bg-white rounded-lg shadow-md p-3 sm:p-4"
             >
-              {/* Drag Handle */}
-              <div className="cursor-move text-gray-400">
-                <GripVertical className="w-5 h-5" />
-              </div>
-
-              {/* Image */}
-              <div className="relative w-32 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                <Image
-                  src={slide.image_url}
-                  alt="Hero slide"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              {/* Content */}
-              <div className="flex-grow">
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <span className="font-medium">الترتيب: {slide.sort_order}</span>
-                  <span className="font-medium">المدة: {slide.duration}ث</span>
+              <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+                {/* Drag Handle - مخفي على الموبايل الصغير */}
+                <div className="hidden sm:block cursor-move text-gray-400 flex-shrink-0">
+                  <GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                {slide.link_url && (
-                  <div className="mt-2 text-xs text-gray-500">
-                    الرابط: <span className="font-mono">{slide.link_url}</span>
+
+                {/* Image */}
+                <div className="relative w-24 h-16 sm:w-32 sm:h-20 lg:w-40 lg:h-24 rounded-lg overflow-hidden flex-shrink-0">
+                  <Image
+                    src={slide.image_url}
+                    alt="Hero slide"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="flex-grow min-w-0 w-full sm:w-auto">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                    <span className="font-medium">الترتيب: {slide.sort_order}</span>
+                    <span className="font-medium">المدة: {slide.duration}ث</span>
                   </div>
-                )}
-              </div>
+                  {slide.link_url && (
+                    <div className="mt-1 sm:mt-2 text-xs text-gray-500">
+                      الرابط: <span className="font-mono truncate block sm:inline">{slide.link_url}</span>
+                    </div>
+                  )}
+                </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => toggleActive(slide)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    slide.is_active
-                      ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                      : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                  }`}
-                  title={slide.is_active ? 'مفعّل' : 'معطّل'}
-                >
-                  {slide.is_active ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                </button>
+                {/* Actions */}
+                <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-end sm:justify-start flex-shrink-0">
+                  <button
+                    onClick={() => toggleActive(slide)}
+                    className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
+                      slide.is_active
+                        ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                    }`}
+                    title={slide.is_active ? 'مفعّل' : 'معطّل'}
+                  >
+                    {slide.is_active ? <Eye className="w-4 h-4 sm:w-5 sm:h-5" /> : <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </button>
 
-                <button
-                  onClick={() => {
-                    setEditingSlide(slide);
-                    setShowForm(true);
-                  }}
-                  className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-                  title="تعديل"
-                >
-                  <Edit className="w-5 h-5" />
-                </button>
+                  <button
+                    onClick={() => {
+                      setEditingSlide(slide);
+                      setShowForm(true);
+                    }}
+                    className="p-1.5 sm:p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                    title="تعديل"
+                  >
+                    <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
 
-                <button
-                  onClick={() => handleDelete(slide.id)}
-                  className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                  title="حذف"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                  <button
+                    onClick={() => handleDelete(slide.id)}
+                    className="p-1.5 sm:p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                    title="حذف"
+                  >
+                    <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))
@@ -265,17 +267,17 @@ function SlideForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-primary mb-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-primary mb-4 sm:mb-6">
             {slide ? 'تعديل صورة البنر' : 'إضافة صورة بنر جديدة'}
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {/* Image Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 صورة البنر *
               </label>
               <ImageUploader
@@ -291,14 +293,14 @@ function SlideForm({
 
             {/* Link URL */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 رابط عند الضغط على الصورة (اختياري)
               </label>
               <input
                 type="text"
                 value={formData.link_url}
                 onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="/category/electrical أو /products"
                 dir="ltr"
               />
@@ -308,29 +310,29 @@ function SlideForm({
             </div>
 
             {/* Duration & Sort Order */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   المدة (بالثواني)
                 </label>
                 <input
                   type="number"
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   min="1"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   الترتيب
                 </label>
                 <input
                   type="number"
                   value={formData.sort_order}
                   onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   min="0"
                 />
               </div>
@@ -343,19 +345,19 @@ function SlideForm({
                 id="is_active"
                 checked={formData.is_active}
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded flex-shrink-0"
               />
-              <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
+              <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer">
                 مفعّل
               </label>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4">
               <button
                 type="submit"
                 disabled={isUploading}
-                className={`flex-1 px-6 py-3 rounded-lg transition-colors font-medium ${
+                className={`flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg transition-colors font-medium text-sm sm:text-base ${
                   isUploading
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-primary text-white hover:bg-primary/90'
@@ -366,7 +368,7 @@ function SlideForm({
               <button
                 type="button"
                 onClick={onCancel}
-                className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                className="flex-1 bg-gray-100 text-gray-700 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm sm:text-base"
               >
                 إلغاء
               </button>

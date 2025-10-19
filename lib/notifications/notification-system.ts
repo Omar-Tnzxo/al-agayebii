@@ -2,7 +2,7 @@ import { logger } from '@/lib/utils/logger';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info' | 'order' | 'promotion';
+  type: 'success' | 'error' | 'warning' | 'info' | 'order';
   title: string;
   message: string;
   timestamp: number;
@@ -18,7 +18,6 @@ interface NotificationPreferences {
   email: boolean;
   browser: boolean;
   orderUpdates: boolean;
-  promotions: boolean;
   security: boolean;
   system: boolean;
 }
@@ -245,7 +244,6 @@ class NotificationSystem {
       email: true,
       browser: true,
       orderUpdates: true,
-      promotions: true,
       security: true,
       system: false
     };
@@ -262,7 +260,6 @@ class NotificationSystem {
       email: true,
       browser: true,
       orderUpdates: true,
-      promotions: true,
       security: true,
       system: false
     };
@@ -310,16 +307,6 @@ export const notificationTemplates = {
     priority: 'high' as const,
     actionUrl: '/admin/inventory',
     metadata: { productName, currentStock }
-  }),
-
-  newPromotion: (title: string, discount: number, userId?: string) => ({
-    type: 'promotion' as const,
-    title: 'عرض جديد!',
-    message: `${title} - خصم ${discount}%`,
-    priority: 'medium' as const,
-    userId,
-    actionUrl: '/products?promo=true',
-    metadata: { title, discount }
   }),
 
   securityAlert: (message: string, userId: string) => ({

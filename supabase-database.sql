@@ -213,20 +213,6 @@ CREATE TABLE public.profiles (
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT profiles_pkey PRIMARY KEY (id)
 );
-CREATE TABLE public.promotions (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  title character varying NOT NULL,
-  description text,
-  image_url text,
-  url character varying,
-  start_date timestamp with time zone,
-  end_date timestamp with time zone,
-  is_active boolean DEFAULT true,
-  priority integer DEFAULT 0,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT promotions_pkey PRIMARY KEY (id)
-);
 CREATE TABLE public.reviews (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   product_id uuid NOT NULL,

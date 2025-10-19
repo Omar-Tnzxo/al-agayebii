@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Activity, AlertTriangle, CheckCircle, Info, Bell } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -18,7 +18,6 @@ const typeIcon = {
   success: CheckCircle,
   error: AlertTriangle,
   order: Activity,
-  promotion: Bell,
 };
 
 export default function DashboardActivityPreview() {

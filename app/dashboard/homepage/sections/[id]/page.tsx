@@ -258,30 +258,30 @@ export default function ManageSectionProductsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8" dir="rtl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8" dir="rtl">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <button
           onClick={() => router.push('/dashboard/homepage/sections')}
-          className="flex items-center gap-2 text-gray-600 hover:text-primary mb-4 transition-colors"
+          className="flex items-center gap-2 text-sm sm:text-base text-gray-600 hover:text-primary mb-4 transition-colors"
         >
-          <ArrowRight className="w-5 h-5" />
-          العودة إلى الأقسام
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+          <span>العودة إلى الأقسام</span>
         </button>
 
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-primary mb-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary mb-2 break-words">
               إدارة منتجات: {section.title}
             </h1>
             {section.subtitle && (
-              <p className="text-gray-600">{section.subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-600 break-words">{section.subtitle}</p>
             )}
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-xs sm:text-sm text-gray-500 mt-2">
               عدد المنتجات: {sectionProducts.length}
             </p>
             {/* Debug Info */}
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-gray-400 break-all">
               <p>Section ID: {sectionId}</p>
               <p>Product Source: {section.settings?.product_source || 'غير محدد'}</p>
             </div>
@@ -289,109 +289,111 @@ export default function ManageSectionProductsPage() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base flex-shrink-0"
           >
-            <Plus className="w-5 h-5" />
-            إضافة منتج
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+            <span>إضافة منتج</span>
           </button>
         </div>
       </div>
 
       {/* Products List */}
       {sectionProducts.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 text-lg mb-4">لا توجد منتجات في هذا القسم</p>
-          <p className="text-gray-400 text-sm mb-6">ابدأ بإضافة منتجات لهذا القسم</p>
+        <div className="text-center py-12 sm:py-16 bg-gray-50 rounded-lg px-4">
+          <p className="text-base sm:text-lg text-gray-500 mb-4">لا توجد منتجات في هذا القسم</p>
+          <p className="text-sm text-gray-400 mb-6">ابدأ بإضافة منتجات لهذا القسم</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
-            إضافة منتج
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+            <span>إضافة منتج</span>
           </button>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {sectionProducts.map((item, index) => (
             <div
               key={item.id}
-              className="bg-white rounded-lg shadow-md p-4 flex items-center gap-4"
+              className="bg-white rounded-lg shadow-md p-3 sm:p-4"
             >
-              {/* Reorder Buttons */}
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={() => moveUp(index)}
-                  disabled={index === 0}
-                  className={`p-1 rounded ${
-                    index === 0
-                      ? 'text-gray-300 cursor-not-allowed'
-                      : 'text-gray-600 hover:text-primary hover:bg-gray-100'
-                  }`}
-                  title="تحريك للأعلى"
-                >
-                  <GripVertical className="w-5 h-5 rotate-90" />
-                </button>
-                <button
-                  onClick={() => moveDown(index)}
-                  disabled={index === sectionProducts.length - 1}
-                  className={`p-1 rounded ${
-                    index === sectionProducts.length - 1
-                      ? 'text-gray-300 cursor-not-allowed'
-                      : 'text-gray-600 hover:text-primary hover:bg-gray-100'
-                  }`}
-                  title="تحريك للأسفل"
-                >
-                  <GripVertical className="w-5 h-5 -rotate-90" />
-                </button>
-              </div>
-
-              {/* Order Number */}
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary font-bold">
-                {index + 1}
-              </div>
-
-              {/* Product Image */}
-              <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                {item.product.image ? (
-                  <Image
-                    src={item.product.image}
-                    alt={item.product.name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    📦
-                  </div>
-                )}
-              </div>
-
-              {/* Product Info */}
-              <div className="flex-grow">
-                <h3 className="font-semibold text-lg text-primary mb-1">
-                  {item.product.name}
-                </h3>
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <span>{formatPrice(item.product.price)}</span>
-                  <span>المخزون: {item.product.stock_quantity}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    item.product.is_active
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}>
-                    {item.product.is_active ? 'مفعّل' : 'معطّل'}
-                  </span>
+              <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+                {/* Reorder Buttons - مخفية على الموبايل الصغير */}
+                <div className="hidden sm:flex flex-col gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => moveUp(index)}
+                    disabled={index === 0}
+                    className={`p-1 rounded ${
+                      index === 0
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-100'
+                    }`}
+                    title="تحريك للأعلى"
+                  >
+                    <GripVertical className="w-4 h-4 sm:w-5 sm:h-5 rotate-90" />
+                  </button>
+                  <button
+                    onClick={() => moveDown(index)}
+                    disabled={index === sectionProducts.length - 1}
+                    className={`p-1 rounded ${
+                      index === sectionProducts.length - 1
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-100'
+                    }`}
+                    title="تحريك للأسفل"
+                  >
+                    <GripVertical className="w-4 h-4 sm:w-5 sm:h-5 -rotate-90" />
+                  </button>
                 </div>
-              </div>
 
-              {/* Remove Button */}
-              <button
-                onClick={() => handleRemoveProduct(item.id)}
-                className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                title="حذف"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+                {/* Order Number */}
+                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 text-primary font-bold text-sm sm:text-base flex-shrink-0">
+                  {index + 1}
+                </div>
+
+                {/* Product Image */}
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                  {item.product.image ? (
+                    <Image
+                      src={item.product.image}
+                      alt={item.product.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl text-gray-400">
+                      📦
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Info */}
+                <div className="flex-grow min-w-0 w-full sm:w-auto">
+                  <h3 className="font-semibold text-base sm:text-lg text-primary mb-1 truncate">
+                    {item.product.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                    <span className="whitespace-nowrap">{formatPrice(item.product.price)}</span>
+                    <span className="whitespace-nowrap">المخزون: {item.product.stock_quantity}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs whitespace-nowrap ${
+                      item.product.is_active
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {item.product.is_active ? 'مفعّل' : 'معطّل'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Remove Button */}
+                <button
+                  onClick={() => handleRemoveProduct(item.id)}
+                  className="p-1.5 sm:p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors flex-shrink-0"
+                  title="حذف"
+                >
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -399,53 +401,53 @@ export default function ManageSectionProductsPage() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-primary">إضافة منتج للقسم</h2>
+            <div className="p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center gap-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary truncate">إضافة منتج للقسم</h2>
               <button
                 onClick={() => {
                   setShowAddModal(false);
                   setSearchTerm('');
                 }}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
             {/* Search Bar */}
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-3 sm:p-4 border-b border-gray-200">
               <div className="relative">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="ابحث عن منتج..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full pr-9 sm:pr-10 pl-3 sm:pl-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
             </div>
 
             {/* Products Grid */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4">
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-gray-500">
+                  <p className="text-sm sm:text-base text-gray-500">
                     {searchTerm ? 'لا توجد نتائج للبحث' : 'جميع المنتجات مضافة بالفعل'}
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {filteredProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="bg-white border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors cursor-pointer"
+                      className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-primary transition-colors cursor-pointer active:scale-95"
                       onClick={() => handleAddProduct(product.id)}
                     >
-                      <div className="relative w-full h-40 rounded-lg overflow-hidden bg-gray-100 mb-3">
+                      <div className="relative w-full h-32 sm:h-40 rounded-lg overflow-hidden bg-gray-100 mb-2 sm:mb-3">
                         {product.image ? (
                           <Image
                             src={product.image}
@@ -454,19 +456,19 @@ export default function ManageSectionProductsPage() {
                             className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
+                          <div className="w-full h-full flex items-center justify-center text-3xl sm:text-4xl text-gray-400">
                             📦
                           </div>
                         )}
                       </div>
-                      <h3 className="font-semibold text-primary mb-2 line-clamp-2">
+                      <h3 className="font-semibold text-sm sm:text-base text-primary mb-1 sm:mb-2 line-clamp-2">
                         {product.name}
                       </h3>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="font-bold text-gray-900">
+                      <div className="flex justify-between items-center text-xs sm:text-sm flex-wrap gap-1">
+                        <span className="font-bold text-gray-900 whitespace-nowrap">
                           {formatPrice(product.price)}
                         </span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 whitespace-nowrap">
                           المخزون: {product.stock_quantity}
                         </span>
                       </div>
@@ -477,13 +479,13 @@ export default function ManageSectionProductsPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <div className="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={() => {
                   setShowAddModal(false);
                   setSearchTerm('');
                 }}
-                className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                className="w-full px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
               >
                 إغلاق
               </button>

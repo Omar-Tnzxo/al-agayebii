@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   ShoppingBag,
-  Megaphone,
   Truck,
   MapPin,
   Bell,
@@ -94,20 +93,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // معالج تسجيل الخروج
   const handleLogout = async () => {
     try {
-      // استخدام نظام المصادقة المبسط
-      const { signOut } = await import('@/lib/auth-simple');
+      // استخدام نظام المصادقة الآمن
+      const { signOut } = await import('@/lib/auth');
       await signOut();
       
-      // إرسال طلب للخادم لمسح الكوكي (اختياري)
+      // إرسال طلب للخادم لمسح الكوكي
       try {
         await fetch('/api/admin/logout', { method: 'POST' });
       } catch (logoutError) {
-        console.log('تحذير: فشل في مسح كوكي الخادم', logoutError);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('تحذير: فشل في مسح كوكي الخادم');
+        }
       }
       
-      // مسح بيانات المدير من التخزين المحلي أو جلسة التخزين
-      localStorage.removeItem('admin_user');
-      sessionStorage.removeItem('admin_user');
+      // مسح بيانات المدير من التخزين المحلي
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_user');
+        sessionStorage.removeItem('admin_user');
+      }
       
       // توجيه إلى صفحة تسجيل الدخول
       router.push('/admin');
@@ -246,15 +249,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 icon={MapPin}
                 text="إدارة الفروع"
                 href="/dashboard/branches"
-              />
-            </SidebarGroup>
-
-            {/* قسم التسويق */}
-            <SidebarGroup title="التسويق">
-              <SidebarItem
-                icon={Megaphone}
-                text="العروض الترويجية"
-                href="/dashboard/promotions"
               />
             </SidebarGroup>
 

@@ -107,7 +107,7 @@ export function createSupabaseClient() {
   });
 }
 
-// التحقق من المصادقة للمدير
+// التحقق من المصادقة للمدير - نظام آمن بدون fallback
 export async function verifyAdminAuth(email: string, password: string): Promise<AdminUser | null> {
   try {
     const supabase = createSupabaseClient();
@@ -121,27 +121,10 @@ export async function verifyAdminAuth(email: string, password: string): Promise<
       .single();
 
     if (adminErr || !adminRow) {
-      console.error('المستخدم غير موجود أو غير نشط:', adminErr?.message);
-      
-      // Fallback للحسابات الافتراضية إذا فشلت قاعدة البيانات
-      if (email === 'admin@gmail.com' && password === 'admin') {
-        return {
-          id: 'fallback-admin-1',
-          email: 'admin@gmail.com',
-          role: 'admin',
-          created_at: new Date().toISOString(),
-        };
+      // عدم تسجيل التفاصيل في الإنتاج
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('المستخدم غير موجود أو غير نشط');
       }
-      
-      if (email === 'omar@admin.com' && (password === '12345678' || password === 'admin123')) {
-        return {
-          id: 'fallback-admin-2',
-          email: 'omar@admin.com',
-          role: 'admin',
-          created_at: new Date().toISOString(),
-        };
-      }
-      
       return null;
     }
 
@@ -152,7 +135,9 @@ export async function verifyAdminAuth(email: string, password: string): Promise<
     });
 
     if (passErr || matched !== true) {
-      console.error('كلمة المرور غير صحيحة:', passErr?.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('كلمة المرور غير صحيحة');
+      }
       return null;
     }
 
@@ -164,27 +149,10 @@ export async function verifyAdminAuth(email: string, password: string): Promise<
       created_at: adminRow.created_at,
     };
   } catch (error) {
-    console.error('خطأ في التحقق من المصادقة:', error);
-    
-    // Fallback في حالة خطأ في الاتصال
-    if (email === 'admin@gmail.com' && password === 'admin') {
-      return {
-        id: 'fallback-admin-1',
-        email: 'admin@gmail.com',
-        role: 'admin',
-        created_at: new Date().toISOString(),
-      };
+    // عدم كشف تفاصيل الخطأ في الإنتاج
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('خطأ في التحقق من المصادقة:', error);
     }
-    
-    if (email === 'omar@admin.com' && (password === '12345678' || password === 'admin123')) {
-      return {
-        id: 'fallback-admin-2',
-        email: 'omar@admin.com',
-        role: 'admin',
-        created_at: new Date().toISOString(),
-      };
-    }
-    
     return null;
   }
 }
