@@ -1,19 +1,36 @@
 /**
  * useOrderAlerts Hook
  * Hook للتعامل مع تنبيهات الطلبات
- * ملاحظة: هذا للتوافق مع الكود القديم
  */
 
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 
-export function useOrderAlerts() {
-  useEffect(() => {
-    // يمكن إضافة منطق التنبيهات هنا في المستقبل
-  }, []);
+export function useOrderAlerts(orders: any[] = []) {
+  const alerts = useMemo(() => {
+    return orders.map(order => ({
+      id: order.id,
+      type: 'info',
+      message: order.customer_name
+    }));
+  }, [orders]);
+
+  const criticalCount = useMemo(() => {
+    return orders.filter(order => order.status === 'pending').length;
+  }, [orders]);
+
+  const warningCount = useMemo(() => {
+    return orders.filter(order => order.status === 'processing').length;
+  }, [orders]);
+
+  const totalCount = orders.length;
 
   return {
-    hasNewOrders: false,
-    newOrdersCount: 0
+    hasNewOrders: orders.length > 0,
+    newOrdersCount: orders.length,
+    alerts,
+    criticalCount,
+    warningCount,
+    totalCount
   };
 }
 
