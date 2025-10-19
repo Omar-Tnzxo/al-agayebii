@@ -9,8 +9,9 @@ export function useOrderAlerts(orders: any[] = []) {
   const alerts = useMemo(() => {
     return orders.map(order => ({
       id: order.id,
-      type: 'info',
-      message: order.customer_name
+      type: order.status === 'pending' ? 'critical' : order.status === 'processing' ? 'warning' : 'info',
+      title: `طلب #${order.order_number || order.id}`,
+      message: `${order.customer_name} - ${order.status}`
     }));
   }, [orders]);
 
