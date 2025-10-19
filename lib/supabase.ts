@@ -55,6 +55,9 @@ export async function checkSupabaseConnection() {
   }
 }
 
+// تصدير createClient للاستخدام في مواضع أخرى
+export { createClient } from '@supabase/supabase-js';
+
 /**
  * فحص ما إذا كان المستخدم مسؤولاً
  */

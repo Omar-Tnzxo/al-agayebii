@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { performanceMonitor } from '@/lib/monitoring/performance';
 import { cacheManager } from '@/lib/cache/cache-manager';
-import { apiRateLimiter } from '@/lib/security/rate-limiter';
-import { authRateLimiter, rateLimitMiddleware } from '@/lib/security/rate-limiter';
+import { loginRateLimit } from '@/lib/security/rate-limiter';
 import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   try {
     // تطبيق Rate Limiting خاص بالمدير
-    const rateLimitResponse = await rateLimitMiddleware(request, authRateLimiter);
+    const rateLimitResponse = await loginRateLimit(request);
     if (rateLimitResponse) {
       return rateLimitResponse;
     }

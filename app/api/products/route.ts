@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BaseApiHandler } from '@/lib/api/base-handler';
 import { supabase } from '@/lib/supabase';
-import { apiRateLimiter, rateLimitMiddleware } from '@/lib/security/rate-limiter';
+import { apiRateLimit } from '@/lib/security/rate-limiter';
 import { setCache, getCache, CACHE_KEYS } from '@/lib/cache/cache-manager';
 
 class ProductsApiHandler extends BaseApiHandler {
