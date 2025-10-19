@@ -62,8 +62,13 @@ function getClientIP(request: NextRequest): string {
     return realIP;
   }
   
-  // fallback للـ IP المباشر
-  return request.ip || 'unknown';
+  // fallback - استخدام header آخر أو قيمة افتراضية
+  const cfConnectingIP = request.headers.get('cf-connecting-ip');
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+  
+  return 'unknown';
 }
 
 /**
