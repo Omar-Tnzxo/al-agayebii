@@ -1,28 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient();
     const productId = context.params.id;
 
     const result = await supabase
       .from('reviews')
       .select('*')
       .eq('product_id', productId)
-      .order('created_at', false);
+      .order('created_at', { ascending: false });
 
     if (result.error) {
-      console.error('Error fetching reviews:', result.error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error fetching reviews:', result.error);
+      }
       return NextResponse.json({ success: false, error: result.error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data: result.data || [] });
   } catch (error: any) {
-    console.error('Request error:', error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Request error:', error);
+    }
     return NextResponse.json({ success: false, error: error.message || 'Server error' }, { status: 500 });
   }
 }
@@ -32,7 +35,6 @@ export async function POST(
   context: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient();
     const productId = context.params.id;
     const body = await request.json();
 
@@ -48,13 +50,17 @@ export async function POST(
       .single();
 
     if (result.error) {
-      console.error('Error adding review:', result.error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error adding review:', result.error);
+      }
       return NextResponse.json({ success: false, error: result.error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data: result.data }, { status: 201 });
   } catch (error: any) {
-    console.error('Request error:', error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Request error:', error);
+    }
     return NextResponse.json({ success: false, error: error.message || 'Server error' }, { status: 500 });
   }
 }
