@@ -93,6 +93,7 @@ export default function AdminLogin() {
                 src={settings.logoUrl}
                 alt={settings.siteName || 'Logo'}
                 fill
+                sizes="80px"
                 className="object-contain"
               />
             ) : (
@@ -100,6 +101,7 @@ export default function AdminLogin() {
                 src="/logo.png" 
                 alt="شعار متجر العجايبي" 
                 fill
+                sizes="80px"
                 className="object-contain"
               />
             )}

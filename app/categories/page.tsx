@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Zap, TrendingUp, Award, ShoppingBag, ArrowRight, Package, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
-import { fetchCategories, fetchProducts } from '@/lib/data/mockData';
+import { supabase } from '@/lib/supabase';
 
 interface Category {
   id: string;
@@ -29,17 +29,34 @@ export default function CategoriesPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // استخدام نفس الدوال التي تعمل في باقي الصفحات
-        const [categoriesData, productsData] = await Promise.all([
-          fetchCategories(),
-          fetchProducts()
-        ]);
+        // جلب الفئات من Supabase
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        if (categoriesError) {
+          console.error('Error fetching categories:', categoriesError);
+          throw categoriesError;
+        }
+
+        // جلب المنتجات من Supabase
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('id, category_type')
+          .eq('is_active', true);
+
+        if (productsError) {
+          console.error('Error fetching products:', productsError);
+          throw productsError;
+        }
 
         console.log('Categories fetched:', categoriesData);
         console.log('Products fetched:', productsData);
 
-        setCategories(categoriesData);
-        setProducts(productsData);
+        setCategories(categoriesData || []);
+        setProducts(productsData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setCategories([]);

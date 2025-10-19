@@ -127,10 +127,10 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.hotjar.com https://*.hotjar.io",
-              "style-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://klumziibjhmsofzhylop.supabase.co https://www.google-analytics.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "connect-src 'self' https://klumziibjhmsofzhylop.supabase.co https://www.google-analytics.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com wss://klumziibjhmsofzhylop.supabase.co",
               "frame-src 'self' https://vars.hotjar.com",
               "media-src 'self'",
               "object-src 'none'",
