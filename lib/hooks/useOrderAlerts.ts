@@ -12,7 +12,8 @@ export function useOrderAlerts(orders: any[] = []) {
       type: order.status === 'pending' ? 'critical' : order.status === 'processing' ? 'warning' : 'info',
       title: `طلب #${order.order_number || order.id}`,
       message: `${order.customer_name} - ${order.status}`,
-      orders: [order.id] // IDs الطلبات المرتبطة بهذا التنبيه
+      orders: [order.id], // IDs الطلبات المرتبطة بهذا التنبيه
+      count: 1 // عدد الطلبات
     }));
   }, [orders]);
 
