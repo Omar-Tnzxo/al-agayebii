@@ -9,7 +9,9 @@ class ProductsApiHandler extends BaseApiHandler {
     return this.handleRequest(async () => {
       let params: any = this.getQueryParams(request);
       
-      console.log('🔍 API Products - Parameters:', params);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔍 API Products - Parameters:', params);
+      }
       
       // دعم color_id في الباراميترات
       if (request.nextUrl && request.nextUrl.searchParams) {
@@ -22,7 +24,9 @@ class ProductsApiHandler extends BaseApiHandler {
       
       if (cachedData) {
         this.logOperation('GET Products (from cache)', { params });
-        console.log('📦 من Cache:', (cachedData as any)?.data?.data?.length || 0, 'منتج');
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('📦 من Cache:', (cachedData as any)?.data?.data?.length || 0, 'منتج');
+        }
         return cachedData;
       }
 
@@ -164,7 +168,7 @@ class ProductsApiHandler extends BaseApiHandler {
       setCache(cacheKey, result, 15);
 
       return result;
-    }, 'GET Products');
+    });
   }
 }
 
@@ -172,7 +176,7 @@ const handler = new ProductsApiHandler();
 
 export async function GET(request: NextRequest) {
   // تطبيق Rate Limiting
-  const rateLimitResponse = await rateLimitMiddleware(request, apiRateLimiter);
+  const rateLimitResponse = await apiRateLimit(request);
   if (rateLimitResponse) {
     return rateLimitResponse;
   }
