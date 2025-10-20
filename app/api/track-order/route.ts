@@ -128,12 +128,13 @@ export async function GET(request: Request) {
             completed_at,
             order_items(
               id,
+              product_id,
               product_name,
               product_image,
               quantity,
               price,
               total_price,
-              product:product_id(name, image, sku, slug)
+              products(name, image, sku, slug)
             )
           `);
 
@@ -213,17 +214,28 @@ export async function GET(request: Request) {
               shipped_at: order.shipped_at,
               completed_at: order.completed_at,
               items_count: order.order_items?.length || 0,
-              order_items: (order.order_items || []).map((item: any) => ({
-                ...item,
-                product_sku: item.product?.sku || null,
-                product_slug: item.product?.slug || null,
-                product: {
-                  name: item.product?.name || item.product_name,
-                  image: item.product?.image || item.product_image,
-                  sku: item.product?.sku,
-                  slug: item.product?.slug
-                }
-              })),
+              order_items: (order.order_items || []).map((item: any) => {
+                // إعطاء الأولوية للبيانات المخزنة في order_items، ثم البيانات من جدول products
+                const productData = item.products || {};
+                return {
+                  id: item.id,
+                  product_id: item.product_id,
+                  product_name: item.product_name || productData.name || 'غير محدد',
+                  product_image: item.product_image || productData.image || '/images/product-default.png',
+                  product_sku: productData.sku || null,
+                  product_slug: productData.slug || null,
+                  quantity: item.quantity,
+                  price: item.price,
+                  unit_price: item.price,
+                  total_price: item.total_price || (item.price * item.quantity),
+                  product: {
+                    name: item.product_name || productData.name || 'غير محدد',
+                    image: item.product_image || productData.image || '/images/product-default.png',
+                    sku: productData.sku,
+                    slug: productData.slug
+                  }
+                };
+              }),
               status_history: statusHistory || []
             };
           }));

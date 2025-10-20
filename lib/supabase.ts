@@ -5,37 +5,50 @@ import type { Database } from './database.types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// تحقق من توفر متغيرات البيئة المطلوبة
+// تحقق من توفر متغيرات البيئة المطلوبة (فقط في development)
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('متغيرات البيئة الخاصة بـ Supabase غير متوفرة. استخدام القيم الافتراضية');
+  if (process.env.NODE_ENV === 'development') {
+    console.error('متغيرات البيئة الخاصة بـ Supabase غير متوفرة');
+  }
 }
 
-import { logger } from './utils/logger';
+// فقط في وضع التطوير
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/logger').then(({ logger }) => {
+    logger.info('🔧 إعدادات Supabase:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+    });
+  });
+}
 
-logger.info('🔧 إعدادات Supabase:', {
-  url: supabaseUrl,
-  anonKeyLength: supabaseAnonKey.length,
-  hasEnvVars: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-});
+// Singleton Pattern - نسخة واحدة فقط من Supabase Client
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
 
 /**
  * إنشاء عميل Supabase للاستخدام في المستعرض
  * مع تكوين إضافي للاستعادة التلقائية
+ * Singleton Pattern لتجنب Multiple Instances
  */
-export const supabase = createClient<Database>(
-  supabaseUrl, 
-  supabaseAnonKey,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-    },
-    global: {
-      fetch: fetch.bind(globalThis),
-      headers: { 'x-application-name': 'al-agayebi-store' },
-    },
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient<Database>(
+      supabaseUrl, 
+      supabaseAnonKey,
+      {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+        },
+        global: {
+          fetch: fetch.bind(globalThis),
+          headers: { 'x-application-name': 'al-agayebi-store' },
+        },
+      }
+    );
   }
-);
+  return supabaseInstance;
+})();
 
 /**
  * فحص اتصال Supabase والتحقق من صحته
@@ -45,12 +58,18 @@ export async function checkSupabaseConnection() {
   try {
     const { data, error } = await supabase.from('categories').select('count').limit(1);
     if (error) {
-      logger.error('خطأ في الاتصال بـ Supabase:', error);
+      if (process.env.NODE_ENV === 'development') {
+        const { logger } = await import('./utils/logger');
+        logger.error('خطأ في الاتصال بـ Supabase:', error);
+      }
       return { connected: false, error: error.message };
     }
     return { connected: true };
   } catch (err: any) {
-    logger.error('استثناء في الاتصال بـ Supabase:', err);
+    if (process.env.NODE_ENV === 'development') {
+      const { logger } = await import('./utils/logger');
+      logger.error('استثناء في الاتصال بـ Supabase:', err);
+    }
     return { connected: false, error: err.message };
   }
 }
@@ -75,7 +94,10 @@ export async function isAdmin(): Promise<boolean> {
 
     return !!adminData && !error;
   } catch (error) {
-    logger.error('خطأ في التحقق من صلاحيات الإدارة:', error);
+    if (process.env.NODE_ENV === 'development') {
+      const { logger } = await import('./utils/logger');
+      logger.error('خطأ في التحقق من صلاحيات الإدارة:', error);
+    }
     return false;
   }
 }
@@ -112,7 +134,10 @@ export async function getDashboardStats() {
       users: usersCount?.toString() || '0',
     };
   } catch (error) {
-    logger.error('خطأ في استرجاع إحصاءات لوحة التحكم:', error);
+    if (process.env.NODE_ENV === 'development') {
+      const { logger } = await import('./utils/logger');
+      logger.error('خطأ في استرجاع إحصاءات لوحة التحكم:', error);
+    }
     return {
       products: '0',
       categories: '0',
@@ -120,4 +145,4 @@ export async function getDashboardStats() {
       users: '0',
     };
   }
-} 
+}

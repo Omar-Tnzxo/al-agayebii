@@ -13,8 +13,10 @@ import {
   RotateCcw,
   RefreshCw,
   CreditCard,
-  CheckCircle2
+  CheckCircle2,
+  Info
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface AnalyticsData {
   overview: {
@@ -42,9 +44,12 @@ interface MetricCardProps {
   trend?: number;
   color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo';
   isLoading?: boolean;
+  info?: string; // نص توضيحي عند التمرير
 }
 
-const MetricCard = ({ title, value, icon: Icon, trend, color, isLoading }: MetricCardProps) => {
+const MetricCard = ({ title, value, icon: Icon, trend, color, isLoading, info }: MetricCardProps) => {
+  const [showInfo, setShowInfo] = useState(false);
+  
   const colorClasses = {
     blue: 'bg-blue-500 text-white',
     green: 'bg-emerald-500 text-white',
@@ -81,27 +86,48 @@ const MetricCard = ({ title, value, icon: Icon, trend, color, isLoading }: Metri
   }
 
   return (
-    <div className={`${bgClasses[color]} rounded-2xl shadow-sm border p-6 relative overflow-hidden`}>
+    <div className={`${bgClasses[color]} rounded-2xl shadow-sm border p-6 relative overflow-hidden group`}>
       <div className="flex items-start justify-between relative z-10">
         <div className={`p-3 rounded-xl ${colorClasses[color]} shadow-lg`}>
           <Icon className="h-6 w-6" />
         </div>
 
-        {trend !== undefined && (
-          <div className="flex items-center">
-            {trend >= 0 ? (
-              <div className="flex items-center text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
-                <TrendingUp className="h-3 w-3 ml-1" />
-                {trend.toFixed(1)}%
-              </div>
-            ) : (
-              <div className="flex items-center text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs font-medium">
-                <TrendingDown className="h-3 w-3 ml-1" />
-                {Math.abs(trend).toFixed(1)}%
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {trend !== undefined && (
+            <div className="flex items-center">
+              {trend >= 0 ? (
+                <div className="flex items-center text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
+                  <TrendingUp className="h-3 w-3 ml-1" />
+                  {trend.toFixed(1)}%
+                </div>
+              ) : (
+                <div className="flex items-center text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs font-medium">
+                  <TrendingDown className="h-3 w-3 ml-1" />
+                  {Math.abs(trend).toFixed(1)}%
+                </div>
+              )}
+            </div>
+          )}
+          
+          {info && (
+            <div className="relative">
+              <button
+                onMouseEnter={() => setShowInfo(true)}
+                onMouseLeave={() => setShowInfo(false)}
+                className="p-1 rounded-full hover:bg-gray-200/50 transition-colors"
+              >
+                <Info className="h-4 w-4 text-gray-500" />
+              </button>
+              
+              {showInfo && (
+                <div className="absolute left-0 top-full mt-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="absolute -top-1 right-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                  {info}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mt-4 relative z-10">
@@ -141,6 +167,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         trend={data?.overview.salesGrowth}
         color="green"
         isLoading={isLoading}
+        info="إجمالي قيمة جميع الطلبات (باستثناء الطلبات المرتجعة والملغاة)"
       />
 
       <MetricCard
@@ -149,6 +176,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={TrendingUp}
         color="blue"
         isLoading={isLoading}
+        info="الربح بعد خصم تكلفة المنتجات وتكاليف الشحن"
       />
 
       <MetricCard
@@ -157,6 +185,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={ShoppingBag}
         color="purple"
         isLoading={isLoading}
+        info="عدد جميع الطلبات في المتجر (بجميع حالاتها)"
       />
 
       <MetricCard
@@ -165,6 +194,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={Package}
         color="orange"
         isLoading={isLoading}
+        info="متوسط قيمة الطلب الواحد من الطلبات المكتملة"
       />
 
       <MetricCard
@@ -173,6 +203,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={Package}
         color="indigo"
         isLoading={isLoading}
+        info="عدد المنتجات المتاحة في المتجر"
       />
 
       <MetricCard
@@ -181,6 +212,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={Percent}
         color="green"
         isLoading={isLoading}
+        info="نسبة الطلبات المسلمة بنجاح من إجمالي الطلبات"
       />
 
       <MetricCard
@@ -189,6 +221,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={Users}
         color="blue"
         isLoading={isLoading}
+        info="عدد تصنيفات المنتجات في المتجر"
       />
 
       <MetricCard
@@ -197,6 +230,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={Bell}
         color="red"
         isLoading={isLoading}
+        info="عدد الإشعارات غير المقروءة"
       />
 
       {/* إحصائيات السوق المصري */}
@@ -206,6 +240,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={Truck}
         color="green"
         isLoading={isLoading}
+        info="نسبة الطلبات التي تم تسليمها بنجاح من إجمالي الطلبات المشحونة"
       />
 
       <MetricCard
@@ -214,6 +249,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={RotateCcw}
         color="red"
         isLoading={isLoading}
+        info="نسبة الطلبات المرتجعة من العملاء من إجمالي الطلبات المشحونة"
       />
 
       <MetricCard
@@ -222,6 +258,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={RefreshCw}
         color="orange"
         isLoading={isLoading}
+        info="نسبة الطلبات التي تم طلب استبدالها من إجمالي الطلبات المسلمة"
       />
 
       <MetricCard
@@ -230,6 +267,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={CreditCard}
         color="blue"
         isLoading={isLoading}
+        info="نسبة الطلبات التي اختار العملاء الدفع عند الاستلام فيها"
       />
 
       <MetricCard
@@ -238,6 +276,7 @@ export default function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps)
         icon={CheckCircle2}
         color="purple"
         isLoading={isLoading}
+        info="نسبة الأموال المحصلة من شركة الشحن من إجمالي طلبات الدفع عند الاستلام"
       />
     </div>
   );

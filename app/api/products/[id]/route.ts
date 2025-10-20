@@ -24,6 +24,10 @@ interface ProductData {
   is_new: boolean;
   discount_percentage: number;
   new_until?: string | null;
+  sku?: string | null;
+  slug?: string;
+  rating?: number;
+  reviews_count?: number;
 }
 
 // Helper function to create Supabase client
@@ -112,6 +116,39 @@ export async function PUT(
       ...productData
     } = body;
 
+    // التحقق من uniqueness للـ sku وslug إذا تم تغييرهما
+    if (productData.sku) {
+      const { data: skuExists } = await supabase
+        .from('products')
+        .select('id')
+        .eq('sku', productData.sku)
+        .neq('id', productId)
+        .maybeSingle();
+      
+      if (skuExists) {
+        return NextResponse.json(
+          { success: false, message: 'كود المنتج (SKU) مستخدم من قبل. اختر كود آخر.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (productData.slug) {
+      const { data: slugExists } = await supabase
+        .from('products')
+        .select('id')
+        .eq('slug', productData.slug)
+        .neq('id', productId)
+        .maybeSingle();
+      
+      if (slugExists) {
+        return NextResponse.json(
+          { success: false, message: 'الرابط المخصص (slug) مستخدم من قبل. اختر رابط آخر.' },
+          { status: 400 }
+        );
+      }
+    }
+
     // تحديث بيانات المنتج الأساسية
     const { error: updateError } = await supabase
           .from('products')
@@ -128,7 +165,13 @@ export async function PUT(
         is_featured: productData.is_featured,
         is_exclusive: productData.is_exclusive,
         is_new: productData.is_new,
-        discount_percentage: productData.discount_percentage,
+        discount_percentage: productData.discount_percentage != null && productData.discount_percentage > 0 
+          ? productData.discount_percentage 
+          : null,
+        sku: productData.sku || null,
+        slug: productData.slug,
+        rating: productData.rating || 0,
+        reviews_count: productData.reviews_count || 0,
         updated_at: new Date().toISOString(),
         new_until: productData.new_until || null
       })

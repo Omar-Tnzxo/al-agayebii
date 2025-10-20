@@ -3,15 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // استثناء صفحة تسجيل الدخول الإدارية من أي معالجة إضافية
-  if (pathname.startsWith('/admin')) {
+  // استثناء صفحة تسجيل الدخول الإدارية والتسجيل الآمن
+  if (pathname.startsWith('/admin') || pathname.startsWith('/s3cur3-r3g1st3r-@dm1n-2025')) {
     return NextResponse.next();
   }
 
   // حماية مسارات لوحة التحكم
   if (pathname.startsWith('/dashboard')) {
-    const adminToken = request.cookies.get('admin_auth_token');
-    if (!adminToken) {
+    const adminSession = request.cookies.get('admin_session');
+    if (!adminSession) {
       return NextResponse.redirect(new URL('/admin', request.url));
     }
   }

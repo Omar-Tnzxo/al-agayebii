@@ -68,4 +68,11 @@ export interface DatabaseOrder {
 
 export interface ApiError {
   error: string;
-} 
+}
+
+export interface AdminSession {
+  userId: string;
+  email: string;
+  role: 'super_admin' | 'admin';
+  type?: 'access' | 'refresh';
+}

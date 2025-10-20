@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       return query;
     };
 
-    // الإحصائيات الأساسية - الحالات المصرية الجديدة
+    // الإحصائيات الأساسية
     const [
       { count: totalOrders },
       { count: totalProducts },
@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
       { count: cancelledOrders }
     ] = await Promise.all([
       createQuery('orders'),
-      supabase.from('products').select('*', { count: 'exact', head: true }), // المنتجات بدون فلتر تاريخ
-      supabase.from('categories').select('*', { count: 'exact', head: true }), // التصنيفات بدون فلتر تاريخ
+      createQuery('products', false), // المنتجات بدون فلتر تاريخ - إجمالي دائماً
+      createQuery('categories', false), // التصنيفات بدون فلتر تاريخ - إجمالي دائماً
       createQuery('orders').eq('status', 'pending'),
       createQuery('orders').eq('status', 'confirmed'),
       createQuery('orders').eq('status', 'shipped'),
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       createQuery('orders').eq('status', 'cancelled')
     ]);
 
-    // إحصائيات المبيعات والأرباح مع فلترة التاريخ - للطلبات المكتملة والمسلمة
+    // إحصائيات المبيعات - كل الطلبات ماعدا المرتجع والملغي
     let salesQuery = supabase
       .from('orders')
       .select(`
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
           )
         )
       `)
-      .in('status', ['delivered', 'replaced']); // الطلبات المسلمة أو المستبدلة تعتبر مكتملة
+      .not('status', 'in', '(returned,cancelled)'); // استبعاد المرتجع والملغي فقط
 
     // تطبيق فلترة التاريخ على المبيعات
     if (filterStartDate && period !== 'all') {
@@ -245,8 +245,9 @@ export async function GET(request: NextRequest) {
     const completedOrdersCount = (deliveredOrders || 0) + (replacedOrders || 0);
     const conversionRate = (totalOrders || 0) > 0 ? (completedOrdersCount / (totalOrders || 1) * 100) : 0;
 
-    // متوسط قيمة الطلب
-    const averageOrderValue = completedOrdersCount > 0 ? totalRevenue / completedOrdersCount : 0;
+    // متوسط قيمة الطلب - من الطلبات التي تم احتسابها في المبيعات (ماعدا الملغي والمرتجع)
+    const ordersCountForAverage = salesData?.length || 1;
+    const averageOrderValue = ordersCountForAverage > 0 ? totalRevenue / ordersCountForAverage : 0;
 
     // نمو المبيعات الشهري (مقارنة بالشهر الماضي)
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -269,10 +270,20 @@ export async function GET(request: NextRequest) {
     const replacementRate = totalDeliveredOrders > 0 ? ((replacementRequestedOrders || 0) + (replacedOrders || 0)) / totalDeliveredOrders * 100 : 0;
 
     // الآن نحتاج لجلب بيانات الدفع من قاعدة البيانات لحساب معدلات الدفع
-    const { data: paymentData } = await supabase
+    let paymentQuery = supabase
       .from('orders')
       .select('payment_status')
       .not('payment_status', 'is', null);
+    
+    // تطبيق فلترة التاريخ على بيانات الدفع
+    if (filterStartDate && period !== 'all') {
+      paymentQuery = paymentQuery.gte('created_at', filterStartDate);
+      if (filterEndDate) {
+        paymentQuery = paymentQuery.lte('created_at', filterEndDate);
+      }
+    }
+    
+    const { data: paymentData } = await paymentQuery;
 
     const codOrdersCount = paymentData?.filter((order: any) => order.payment_status === 'cash_on_delivery').length || 0;
     const collectedOrdersCount = paymentData?.filter((order: any) => order.payment_status === 'collected').length || 0;

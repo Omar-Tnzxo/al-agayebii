@@ -179,6 +179,8 @@ export async function GET(request: NextRequest) {
           id,
           quantity,
           price,
+          product_name,
+          product_image,
           products (
             id,
             name,
@@ -280,6 +282,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('📦 Received Order Request:', JSON.stringify(body, null, 2));
+    
     let {
       customer_name,
       customer_phone,
@@ -290,13 +294,32 @@ export async function POST(request: NextRequest) {
       shipping_method = 'standard',
       shipping_cost,
       notes = '',
-      governorate
+      governorate,
+      delivery_type = 'shipping', // shipping أو pickup
+      pickup_branch_id = null // معرف الفرع للاستلام
     } = body;
 
     // التحقق من صحة البيانات المطلوبة
-    if (!customer_name || !customer_phone || !address || !items || total === undefined || !payment_method) {
+    // عند الشحن، يجب توفر العنوان
+    // عند الاستلام من الفرع، يجب توفر pickup_branch_id
+    if (!customer_name || !customer_phone || !items || total === undefined || !payment_method) {
       return NextResponse.json(
-        { error: 'البيانات المطلوبة مفقودة: customer_name, customer_phone, address, items, total, payment_method' },
+        { error: 'البيانات المطلوبة مفقودة: customer_name, customer_phone, items, total, payment_method' },
+        { status: 400 }
+      );
+    }
+
+    // التحقق من نوع التوصيل
+    if (delivery_type === 'shipping' && !address) {
+      return NextResponse.json(
+        { error: 'العنوان مطلوب عند اختيار الشحن' },
+        { status: 400 }
+      );
+    }
+
+    if (delivery_type === 'pickup' && !pickup_branch_id) {
+      return NextResponse.json(
+        { error: 'يجب اختيار فرع الاستلام' },
         { status: 400 }
       );
     }
@@ -329,28 +352,33 @@ export async function POST(request: NextRequest) {
     const grandTotal = subTotal + parseFloat(shipping_cost);
 
     // إضافة الطلب
+    const orderData = {
+      order_number: orderNumber,
+      customer_name: customer_name.trim(),
+      customer_phone: customer_phone.trim(),
+      address: delivery_type === 'shipping' ? (address || '').trim() : '',
+      governorate: delivery_type === 'shipping' ? (governorate || '') : null,
+      delivery_type: delivery_type,
+      pickup_branch_id: delivery_type === 'pickup' ? pickup_branch_id : null,
+      total: grandTotal,
+      shipping_cost: parseFloat(shipping_cost),
+      shipping_company: shippingCompanyName,
+      payment_method: payment_method.trim(),
+      shipping_method,
+      customer_notes: (notes || '').trim(),
+      status: 'pending'
+    };
+    
+    console.log('📝 Order Data to Insert:', orderData);
+    
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert([{
-        order_number: orderNumber,
-        customer_name: customer_name.trim(),
-        customer_phone: customer_phone.trim(),
-        address: address.trim(),
-        governorate: governorate, // تأكد أنها هنا
-        total: grandTotal,
-        shipping_cost: parseFloat(shipping_cost),
-        shipping_company: shippingCompanyName,
-        payment_method: payment_method.trim(),
-        shipping_method,
-        customer_notes: notes.trim(),
-        status: 'pending'
-      }])
+      .insert([orderData])
       .select() // بدون تحديد أعمدة
       .single();
 
     if (orderError) {
-      // لا تطبع الخطأ في الـ console لتجنب الـ spam
-      // console.error('خطأ في إضافة الطلب:', orderError);
+      console.error('❌ Error inserting order:', orderError);
       return NextResponse.json(
         {
           error: 'فشل في إضافة الطلب',
@@ -359,6 +387,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    console.log('✅ Order created successfully:', order);
 
     // إضافة عناصر الطلب
     const orderItems = items.map(item => ({
@@ -376,8 +406,7 @@ export async function POST(request: NextRequest) {
       .insert(orderItems);
 
     if (itemsError) {
-      // لا تطبع الخطأ في الـ console لتجنب الـ spam
-      // console.error('خطأ في إضافة عناصر الطلب:', itemsError);
+      console.error('❌ Error inserting order items:', itemsError);
       // حذف الطلب في حالة فشل إضافة العناصر
       await supabase.from('orders').delete().eq('id', order.id);
       return NextResponse.json(
@@ -388,6 +417,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    console.log('✅ Order items added successfully');
 
     // تحديث المخزون لكل منتج
     for (const item of items) {

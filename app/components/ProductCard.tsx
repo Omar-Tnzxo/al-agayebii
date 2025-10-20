@@ -138,7 +138,7 @@ const ProductCard = ({ product, className = '' }: ProductCardProps) => {
             )}
             {isDiscounted && (
               <span className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
-                -{product.discount_percentage}%
+                -{Math.round(product.discount_percentage || 0)}%
               </span>
             )}
             {isOutOfStock && (

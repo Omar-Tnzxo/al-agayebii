@@ -90,6 +90,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [router]);
 
+  // فحص حالة الحساب بشكل دوري
+  useEffect(() => {
+    const checkAccountStatus = async () => {
+      try {
+        const response = await fetch('/api/admin/check-active');
+        const data = await response.json();
+        
+        if (!data.success || !data.isActive) {
+          // إخراج المستخدم فوراً
+          localStorage.removeItem('admin_user');
+          sessionStorage.removeItem('admin_user');
+          await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
+          router.push('/admin?message=تم تعطيل حسابك');
+        }
+      } catch (error) {
+        // في حالة الخطأ، لا تفعل شيء لتجنب إخراج المستخدم بدون سبب
+      }
+    };
+
+    // فحص الحالة كل 30 ثانية
+    const interval = setInterval(checkAccountStatus, 30000);
+    
+    // فحص أولي
+    checkAccountStatus();
+
+    return () => clearInterval(interval);
+  }, [router]);
+
   // معالج تسجيل الخروج
   const handleLogout = async () => {
     try {
@@ -254,6 +282,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* قسم النظام */}
             <SidebarGroup title="النظام">
+              <SidebarItem
+                icon={Users}
+                text="إدارة المديرين"
+                href="/dashboard/admins"
+              />
               <SidebarItem
                 icon={Phone}
                 text="صفحة الاتصال"

@@ -458,50 +458,59 @@ export default function TrackOrderPage() {
             عناصر الطلب ({order.order_items.length} عنصر)
           </h4>
           <div className="space-y-4">
-            {order.order_items.map((item: any, index: number) => (
-              <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                {/* صورة المنتج */}
-                <div className="w-20 h-20 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
-                  <SafeImage
-                    src={item.product_image || '/images/product-default.png'}
-                    alt={item.product_name || 'منتج'}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                    fallbackSrc="/images/product-default.png"
-                  />
-                </div>
+            {order.order_items.map((item: any, index: number) => {
+              // أولوية الحصول على البيانات: product object > item direct properties > fallback
+              const productImage = item.product?.image || item.product_image || '/images/product-default.png';
+              const productName = item.product?.name || item.product_name || `منتج ${formatProductId(item.product_id)}`;
+              const productSku = item.product?.sku || item.product_sku;
+              const itemPrice = item.price || item.unit_price || 0;
+              const itemTotalPrice = item.total_price || (itemPrice * item.quantity);
+              
+              return (
+                <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  {/* صورة المنتج */}
+                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                    <SafeImage
+                      src={productImage}
+                      alt={productName}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                      fallbackSrc="/images/product-default.png"
+                    />
+                  </div>
 
-                {/* معلومات المنتج */}
-                <div className="flex-1">
-                  <h5 className="font-semibold text-gray-900 mb-1">
-                    {item.product_name || `منتج ${formatProductId(item.product_id)}`}
-                  </h5>
-                  {item.product_sku && (
-                    <p className="text-sm text-gray-500 mb-2">
-                      رقم المنتج: {item.product_sku}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <Package className="h-3 w-3" />
-                      <span>الكمية: {item.quantity}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <CreditCard className="h-3 w-3" />
-                      <span>السعر: {formatCurrency(item.price || item.unit_price)}</span>
+                  {/* معلومات المنتج */}
+                  <div className="flex-1">
+                    <h5 className="font-semibold text-gray-900 mb-1">
+                      {productName}
+                    </h5>
+                    {productSku && (
+                      <p className="text-sm text-gray-500 mb-2">
+                        رقم المنتج: {productSku}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <Package className="h-3 w-3" />
+                        <span>الكمية: {item.quantity}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CreditCard className="h-3 w-3" />
+                        <span>السعر: {formatCurrency(itemPrice)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* السعر الإجمالي */}
-                <div className="text-left flex-shrink-0">
-                  <p className="text-lg font-bold text-primary">
-                    {formatCurrency(item.total_price || (item.price || item.unit_price) * item.quantity)}
-                  </p>
+                  {/* السعر الإجمالي */}
+                  <div className="text-left flex-shrink-0">
+                    <p className="text-lg font-bold text-primary">
+                      {formatCurrency(itemTotalPrice)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

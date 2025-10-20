@@ -315,6 +315,8 @@ export default function NewProductPage() {
     
     if (!product.sku.trim()) {
       newErrors.sku = 'كود المنتج (SKU) مطلوب';
+    } else if (!/^[a-zA-Z0-9\-]+$/.test(product.sku.trim())) {
+      newErrors.sku = 'كود المنتج يجب أن يحتوي فقط على أحرف إنجليزية، أرقام، والشرطة (-)';
     }
     
     if (!product.slug.trim()) {
@@ -407,7 +409,9 @@ export default function NewProductPage() {
         is_featured: product.is_featured,
         is_new: isNew,
         new_until: isNew ? newUntil : null,
-        discount_percentage: parseInt(product.discount_percentage.toString()),
+        discount_percentage: product.discount_percentage > 0 
+          ? parseInt(product.discount_percentage.toString()) 
+          : null,
         rating: parseFloat(product.rating.toString()),
         reviews_count: parseInt(product.reviews_count.toString()),
         sku: product.sku.trim(),
@@ -696,13 +700,20 @@ export default function NewProductPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="md:col-span-2 lg:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2 required">
-                اسم المنتج *
+              <label className="block text-sm font-medium text-gray-700 mb-2 required flex items-center justify-between">
+                <span>اسم المنتج *</span>
+                <span className={`text-xs ${product.name.length > 100 ? 'text-amber-500' : 'text-gray-500'}`}>
+                  {product.name.length} / 150 حرف
+                </span>
               </label>
               <input
                 type="text"
                 value={product.name}
-                onChange={(e) => setProduct(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => {
+                  if (e.target.value.length <= 150) {
+                    setProduct(prev => ({ ...prev, name: e.target.value }));
+                  }
+                }}
                 className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
@@ -719,25 +730,46 @@ export default function NewProductPage() {
 
             {/* حقول السعر والتكلفة */}
             <div className="md:col-span-2 lg:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2 required">
-                السعر للعملاء (جنيه مصري) *
+              <label className="block text-sm font-medium text-gray-700 mb-2 required flex items-center gap-2">
+                <span>السعر للعملاء (جنيه مصري) *</span>
+                <Tooltip text="سعر بيع المنتج للعملاء. يجب أن يكون أكبر من سعر التكلفة لتحقيق ربح.">
+                  <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                </Tooltip>
               </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={product.price}
-                onChange={(e) => setProduct(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
-                  errors.price ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
-                placeholder="0.00 ج.م"
-                required
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1000000"
+                  value={product.price || ''}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    if (value <= 1000000) {
+                      setProduct(prev => ({ ...prev, price: value }));
+                    }
+                  }}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
+                    errors.price ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  placeholder="0.00"
+                  dir="ltr"
+                  style={{ textAlign: 'left' }}
+                  required
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                  ج.م
+                </span>
+              </div>
               {errors.price && (
                 <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
                   <span>{errors.price}</span>
+                </p>
+              )}
+              {product.price > 0 && !errors.price && (
+                <p className="mt-1 text-xs text-green-600 flex items-center">
+                  ✓ السعر: {product.price.toLocaleString('ar-EG')} جنيه مصري
                 </p>
               )}
             </div>
@@ -831,17 +863,28 @@ export default function NewProductPage() {
             </div>
 
             <div className="md:col-span-2 lg:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2 required">
-                كود المنتج (SKU)
+              <label className="block text-sm font-medium text-gray-700 mb-2 required flex items-center gap-2">
+                <span>كود المنتج (SKU)</span>
+                <Tooltip text="يجب أن يحتوي كود المنتج فقط على أحرف إنجليزية (A-Z)، أرقام (0-9)، والشرطة (-). لا يسمح بأحرف عربية أو رموز أخرى.">
+                  <AlertCircle className="h-4 w-4 text-amber-500 cursor-help" />
+                </Tooltip>
               </label>
               <input
                 type="text"
                 value={product.sku}
-                onChange={(e) => setProduct(prev => ({ ...prev, sku: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // السماح فقط بأحرف إنجليزية وأرقام والشرطة
+                  if (value === '' || /^[a-zA-Z0-9\-]*$/.test(value)) {
+                    setProduct(prev => ({ ...prev, sku: value }));
+                  }
+                }}
                 className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.sku ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="مثال: PROD-00123"
+                dir="ltr"
+                style={{ textAlign: 'left' }}
               />
               {errors.sku && (
                 <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
@@ -849,20 +892,34 @@ export default function NewProductPage() {
                   <span>{errors.sku}</span>
                 </p>
               )}
+              <p className="mt-1 text-xs text-gray-500">
+                أحرف إنجليزية وأرقام والشرطة (-) فقط
+              </p>
             </div>
 
             <div className="md:col-span-2 lg:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2 required">
-                الرابط المخصص (slug) *
+              <label className="block text-sm font-medium text-gray-700 mb-2 required flex items-center gap-2">
+                <span>الرابط المخصص (slug) *</span>
+                <Tooltip text="يجب أن يحتوي الرابط فقط على أحرف إنجليزية صغيرة (a-z)، أرقام (0-9)، والشرطة (-). لا يسمح بمسافات أو أحرف عربية أو أحرف كبيرة.">
+                  <AlertCircle className="h-4 w-4 text-blue-500 cursor-help" />
+                </Tooltip>
               </label>
               <input
                 type="text"
                 value={product.slug}
-                onChange={(e) => setProduct(prev => ({ ...prev, slug: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value.toLowerCase(); // تحويل لأحرف صغيرة تلقائياً
+                  // السماح فقط بأحرف إنجليزية صغيرة وأرقام والشرطة
+                  if (value === '' || /^[a-z0-9\-]*$/.test(value)) {
+                    setProduct(prev => ({ ...prev, slug: value }));
+                  }
+                }}
                 className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
                   errors.slug ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="مثال: product-name-123"
+                dir="ltr"
+                style={{ textAlign: 'left' }}
                 required
               />
               {errors.slug && (
@@ -871,21 +928,50 @@ export default function NewProductPage() {
                   <span>{errors.slug}</span>
                 </p>
               )}
+              <p className="mt-1 text-xs text-gray-500">
+                أحرف إنجليزية صغيرة وأرقام والشرطة (-) فقط - سيتم التحويل تلقائياً
+              </p>
             </div>
           </div>
 
           <div className="mt-4 sm:mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              وصف المنتج
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                وصف المنتج *
+                <Tooltip text="اكتب وصف تفصيلي للمنتج يساعد العملاء على فهم مميزاته واستخداماته. الحد الأدنى 10 أحرف.">
+                  <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                </Tooltip>
+              </span>
+              <span className={`text-xs ${product.description.length < 10 ? 'text-red-500' : product.description.length > 500 ? 'text-amber-500' : 'text-gray-500'}`}>
+                {product.description.length} / 1000 حرف
+              </span>
             </label>
             <textarea
               value={product.description}
-              onChange={(e) => setProduct(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base"
-              rows={4}
-              placeholder="أدخل وصف مفصل للمنتج..."
+              onChange={(e) => {
+                if (e.target.value.length <= 1000) {
+                  setProduct(prev => ({ ...prev, description: e.target.value }));
+                }
+              }}
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-sm sm:text-base ${
+                errors.description ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+              rows={5}
+              placeholder="أدخل وصف مفصل للمنتج... (مثال: المواصفات، الاستخدامات، المميزات، المحتويات)"
               required
             />
+            {errors.description && (
+              <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                <span>{errors.description}</span>
+              </p>
+            )}
+            {!errors.description && product.description.length > 0 && product.description.length < 10 && (
+              <p className="mt-1 text-xs text-amber-600 flex items-center">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                <span>الوصف قصير جداً. يُفضل كتابة وصف أكثر تفصيلاً.</span>
+              </p>
+            )}
           </div>
         </div>
         

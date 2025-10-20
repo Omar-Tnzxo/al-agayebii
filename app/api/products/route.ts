@@ -280,7 +280,9 @@ export async function POST(request: NextRequest) {
         is_featured,
         is_exclusive,
         is_new,
-        discount_percentage: parseFloat(discount_percentage),
+        discount_percentage: discount_percentage && parseFloat(discount_percentage) > 0 
+          ? parseFloat(discount_percentage) 
+          : null,
         image: image || images[0] || null,
         sku,
         slug

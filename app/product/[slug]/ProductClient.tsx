@@ -350,7 +350,6 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
     fullName: '',
     phone: '',
     address: '',
-    city: '',
     governorate: '', // يُكتب يدوياً من العميل
     paymentMethod: 'cash',
     notes: '',
@@ -404,6 +403,25 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
     }
   }, [shippingEnabled, pickupEnabled]);
 
+  // تنظيف الحقول غير المطلوبة عند تغيير نوع التوصيل
+  useEffect(() => {
+    // مسح رسائل الخطأ والنجاح
+    setQuickBuyError('');
+    setQuickBuySuccess('');
+    
+    if (quickBuyDeliveryType === 'pickup') {
+      // عند الاستلام من الفرع، مسح حقول العنوان والمحافظة
+      setQuickBuyForm(prev => ({
+        ...prev,
+        address: '',
+        governorate: ''
+      }));
+    } else {
+      // عند الشحن، إلغاء تحديد الفرع
+      setQuickBuySelectedBranch(null);
+    }
+  }, [quickBuyDeliveryType]);
+
   // حساب تكلفة الشحن عند تغير الكمية أو نوع التوصيل
   useEffect(() => {
     const updateShipping = async () => {
@@ -447,8 +465,14 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
     }
 
     // تحقق من الحقول الأساسية المطلوبة دائماً
-    if (!quickBuyForm.fullName.trim() || !quickBuyForm.phone.trim()) {
-      setQuickBuyError('يرجى إكمال الاسم ورقم الهاتف');
+    if (!quickBuyForm.fullName.trim()) {
+      setQuickBuyError('يرجى إدخال الاسم الكامل');
+      setIsQuickBuying(false);
+      return;
+    }
+
+    if (!quickBuyForm.phone.trim()) {
+      setQuickBuyError('يرجى إدخال رقم الهاتف');
       setIsQuickBuying(false);
       return;
     }
@@ -456,15 +480,21 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
     // تحقق من الحقول حسب نوع التوصيل
     if (quickBuyDeliveryType === 'shipping') {
       // عند الشحن، يجب إدخال العنوان والمحافظة
-      if (!quickBuyForm.address.trim() || !quickBuyForm.governorate.trim()) {
-        setQuickBuyError('يرجى إكمال بيانات الشحن (العنوان، المحافظة)');
+      if (!quickBuyForm.address.trim()) {
+        setQuickBuyError('يرجى إدخال العنوان التفصيلي');
+        setIsQuickBuying(false);
+        return;
+      }
+      
+      if (!quickBuyForm.governorate.trim()) {
+        setQuickBuyError('يرجى إدخال المحافظة');
         setIsQuickBuying(false);
         return;
       }
     } else {
       // عند الاستلام من الفرع، يجب اختيار الفرع
       if (!quickBuySelectedBranch || !quickBuySelectedBranch.id) {
-        setQuickBuyError('يرجى اختيار الفرع للاستلام');
+        setQuickBuyError('يرجى اختيار فرع الاستلام');
         setIsQuickBuying(false);
         return;
       }
@@ -502,6 +532,8 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
         items: [
           {
             product_id: product.id,
+            product_name: product.name,
+            product_image: product.image || '/images/drill.png',
             quantity,
             price: discountedPrice,
             color: selectedColor || null,
@@ -509,19 +541,27 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
         ],
         total: Math.round((subtotal + finalShippingCost) * 100) / 100,
         shipping_cost: Math.round(finalShippingCost * 100) / 100,
-        notes: quickBuyForm.notes || null,
+        notes: quickBuyForm.notes || '',
       };
+      
+      // طباعة البيانات المرسلة للتأكد (يمكن حذفها لاحقاً)
+      console.log('Order Body:', orderBody);
+      
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderBody),
       });
       const data = await res.json();
+      
+      // طباعة الاستجابة للتأكد
+      console.log('API Response:', { status: res.status, data });
+      
       if (res.ok && data && data.error === undefined) {
         setQuickBuySuccess('تم إرسال طلبك بنجاح!');
         setOrderNumber(data.order_number || data.data?.order_number || '');
         setQuickBuyForm({
-          fullName: '', phone: '', address: '', city: '', governorate: '', paymentMethod: 'cash', notes: ''
+          fullName: '', phone: '', address: '', governorate: '', paymentMethod: 'cash', notes: ''
         });
         // تحويل المستخدم لصفحة النجاح بعد انتهاء الأنيميشن
         const code = data.order_number || data.data?.order_number;
@@ -534,6 +574,7 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
           }, 10000); // 10 ثواني
         }
       } else {
+        console.error('Order Error:', data);
         setQuickBuyError(data.error || 'حدث خطأ أثناء تنفيذ الطلب');
       }
     } catch (err) {
@@ -1074,41 +1115,42 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
                     label="رقم الهاتف"
                     icon={<Phone className="w-4 h-4 text-blue-600" />}
                     required
-                    hint="سيتم التواصل معك على هذا الرقم"
+                    hint="يجب استخدام الأرقام الإنجليزية فقط (0-9)"
                   >
                     <input
+                      type="tel"
                       name="phone"
                       value={quickBuyForm.phone}
-                      onChange={handleQuickBuyChange}
-                      placeholder="مثال: 01012345678"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // قبول الأرقام الإنجليزية فقط
+                        if (value === '' || /^[0-9]+$/.test(value)) {
+                          handleQuickBuyChange(e);
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        // منع إدخال أي شيء غير الأرقام الإنجليزية
+                        if (!/[0-9]/.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      placeholder="01012345678"
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-gray-400"
                       required
                       dir="ltr"
                       style={{ textAlign: 'right' }}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={11}
                     />
+                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      استخدم الأرقام الإنجليزية فقط (0123456789) وليس الأرقام العربية (٠١٢٣٤٥٦٧٨٩)
+                    </p>
                   </FormField>
                 </div>
 
-                {/* 3. المحافظة - Always show */}
-                <div className="sm:col-span-2">
-                  <FormField
-                    label="المحافظة"
-                    icon={<MapPin className="w-4 h-4 text-blue-600" />}
-                    required
-                    hint="مثال: القاهرة، الجيزة، الإسكندرية"
-                  >
-                    <input
-                      name="governorate"
-                      value={quickBuyForm.governorate}
-                      onChange={handleQuickBuyChange}
-                      placeholder="اكتب اسم المحافظة"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-gray-400"
-                      required
-                    />
-                  </FormField>
-                </div>
-
-                {/* 4. العنوان التفصيلي - Only show when shipping */}
+                {/* 3. العنوان التفصيلي - Only show when shipping */}
                 {quickBuyDeliveryType === 'shipping' && (
                   <div className="sm:col-span-2">
                     <FormField
@@ -1122,6 +1164,27 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
                         value={quickBuyForm.address}
                         onChange={handleQuickBuyChange}
                         placeholder="مثال: 15 شارع الجامعة، المعادي"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-gray-400"
+                        required
+                      />
+                    </FormField>
+                  </div>
+                )}
+
+                {/* 4. المحافظة - Only show when shipping */}
+                {quickBuyDeliveryType === 'shipping' && (
+                  <div className="sm:col-span-2">
+                    <FormField
+                      label="المحافظة"
+                      icon={<MapPin className="w-4 h-4 text-blue-600" />}
+                      required
+                      hint="مثال: القاهرة، الجيزة، الإسكندرية"
+                    >
+                      <input
+                        name="governorate"
+                        value={quickBuyForm.governorate}
+                        onChange={handleQuickBuyChange}
+                        placeholder="اكتب اسم المحافظة"
                         className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder-gray-400"
                         required
                       />
@@ -1208,16 +1271,31 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
                         </div>
                       </label>
                     </div>
+                    
+                    {/* تحذير عند اختيار الاستلام من الفرع */}
+                    {quickBuyDeliveryType === 'pickup' && (
+                      <div className="mt-3 flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                        <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
+                        <p>سيتم التواصل معك لتحديد موعد الاستلام من الفرع المختار</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* محدد الفروع - Show when pickup is selected */}
                 {quickBuyDeliveryType === 'pickup' && (
-                  <div className="md:col-span-2">
-                    <SimpleBranchSelector
-                      selectedBranchId={quickBuySelectedBranch?.id}
-                      onSelectBranch={setQuickBuySelectedBranch}
-                    />
+                  <div className="sm:col-span-2">
+                    <FormField
+                      label="فرع الاستلام"
+                      icon={<MapPin className="w-4 h-4 text-blue-600" />}
+                      required
+                      hint="اختر الفرع الذي ترغب في استلام طلبك منه"
+                    >
+                      <SimpleBranchSelector
+                        selectedBranchId={quickBuySelectedBranch?.id}
+                        onSelectBranch={setQuickBuySelectedBranch}
+                      />
+                    </FormField>
                   </div>
                 )}
 
@@ -1235,7 +1313,12 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
                   </div>
                 </div>
               </div>
-              {quickBuyError && <div className="text-red-600 mt-4 text-sm font-bold text-center animate-pulse">{quickBuyError}</div>}
+              {quickBuyError && (
+                <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm font-medium animate-pulse">
+                  <X className="w-5 h-5 flex-shrink-0" />
+                  <span>{quickBuyError}</span>
+                </div>
+              )}
 
               {/* ملخص الطلب - بنفس تصميم checkout */}
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mt-8">

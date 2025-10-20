@@ -9,15 +9,46 @@ CREATE TABLE public._deleted_data_backup (
   deleted_by character varying DEFAULT 'complete_setup_script'::character varying,
   CONSTRAINT _deleted_data_backup_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.admin_invitation_codes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  code character varying NOT NULL UNIQUE,
+  created_by uuid,
+  used_by uuid,
+  is_used boolean NOT NULL DEFAULT false,
+  max_uses integer NOT NULL DEFAULT 1 CHECK (max_uses > 0),
+  current_uses integer NOT NULL DEFAULT 0,
+  expires_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  used_at timestamp with time zone,
+  CONSTRAINT admin_invitation_codes_pkey PRIMARY KEY (id),
+  CONSTRAINT admin_invitation_codes_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.admin_users(id),
+  CONSTRAINT admin_invitation_codes_used_by_fkey FOREIGN KEY (used_by) REFERENCES public.admin_users(id)
+);
+CREATE TABLE public.admin_login_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  email character varying NOT NULL,
+  admin_id uuid,
+  success boolean NOT NULL,
+  ip_address character varying,
+  user_agent text,
+  failure_reason character varying,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT admin_login_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT admin_login_logs_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.admin_users(id)
+);
 CREATE TABLE public.admin_users (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   email character varying NOT NULL UNIQUE,
-  role character varying DEFAULT 'admin'::character varying,
-  is_active boolean DEFAULT true,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  password_hash text,
+  password_hash text NOT NULL,
+  password_salt text NOT NULL,
+  role character varying NOT NULL DEFAULT 'admin'::character varying CHECK (role::text = ANY (ARRAY['super_admin'::character varying, 'admin'::character varying, 'moderator'::character varying]::text[])),
   phone character varying,
+  is_active boolean NOT NULL DEFAULT true,
+  last_login timestamp with time zone,
+  failed_login_attempts integer NOT NULL DEFAULT 0,
+  locked_until timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT admin_users_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.branches (

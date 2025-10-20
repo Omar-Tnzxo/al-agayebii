@@ -303,6 +303,25 @@ export default function CheckoutPage() {
     setTotal(subtotal + shippingFee);
   }, [subtotal, shippingFee]);
 
+  // تنظيف الحقول غير المطلوبة عند تغيير نوع التوصيل
+  useEffect(() => {
+    // مسح رسائل الخطأ
+    setError(null);
+    setMissingFields([]);
+    
+    if (deliveryType === 'pickup') {
+      // عند الاستلام من الفرع، مسح حقول العنوان والمحافظة
+      setShippingAddress(prev => ({
+        ...prev,
+        address: '',
+        governorate: ''
+      }));
+    } else {
+      // عند الشحن، إلغاء تحديد الفرع
+      setSelectedBranch(null);
+    }
+  }, [deliveryType]);
+
   // عند تغيير الحقول، قم بالتحقق من صحة البيانات
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -582,55 +601,46 @@ export default function CheckoutPage() {
                       icon={<Phone className="w-4 h-4 text-blue-600" />}
                       required
                       error={missingFields.includes('phone') ? 'هذا الحقل مطلوب' : ''}
-                      hint="سيتم التواصل معك على هذا الرقم"
+                      hint="يجب استخدام الأرقام الإنجليزية فقط (0-9)"
                     >
                       <input
                         type="tel"
                         name="phone"
                         value={shippingAddress.phone}
-                        onChange={handleAddressChange}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // قبول الأرقام الإنجليزية فقط
+                          if (value === '' || /^[0-9]+$/.test(value)) {
+                            handleAddressChange(e);
+                          }
+                        }}
+                        onKeyPress={(e) => {
+                          // منع إدخال أي شيء غير الأرقام الإنجليزية
+                          if (!/[0-9]/.test(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border transition-all duration-200 ${
                           missingFields.includes('phone')
                             ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
                             : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
                         } outline-none`}
-                        placeholder="01xxxxxxxxx"
-                        pattern="[0-9+\-\s()]*"
-                        onBlur={(e) => {
-                          if (e.target.value && !isValidPhone(e.target.value)) {
-                            setError('يرجى إدخال رقم هاتف صحيح');
-                          }
-                        }}
+                        placeholder="01012345678"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={11}
                         required
                         ref={phoneRef}
+                        dir="ltr"
+                        style={{ textAlign: 'right' }}
                       />
+                      <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        استخدم الأرقام الإنجليزية فقط (0123456789) وليس الأرقام العربية (٠١٢٣٤٥٦٧٨٩)
+                      </p>
                     </FormField>
 
-                    {/* المحافظة - Always show */}
-                    <FormField
-                      label="المحافظة"
-                      icon={<MapPin className="w-4 h-4 text-blue-600" />}
-                      required
-                      error={missingFields.includes('governorate') ? 'هذا الحقل مطلوب' : ''}
-                      hint="مثال: القاهرة، الجيزة، الإسكندرية"
-                    >
-                      <input
-                        type="text"
-                        name="governorate"
-                        value={shippingAddress.governorate}
-                        onChange={handleAddressChange}
-                        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border transition-all duration-200 ${
-                          missingFields.includes('governorate')
-                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                        } outline-none`}
-                        placeholder="القاهرة"
-                        required
-                        ref={governorateRef}
-                      />
-                    </FormField>
-
-                    {/* العنوان التفصيلي */}
+                    {/* العنوان التفصيلي - Only show when shipping */}
                     {deliveryType === 'shipping' && (
                       <FormField
                         label="العنوان التفصيلي"
@@ -652,6 +662,32 @@ export default function CheckoutPage() {
                           placeholder="شارع 15، المعادي الجديدة"
                           required
                           ref={addressRef}
+                        />
+                      </FormField>
+                    )}
+
+                    {/* المحافظة - Only show when shipping */}
+                    {deliveryType === 'shipping' && (
+                      <FormField
+                        label="المحافظة"
+                        icon={<MapPin className="w-4 h-4 text-blue-600" />}
+                        required
+                        error={missingFields.includes('governorate') ? 'هذا الحقل مطلوب' : ''}
+                        hint="مثال: القاهرة، الجيزة، الإسكندرية"
+                      >
+                        <input
+                          type="text"
+                          name="governorate"
+                          value={shippingAddress.governorate}
+                          onChange={handleAddressChange}
+                          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border transition-all duration-200 ${
+                            missingFields.includes('governorate')
+                              ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                              : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                          } outline-none`}
+                          placeholder="اكتب اسم المحافظة"
+                          required
+                          ref={governorateRef}
                         />
                       </FormField>
                     )}
@@ -795,6 +831,14 @@ export default function CheckoutPage() {
                         </label>
                       )}
                     </div>
+
+                    {/* تحذير عند اختيار الاستلام من الفرع */}
+                    {deliveryType === 'pickup' && (
+                      <div className="mt-3 flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
+                        <p>سيتم التواصل معك لتحديد موعد الاستلام من الفرع المختار</p>
+                      </div>
+                    )}
 
                     {/* Branch Selector - Show only when pickup is selected */}
                     {deliveryType === 'pickup' && (

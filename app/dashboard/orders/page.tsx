@@ -58,6 +58,19 @@ interface Order {
   items_count: number;
   created_at: string;
   updated_at: string;
+  order_items?: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    product_name?: string;
+    product_image?: string;
+    products?: {
+      id: string;
+      name: string;
+      image: string;
+      cost_price?: number;
+    };
+  }>;
 }
 
 const statusColors: Record<OrderStatus, string> = {
@@ -104,7 +117,9 @@ export default function OrdersManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(50); // زيادة من 10 إلى 50
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -144,15 +159,15 @@ export default function OrdersManagement() {
 
   // جلب الطلبات
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage]);
 
   // دعم التحديث الفوري realtime
   useSupabaseRealtime({
     table: 'orders',
     event: '*',
     onChange: () => {
-      fetchOrders();
+      fetchOrders(currentPage, itemsPerPage);
     },
   });
 
@@ -308,18 +323,26 @@ export default function OrdersManagement() {
     setCurrentPage(1); // إعادة تعيين الصفحة عند التصفية
   }, [orders, filters, sortBy, sortOrder, activeAlertFilter, alertFilterOrderIds]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (page = 1, itemsPerPage = 50) => {
     try {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await handleApiResponse<any>(fetch('/api/orders'));
+      const { data, error } = await handleApiResponse<any>(
+        fetch(`/api/orders?page=${page}&limit=${itemsPerPage}`)
+      );
       if (error) {
         setError(error);
         return;
       }
       const ordersData = data?.data || data || [];
       setOrders(Array.isArray(ordersData) ? ordersData : []);
+      
+      // تحديث معلومات pagination إذا كانت موجودة
+      if (data?.pagination) {
+        setTotalPages(data.pagination.totalPages);
+        setTotalOrders(data.pagination.total);
+      }
     } catch (err: any) {
       console.error('خطأ في جلب الطلبات:', err);
       setError(err.message || 'حدث خطأ في جلب الطلبات');
@@ -352,7 +375,7 @@ export default function OrdersManagement() {
 
       // تحديث البيانات من الخادم للتأكد من التطابق (في حالة التحديثات التلقائية لحالة الدفع)
       setTimeout(() => {
-        fetchOrders();
+        fetchOrders(currentPage, itemsPerPage);
       }, 500);
     } catch (err: any) {
       showErrorToast('حدث خطأ في تحديث حالة الطلب');
@@ -373,7 +396,7 @@ export default function OrdersManagement() {
 
   // تحديث الطلبات بعد التعديل في Modal
   const handleOrderUpdate = () => {
-    fetchOrders();
+    fetchOrders(currentPage, itemsPerPage);
   };
 
   // تحديث الفلاتر
@@ -466,7 +489,7 @@ export default function OrdersManagement() {
       }
 
       // إعادة تحميل البيانات
-      await fetchOrders();
+      await fetchOrders(currentPage, itemsPerPage);
       setSelectedOrders([]);
       setShowBulkStatusModal(false);
     } catch (err: any) {
@@ -503,7 +526,7 @@ export default function OrdersManagement() {
         showErrorToast(`تم حذف ${selectedOrders.length} طلب بنجاح`, 'success');
       }
 
-      await fetchOrders();
+      await fetchOrders(currentPage, itemsPerPage);
       setSelectedOrders([]);
     } catch (err: any) {
       showErrorToast('حدث خطأ في الحذف الجماعي');
@@ -562,7 +585,7 @@ export default function OrdersManagement() {
 
       // تحديث البيانات من الخادم للتأكد من التطابق (في حالة التحديثات التلقائية)
       setTimeout(() => {
-        fetchOrders();
+        fetchOrders(currentPage, itemsPerPage);
       }, 500);
     } catch (err: any) {
       showErrorToast(err.message || 'حدث خطأ في تحديث حالة الدفع');
@@ -570,11 +593,9 @@ export default function OrdersManagement() {
   };
 
 
-  // حساب الطلبات المعروضة حسب الصفحة
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentOrders = Array.isArray(filteredOrders) ? filteredOrders.slice(startIndex, endIndex) : [];
-  const totalPages = Array.isArray(filteredOrders) ? Math.ceil(filteredOrders.length / itemsPerPage) : 0;
+  // حساب الطلبات المعروضة - نعرض جميع الطلبات المحملة من السيرفر
+  // لأن السيرفر يرسل فقط الطلبات للصفحة الحالية
+  const currentOrders = Array.isArray(filteredOrders) ? filteredOrders : [];
 
   // إحصائيات متقدمة للطلبات مع البيانات المالية
   const stats = useMemo(() => {
@@ -1105,6 +1126,7 @@ export default function OrdersManagement() {
                   )}
                 </button>
               </th>
+              <th className="px-3 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">المنتجات</th>
               <th className="px-3 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">رقم الطلب</th>
               <th className="px-3 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">العميل</th>
               <th className="px-3 py-3 text-xs font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">الهاتف</th>
@@ -1126,14 +1148,14 @@ export default function OrdersManagement() {
             {/* صف فارغ في البداية لتوفير مساحة للقوائم المنسدلة في الصفوف الأولى */}
             {filteredOrders.length > 0 && (
               <tr className="h-2">
-                <td colSpan={15} className="p-0"></td>
+                <td colSpan={16} className="p-0"></td>
               </tr>
             )}
             {loading ? (
               skeletonRows
             ) : filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan={15} className="text-center py-12 text-gray-400 dark:text-gray-500">
+                <td colSpan={16} className="text-center py-12 text-gray-400 dark:text-gray-500">
                   لا توجد طلبات مطابقة
                       </td>
               </tr>
@@ -1164,6 +1186,56 @@ export default function OrdersManagement() {
                       )}
                     </button>
                   </td>
+                  
+                  {/* عمود صور المنتجات */}
+                  <td className="px-3 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      {order.order_items && order.order_items.length > 0 ? (
+                        <>
+                          {/* عرض أول 3 منتجات كصور مصغرة */}
+                          {order.order_items.slice(0, 3).map((item: any, itemIdx: number) => {
+                            const productImage = item.products?.image || item.product_image || '/images/product-default.png';
+                            const productName = item.products?.name || item.product_name || 'منتج';
+                            
+                            return (
+                              <div
+                                key={itemIdx}
+                                className="relative w-10 h-10 rounded-md overflow-hidden border border-gray-200 bg-white shadow-sm"
+                                style={{ marginLeft: itemIdx > 0 ? '-8px' : '0', zIndex: 3 - itemIdx }}
+                                title={productName}
+                              >
+                                <img
+                                  src={productImage}
+                                  alt={productName}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/product-default.png';
+                                  }}
+                                />
+                              </div>
+                            );
+                          })}
+                          
+                          {/* عرض عدد المنتجات المتبقية */}
+                          {order.order_items.length > 3 && (
+                            <div
+                              className="flex items-center justify-center w-10 h-10 rounded-md bg-gray-100 border border-gray-200 text-xs font-medium text-gray-600"
+                              style={{ marginLeft: '-8px', zIndex: 0 }}
+                              title={`${order.order_items.length - 3} منتجات إضافية`}
+                            >
+                              +{order.order_items.length - 3}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-center w-10 h-10 rounded-md bg-gray-50 border border-gray-200">
+                          <Package className="w-5 h-5 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  
                   <td className="px-3 py-4 font-mono text-xs whitespace-nowrap">{order.order_number}</td>
                   <td className="px-3 py-4 whitespace-nowrap">{order.customer_name}</td>
                   <td className="px-3 py-4 whitespace-nowrap">{order.customer_phone}</td>
@@ -1216,7 +1288,7 @@ export default function OrdersManagement() {
             {/* صف فارغ في النهاية لتوفير مساحة للقوائم المنسدلة */}
             {filteredOrders.length > 0 && (
               <tr className="h-80">
-                <td colSpan={15} className="p-0"></td>
+                <td colSpan={16} className="p-0"></td>
               </tr>
             )}
                 </tbody>
@@ -1226,10 +1298,28 @@ export default function OrdersManagement() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="bg-white rounded-b-xl border-t border-gray-200 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
-              عرض {startIndex + 1} إلى {Math.min(endIndex, filteredOrders.length)} من {filteredOrders.length} طلب
+              عرض {((currentPage - 1) * itemsPerPage) + 1} إلى {Math.min(currentPage * itemsPerPage, totalOrders)} من {totalOrders} طلب
             </span>
+            
+            {/* خيارات عدد العناصر في الصفحة */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">عدد الطلبات:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1); // العودة للصفحة الأولى عند تغيير العدد
+                }}
+                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1416,3 +1506,4 @@ export default function OrdersManagement() {
     </div>
   );
 }
+

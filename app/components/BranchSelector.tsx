@@ -277,18 +277,16 @@ export function SimpleBranchSelector({
 
   return (
     <div className={className}>
-      <label className="block text-sm font-medium text-gray-800 mb-2">
-        اختر فرع الاستلام
-      </label>
       <select
         value={selectedBranchId || ''}
         onChange={(e) => {
           const branch = branches.find(b => b.id === e.target.value);
           onSelectBranch(branch || null);
         }}
-        className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+        required
       >
-        <option value="">-- اختر فرعاً --</option>
+        <option value="">-- اختر فرع الاستلام --</option>
         {branches.map((branch) => (
           <option key={branch.id} value={branch.id}>
             {branch.name} - {branch.city || branch.address}
@@ -297,12 +295,16 @@ export function SimpleBranchSelector({
       </select>
 
       {selectedBranchId && (
-        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100 text-sm">
+        <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200 text-sm">
           {(() => {
             const selectedBranch = branches.find(b => b.id === selectedBranchId);
             if (!selectedBranch) return null;
             return (
               <div className="space-y-1 text-gray-700">
+                <p className="font-medium text-green-800 mb-2 flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  تفاصيل الفرع المختار:
+                </p>
                 <p><strong>العنوان:</strong> {selectedBranch.address}</p>
                 {selectedBranch.phone && (
                   <p><strong>الهاتف:</strong> {selectedBranch.phone}</p>
