@@ -93,7 +93,12 @@ export async function generateMetadata(): Promise<Metadata> {
       title: siteName,
     card: 'summary_large_image',
   },
-    icons: settings.faviconUrl ? { icon: settings.faviconUrl } : undefined,
+    icons: settings.faviconUrl ? { icon: settings.faviconUrl } : {
+      icon: [
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicon.ico', sizes: 'any' }
+      ]
+    },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   },

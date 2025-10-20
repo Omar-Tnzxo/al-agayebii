@@ -16,8 +16,12 @@ export const metadata: Metadata = {
   },
 };
 
-// إعادة توليد الصفحة كل 10 دقائق (ISR)
-export const revalidate = 600;
+// إعادة توليد الصفحة كل 5 دقائق (ISR)
+export const revalidate = 300;
+
+// تفعيل Static Generation مع جلب البيانات عند الطلب
+export const dynamic = 'force-static';
+export const dynamicParams = true;
 
 // واجهات البيانات (مبسط - صورة + رابط فقط)
 interface HeroSlide {

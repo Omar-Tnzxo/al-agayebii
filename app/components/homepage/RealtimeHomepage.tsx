@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSupabaseRealtime } from '@/lib/hooks/useSupabaseRealtime';
 import HeroCarousel from './HeroCarousel';
 import CategorySection from './CategoryGrid';
@@ -59,12 +59,12 @@ export default function RealtimeHomepage({
   const [heroSlides, setHeroSlides] = useState(initialHeroSlides);
   const [categories, setCategories] = useState(initialCategories);
   const [sections, setSections] = useState(initialSections);
+  const [isLoading, setIsLoading] = useState(false);
 
   // استماع للتغييرات في hero_slides
   useSupabaseRealtime({
     table: 'hero_slides',
     onChange: async () => {
-      console.log('🔄 Hero slides updated, fetching new data...');
       try {
         const response = await fetch('/api/homepage/hero-slides?active=true');
         const data = await response.json();
@@ -81,7 +81,6 @@ export default function RealtimeHomepage({
   useSupabaseRealtime({
     table: 'categories',
     onChange: async () => {
-      console.log('🔄 Categories updated, fetching new data...');
       try {
         const response = await fetch('/api/categories?status=active');
         const data = await response.json();
@@ -98,19 +97,16 @@ export default function RealtimeHomepage({
   useSupabaseRealtime({
     table: 'products',
     onChange: async () => {
-      console.log('🔄 Products updated, reloading sections...');
-      // عند تحديث المنتجات، نحتاج لإعادة جلب جميع الأقسام
+      setIsLoading(true);
       try {
         const response = await fetch('/api/homepage/sections?active=true');
         const data = await response.json();
         if (data.success) {
-          // هنا يجب أن نجلب المنتجات لكل قسم أيضاً
           const sectionsWithProducts = await Promise.all(
             (data.data || []).map(async (section: HomepageSection) => {
               if (section.section_type === 'products') {
                 const settings = section.settings || {};
                 try {
-                  // استخدام API endpoint مخصص للمنتجات حسب القسم
                   let url = '/api/products?status=active';
                   
                   if (settings.product_source === 'category' && settings.category_type) {
@@ -158,12 +154,14 @@ export default function RealtimeHomepage({
         }
       } catch (error) {
         console.error('Error refreshing sections:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
   });
 
   return (
-    <main dir="rtl" className="bg-white">
+    <main dir="rtl" className="bg-white min-h-screen">
       {/* Hero Carousel - البنر الدوار */}
       {heroSlides.length > 0 && <HeroCarousel slides={heroSlides} />}
 
@@ -176,12 +174,19 @@ export default function RealtimeHomepage({
         />
       )}
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-gray-500 mt-4">جاري تحميل المنتجات...</p>
+        </div>
+      )}
+
       {/* Dynamic Product Sections - الأقسام الديناميكية */}
-      {sections.map((section) => {
+      {!isLoading && sections.map((section) => {
         if (section.section_type === 'products' && section.products && section.products.length > 0) {
-          // تحديد رابط "عرض الكل" حسب نوع القسم
-          let viewAllLink = '/products';
           const settings = section.settings || {};
+          let viewAllLink = '/products';
 
           if (settings.product_source === 'category' && settings.category_type) {
             viewAllLink = `/category/${settings.category_type}`;
@@ -209,7 +214,7 @@ export default function RealtimeHomepage({
       })}
 
       {/* رسالة افتراضية في حال عدم وجود أقسام */}
-      {sections.filter(s => s.section_type === 'products').length === 0 && (
+      {!isLoading && sections.filter(s => s.section_type === 'products').length === 0 && (
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-gray-500 text-lg">لا توجد أقسام معروضة حالياً</p>
           <p className="text-gray-400 text-sm mt-2">يمكنك إضافة أقسام من لوحة التحكم</p>
