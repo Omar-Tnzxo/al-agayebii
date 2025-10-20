@@ -82,7 +82,9 @@ export default function DynamicProductSection({
             product={{
               ...product,
               image: product.images[0],
-              discount_percentage: product.originalPrice ? calculateDiscount(product.originalPrice, product.price) : 0,
+              discount_percentage: product.originalPrice && product.originalPrice > product.price 
+                ? calculateDiscount(product.originalPrice, product.price) 
+                : undefined,
               stock_quantity: product.inStock ? 1 : 0
             }} 
           />
@@ -139,7 +141,9 @@ export default function DynamicProductSection({
               product={{
                 ...product,
                 image: product.images[0],
-                discount_percentage: product.originalPrice ? calculateDiscount(product.originalPrice, product.price) : 0,
+                discount_percentage: product.originalPrice && product.originalPrice > product.price 
+                  ? calculateDiscount(product.originalPrice, product.price) 
+                  : undefined,
                 stock_quantity: product.inStock ? 1 : 0
               }} 
             />
