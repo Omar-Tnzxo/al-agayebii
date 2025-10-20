@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   },
 };
 
-// إعادة توليد الصفحة كل 5 دقائق (ISR)
-export const revalidate = 300;
+// إعادة توليد الصفحة كل دقيقة (ISR)
+export const revalidate = 60;
 
-// تفعيل Static Generation مع جلب البيانات عند الطلب
-export const dynamic = 'force-static';
+// تفعيل Dynamic Rendering للصفحة الرئيسية
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 // واجهات البيانات (مبسط - صورة + رابط فقط)
