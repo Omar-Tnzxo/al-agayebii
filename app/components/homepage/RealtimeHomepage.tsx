@@ -99,7 +99,7 @@ export default function RealtimeHomepage({
     onChange: async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/homepage/sections?active=true');
+        const response = await fetch('/api/homepage-sections?active=true');
         const data = await response.json();
         if (data.success) {
           const sectionsWithProducts = await Promise.all(

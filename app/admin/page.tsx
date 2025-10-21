@@ -35,33 +35,42 @@ export default function AdminLogin() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // التحقق من التخزين المحلي أولاً
         const adminUser = localStorage.getItem('admin_user') || sessionStorage.getItem('admin_user');
-        if (adminUser) {
-          router.replace('/dashboard');
-          return;
-        }
         
-        // التحقق من cookie
+        // التحقق من صحة الجلسة عبر API
         const response = await fetch('/api/admin/check-session', {
           credentials: 'include',
         });
         
         if (response.ok) {
           const data = await response.json();
-          if (data.authenticated) {
+          if (data.authenticated && data.adminUser) {
+            // حفظ بيانات المستخدم إذا لم تكن موجودة
+            if (!adminUser) {
+              const storage = rememberMe ? localStorage : sessionStorage;
+              storage.setItem('admin_user', JSON.stringify(data.adminUser));
+            }
             router.replace('/dashboard');
             return;
           }
         }
+        
+        // مسح أي بيانات قديمة إذا كانت الجلسة غير صالحة
+        localStorage.removeItem('admin_user');
+        sessionStorage.removeItem('admin_user');
       } catch (error) {
         console.error('خطأ في التحقق من الجلسة:', error);
+        // مسح البيانات في حالة الخطأ
+        localStorage.removeItem('admin_user');
+        sessionStorage.removeItem('admin_user');
       } finally {
         setIsCheckingSession(false);
       }
     };
     
     checkSession();
-  }, [router]);
+  }, [router, rememberMe]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,8 +106,8 @@ export default function AdminLogin() {
 
       const result = await response.json();
 
-      if (result.success) {
-        // حفظ بيانات المدير
+      if (result.success && result.adminUser) {
+        // حفظ بيانات المدير في التخزين المناسب
         const storage = rememberMe ? localStorage : sessionStorage;
         storage.setItem('admin_user', JSON.stringify(result.adminUser));
 
@@ -118,7 +127,7 @@ export default function AdminLogin() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isLoading) {
       handleLogin();
     }
   };

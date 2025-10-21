@@ -11,8 +11,29 @@ export async function middleware(request: NextRequest) {
   // حماية مسارات لوحة التحكم
   if (pathname.startsWith('/dashboard')) {
     const adminSession = request.cookies.get('admin_session');
-    if (!adminSession) {
-      return NextResponse.redirect(new URL('/admin', request.url));
+    
+    if (!adminSession || !adminSession.value) {
+      return NextResponse.redirect(new URL('/admin?message=يرجى تسجيل الدخول أولاً', request.url));
+    }
+
+    // التحقق من صيغة الجلسة
+    const sessionParts = adminSession.value.split(':');
+    if (sessionParts.length !== 4) {
+      const response = NextResponse.redirect(new URL('/admin?message=جلسة غير صالحة', request.url));
+      response.cookies.delete('admin_session');
+      return response;
+    }
+
+    // التحقق من صلاحية الجلسة (عمر الجلسة)
+    const timestamp = parseInt(sessionParts[3], 10);
+    const now = Date.now();
+    const sessionAge = (now - timestamp) / 1000; // بالثواني
+    const maxSessionAge = 60 * 60 * 24 * 7; // 7 أيام
+
+    if (sessionAge > maxSessionAge) {
+      const response = NextResponse.redirect(new URL('/admin?message=انتهت صلاحية الجلسة', request.url));
+      response.cookies.delete('admin_session');
+      return response;
     }
   }
 

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Star, ShoppingCart } from 'lucide-react';
-import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
+import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 import { toast } from 'sonner';
 import { addToCart } from '@/lib/store/cart';
 import { useState } from 'react';
@@ -29,7 +29,7 @@ interface UnifiedProductCardProps {
 }
 
 export default function UnifiedProductCard({ product, className = '' }: UnifiedProductCardProps) {
-  const { settings } = useLiveSiteSettings();
+  const { settings } = useSiteSettings();
   const reviewsEnabled = settings.reviews_enabled === 'true';
   const [isAdding, setIsAdding] = useState(false);
   

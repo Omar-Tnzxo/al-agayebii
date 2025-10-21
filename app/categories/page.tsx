@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Zap, TrendingUp, Award, ShoppingBag, ArrowRight, Package, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
+import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 import { supabase } from '@/lib/supabase';
 
 interface Category {
@@ -21,7 +21,7 @@ interface Product {
 }
 
 export default function CategoriesPage() {
-  const { settings } = useLiveSiteSettings();
+  const { settings } = useSiteSettings();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);

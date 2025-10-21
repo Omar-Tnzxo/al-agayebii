@@ -54,7 +54,7 @@ import { Dialog } from '@headlessui/react';
 import { Combobox } from '@headlessui/react';
 // تم إزالة استيراد governoratesList الثابت
 import Head from 'next/head';
-import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
+import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 import { AnimatedOrderButton } from '@/components/ui/AnimatedOrderButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SimpleBranchSelector } from '@/app/components/BranchSelector';
@@ -374,7 +374,7 @@ export default function ProductClient({ params }: { params?: { slug?: string } }
   // لا حاجة لـ state شركات الشحن - النظام المبسط لا يستخدمها
 
   // استخدم useLiveSiteSettings فقط
-  const { settings } = useLiveSiteSettings();
+  const { settings } = useSiteSettings();
   const currency = settings.currencySymbol || 'ج.م';
   const freeShippingMin = Number(settings.free_shipping_threshold) || 500;
   const shippingCost = Number(settings.shipping_cost) || 25;

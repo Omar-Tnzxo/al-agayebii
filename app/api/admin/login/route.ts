@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { setAdminSession } from '@/lib/auth-utils';
 import { z } from 'zod';
 
 // Validation Schema
@@ -11,7 +12,6 @@ const loginSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('📥 طلب تسجيل دخول:', { email: body.email });
     
     // Validate input
     const validation = loginSchema.safeParse(body);
@@ -56,32 +56,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create session
+    // Create response with admin data
+    const adminUser = {
+      id: authResult.admin_id,
+      email: email,
+      role: authResult.role,
+    };
+
     const response = NextResponse.json({
       success: true,
       message: authResult.message,
-      adminUser: {
-        id: authResult.admin_id,
-        email: email,
-        role: authResult.role,
-      },
+      adminUser,
     });
 
-    response.cookies.set({
-      name: 'admin_session',
-      value: `${authResult.admin_id}:${email}:${authResult.role}`,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    });
+    // Set secure session cookie
+    setAdminSession(response, adminUser);
 
-    console.log('✅ تم تسجيل الدخول بنجاح');
+    console.log('✅ تم تسجيل الدخول بنجاح:', email);
     return response;
     
   } catch (error: any) {
-    console.error('❌ خطأ:', error);
+    console.error('❌ خطأ في تسجيل الدخول:', error);
     return NextResponse.json(
       { success: false, message: 'حدث خطأ في معالجة الطلب' },
       { status: 500 }

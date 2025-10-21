@@ -38,26 +38,11 @@ export default function OrderStatusSelector({
   const currentStatusOption = statusOptions.find(option => option.value === currentStatus);
   const CurrentIcon = currentStatusOption?.icon || Clock;
 
-  // تحديد موضع القائمة (أعلى أو أسفل) بناءً على المساحة المتاحة
+  // تحديد موضع القائمة (افتح دائماً للأعلى في جداول الطلبات)
   useEffect(() => {
     if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      
-      // ارتفاع القائمة المتوقع (8 عناصر × 40px تقريباً)
-      const dropdownHeight = 320;
-      
-      // المسافة المطلوبة للأمان
-      const safetyBuffer = 20;
-
-      // قرار ذكي محسّن: افتح للأعلى إذا كانت المساحة أسفلاً قليلة
-      if (spaceBelow < dropdownHeight + safetyBuffer) {
-        setDropdownPosition('top');
-      } else {
-        setDropdownPosition('bottom');
-      }
+      // افتح دائماً للأعلى في جداول الطلبات
+      setDropdownPosition('top');
     }
   }, [isOpen]);
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, User, Calendar, CheckCircle, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { useLiveSiteSettings } from '@/app/components/useLiveSiteSettings';
+import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 
 interface Review {
   id: string;
@@ -22,7 +22,7 @@ interface ReviewStats {
 }
 
 export default function ProductReviews({ productId }: { productId: string }) {
-  const { settings } = useLiveSiteSettings();
+  const { settings } = useSiteSettings();
   const reviewsEnabled = settings.reviews_enabled === 'true';
 
   const [reviews, setReviews] = useState<Review[]>([]);

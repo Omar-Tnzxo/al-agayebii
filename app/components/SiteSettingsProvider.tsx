@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 export interface SiteSettingsContextValue {
   settings: Record<string, string>;
@@ -19,37 +19,52 @@ interface SiteSettingsProviderProps {
 export function SiteSettingsProvider({ initialSettings, children }: SiteSettingsProviderProps) {
   const [settings, setSettings] = useState<Record<string, string>>(initialSettings);
   const [isLoading, setIsLoading] = useState(false);
+  const refreshInProgressRef = useRef(false);
 
-  // دالة لتحديث الإعدادات من الخادم
+  // دالة لتحديث الإعدادات من الخادم مع منع الطلبات المتكررة
   const refreshSettings = async () => {
+    // منع الطلبات المتزامنة
+    if (refreshInProgressRef.current || isLoading) {
+      return;
+    }
+
+    refreshInProgressRef.current = true;
     setIsLoading(true);
+    
     try {
-      const res = await fetch('/api/settings');
+      const res = await fetch('/api/settings', {
+        cache: 'no-cache',
+        // إضافة مهلة زمنية
+        signal: AbortSignal.timeout(5000)
+      });
+      
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
+      
       const json = await res.json();
       if (json.success && json.data) {
         setSettings(json.data);
-      } else {
-        console.warn('لم يتم استلام إعدادات صحيحة من الخادم:', json);
       }
     } catch (error) {
-      console.error('خطأ في تحديث الإعدادات:', error);
-      // عدم تغيير الإعدادات الحالية في حالة الخطأ
+      // تجاهل أخطاء timeout والشبكة بصمت
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('تحذير: فشل تحديث الإعدادات:', error);
+      }
     } finally {
       setIsLoading(false);
+      refreshInProgressRef.current = false;
     }
   };
 
-  // تحديث الإعدادات كل 5 دقائق للتزامن
+  // تحديث الإعدادات كل 10 دقائق (بدلاً من 5 للتقليل من الطلبات)
   useEffect(() => {
     const interval = setInterval(() => {
       refreshSettings();
-    }, 5 * 60 * 1000); // 5 دقائق
+    }, 10 * 60 * 1000); // 10 دقائق
 
     return () => clearInterval(interval);
-  }, []);
+  }, []); // تشغيل مرة واحدة فقط
 
   return (
     <SiteSettingsContext.Provider value={{ settings, setSettings, refreshSettings, isLoading }}>
@@ -64,4 +79,4 @@ export function useSiteSettings(): SiteSettingsContextValue {
     throw new Error('useSiteSettings must be used within a SiteSettingsProvider');
   }
   return context;
-} 
+}

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useSiteSettings } from '@/app/components/SiteSettingsProvider';
 import AdminNotifications from '@/app/components/AdminNotifications';
+import { toast } from 'sonner';
 
 // مكون عنصر القائمة الجانبية
 const SidebarItem = ({ 
@@ -80,40 +81,70 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // التحقق من وجود جلسة مدير على العميل
   useEffect(() => {
-    const storedUser =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('admin_user') || sessionStorage.getItem('admin_user')
-        : null;
+    const checkInitialSession = async () => {
+      const storedUser =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('admin_user') || sessionStorage.getItem('admin_user')
+          : null;
 
-    if (!storedUser) {
-      router.replace('/admin');
-    }
+      if (!storedUser) {
+        router.replace('/admin?message=يرجى تسجيل الدخول أولاً');
+        return;
+      }
+
+      // التحقق من صحة الجلسة عبر API
+      try {
+        const response = await fetch('/api/admin/check-session', {
+          credentials: 'include',
+        });
+        
+        if (!response.ok || !(await response.json()).authenticated) {
+          localStorage.removeItem('admin_user');
+          sessionStorage.removeItem('admin_user');
+          router.replace('/admin?message=انتهت صلاحية الجلسة');
+        }
+      } catch (error) {
+        console.error('خطأ في التحقق من الجلسة:', error);
+      }
+    };
+
+    checkInitialSession();
   }, [router]);
 
-  // فحص حالة الحساب بشكل دوري
+  // فحص حالة الحساب وتحديث الجلسة بشكل دوري
   useEffect(() => {
     const checkAccountStatus = async () => {
       try {
-        const response = await fetch('/api/admin/check-active');
+        const response = await fetch('/api/admin/check-active', {
+          credentials: 'include',
+        });
+        
         const data = await response.json();
         
         if (!data.success || !data.isActive) {
           // إخراج المستخدم فوراً
           localStorage.removeItem('admin_user');
           sessionStorage.removeItem('admin_user');
-          await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
-          router.push('/admin?message=تم تعطيل حسابك');
+          
+          await fetch('/api/admin/logout', { 
+            method: 'POST',
+            credentials: 'include',
+          }).catch(() => {});
+          
+          const message = data.error || 'تم تعطيل حسابك';
+          router.push(`/admin?message=${encodeURIComponent(message)}`);
         }
       } catch (error) {
-        // في حالة الخطأ، لا تفعل شيء لتجنب إخراج المستخدم بدون سبب
+        // في حالة الخطأ، لا نخرج المستخدم لتجنب إخراج غير مبرر
+        console.error('خطأ في فحص حالة الحساب:', error);
       }
     };
 
-    // فحص الحالة كل 30 ثانية
-    const interval = setInterval(checkAccountStatus, 30000);
-    
     // فحص أولي
     checkAccountStatus();
+    
+    // فحص الحالة كل دقيقة (60 ثانية)
+    const interval = setInterval(checkAccountStatus, 60000);
 
     return () => clearInterval(interval);
   }, [router]);
@@ -121,18 +152,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // معالج تسجيل الخروج
   const handleLogout = async () => {
     try {
-      // استخدام نظام المصادقة الآمن
-      const { signOut } = await import('@/lib/auth');
-      await signOut();
+      // إظهار رسالة تحميل
+      toast.loading('جاري تسجيل الخروج...');
       
       // إرسال طلب للخادم لمسح الكوكي
-      try {
-        await fetch('/api/admin/logout', { method: 'POST' });
-      } catch (logoutError) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('تحذير: فشل في مسح كوكي الخادم');
-        }
-      }
+      await fetch('/api/admin/logout', { 
+        method: 'POST',
+        credentials: 'include',
+      });
       
       // مسح بيانات المدير من التخزين المحلي
       if (typeof window !== 'undefined') {
@@ -140,15 +167,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         sessionStorage.removeItem('admin_user');
       }
       
+      // إخفاء رسالة التحميل
+      toast.dismiss();
+      
       // توجيه إلى صفحة تسجيل الدخول
-      router.push('/admin');
+      router.push('/admin?message=تم تسجيل الخروج بنجاح');
       router.refresh();
     } catch (error) {
       console.error('خطأ في تسجيل الخروج:', error);
+      toast.dismiss();
+      
       // في حالة فشل تسجيل الخروج، امسح البيانات المحلية على الأقل
-      localStorage.removeItem('admin_user');
-      sessionStorage.removeItem('admin_user');
-      router.push('/admin');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_user');
+        sessionStorage.removeItem('admin_user');
+      }
+      
+      router.push('/admin?message=تم تسجيل الخروج');
     }
   };
 
